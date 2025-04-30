@@ -6,15 +6,62 @@ const messageCache = new Set();
 const MAX_CACHE_SIZE = 100;
 
 export const initializeSocket = (userId) => {
-  if (!socket) {
-    socket = io('http://localhost:5000', {
-      withCredentials: false,
-    });
+  if (socket?.connected) {
+    return socket; // Return existing connection if active
   }
+  
+  // Close any existing socket
+  if (socket) {
+    socket.close();
+  }
+  
+  // Get the auth token from localStorage
+  const authData = localStorage.getItem('auth');
+  let token = null;
+  
+  if (authData) {
+    try {
+      const parsedAuth = JSON.parse(authData);
+      token = parsedAuth.token;
+    } catch (error) {
+      console.error('Error parsing auth data:', error);
+      localStorage.removeItem('auth');
+      return null;
+    }
+  }
+  
+  if (!token) {
+    console.warn('No authentication token available for socket connection');
+    return null;
+  }
+  
+  socket = io('http://localhost:5000', {
+    withCredentials: false,
+    auth: { token },
+    reconnection: true,
+    reconnectionAttempts: 5,
+    reconnectionDelay: 1000
+  });
 
-  // Connect and identify the user
-  socket.connect();
-  socket.emit('join', userId);
+  // Set up event handlers
+  socket.on('connect', () => {
+    console.log('Socket connected successfully');
+    // Connect and identify the user
+    socket.emit('join', userId);
+  });
+  
+  socket.on('connect_error', (error) => {
+    console.error('Socket connection error:', error);
+  });
+  
+  socket.on('error', (error) => {
+    console.error('Socket error:', error);
+    if (error.message === 'Authentication required' || 
+        error.message === 'Invalid token') {
+      // Handle authentication errors
+      socket.close();
+    }
+  });
 
   return socket;
 };

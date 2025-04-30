@@ -39,3 +39,12 @@ model Message {
   @@index([senderId])
   @@index([receiverId])
 }
+
+model AnonymousMessage {
+  id        String    @id @default(uuid())
+  content   String
+  guestId   String    // Identifier for the anonymous user
+  timestamp DateTime  @default(now())
+
+  @@index([timestamp])
+}

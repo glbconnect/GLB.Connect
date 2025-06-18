@@ -32,16 +32,22 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// Routes
+// API Routes - MUST come before static file serving
 app.use('/api/messages', messageRouter);
 app.use('/api/users', userRouter);
 app.use('/api/batch', batchRouter);
 app.use('/api/anonymous-messages', anonymousMessageRouter);
 
+// Simple test endpoint
+app.get('/api/test', (req, res) => {
+  res.json({ message: 'API is working!', timestamp: new Date().toISOString() });
+});
+
 // Serve static files from the React app in production
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, 'client/dist')));
   
+  // Catch-all route for React app - MUST be last
   app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'client/dist', 'index.html'));
   });

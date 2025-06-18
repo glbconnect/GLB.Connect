@@ -45,6 +45,20 @@ export const getUserById = async (id) => {
   });
 };
 
+export const getUserByIdWithPassword = async (id) => {
+  return prisma.user.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      password: true,
+      createdAt: true,
+      updatedAt: true
+    }
+  });
+};
+
 export const getAllUsers = async () => {
   return prisma.user.findMany({
     select: {

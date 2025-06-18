@@ -1,11 +1,14 @@
 import { 
   createUser, 
   getUserById, 
+  getUserByIdWithPassword,
   getAllUsers, 
   findUserByEmail, 
   validatePassword, 
   generateToken,
-  searchUsersByEmail
+  searchUsersByEmail,
+  updateUser,
+  updateUserPassword
 } from '../models/userModel.js';
 import bcrypt from 'bcryptjs';
 
@@ -174,7 +177,7 @@ export const changePassword = async (req, res) => {
     }
     
     // Get user with password
-    const user = await getUserById(userId);
+    const user = await getUserByIdWithPassword(userId);
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
@@ -189,7 +192,7 @@ export const changePassword = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedNewPassword = await bcrypt.hash(newPassword, salt);
     
-    // Update password in database (you'll need to add this function to userModel.js)
+    // Update password in database
     await updateUserPassword(userId, hashedNewPassword);
     
     res.json({

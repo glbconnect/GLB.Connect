@@ -10,7 +10,7 @@ import { verifyToken } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-// Health check endpoint
+// Health check endpoint - MUST be first to avoid being caught by /:id route
 router.get('/health', (req, res) => {
   res.status(200).json({ 
     status: 'OK', 
@@ -25,7 +25,7 @@ router.post('/login', loginUser);
 
 // Protected routes
 router.get('/me', verifyToken, getCurrentUser);
-router.get('/:id', getUser);
 router.get('/', getUsers);
+router.get('/:id', getUser);
 
 export default router; 

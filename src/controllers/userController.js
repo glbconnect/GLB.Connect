@@ -7,6 +7,7 @@ import {
   generateToken,
   searchUsersByEmail
 } from '../models/userModel.js';
+import bcrypt from 'bcryptjs';
 
 export const registerUser = async (req, res) => {
   try {
@@ -122,5 +123,81 @@ export const getCurrentUser = async (req, res) => {
   } catch (error) {
     console.error('Error getting current user:', error);
     res.status(500).json({ error: 'Failed to get current user' });
+  }
+};
+
+export const updateProfile = async (req, res) => {
+  try {
+    const { name, email } = req.body;
+    const userId = req.user.id;
+    
+    // Get current user
+    const currentUser = await getUserById(userId);
+    if (!currentUser) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    
+    // Check if new email is already taken by another user
+    if (email && email !== currentUser.email) {
+      const existingUser = await findUserByEmail(email);
+      if (existingUser && existingUser.id !== userId) {
+        return res.status(400).json({ error: 'Email is already in use' });
+      }
+    }
+    
+    // Update user in database (you'll need to add this function to userModel.js)
+    const updatedUser = await updateUser(userId, { name, email });
+    
+    // Return user without password
+    const { password: removedPassword, ...userWithoutPassword } = updatedUser;
+    
+    res.json({
+      success: true,
+      user: userWithoutPassword,
+      message: 'Profile updated successfully'
+    });
+  } catch (error) {
+    console.error('Error updating profile:', error);
+    res.status(500).json({ error: 'Failed to update profile' });
+  }
+};
+
+export const changePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    const userId = req.user.id;
+    
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ 
+        error: 'Please provide current and new password' 
+      });
+    }
+    
+    // Get user with password
+    const user = await getUserById(userId);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    
+    // Verify current password
+    const isCurrentPasswordValid = await validatePassword(currentPassword, user.password);
+    if (!isCurrentPasswordValid) {
+      return res.status(401).json({ error: 'Current password is incorrect' });
+    }
+    
+    // Hash new password
+    const salt = await bcrypt.genSalt(10);
+    const hashedNewPassword = await bcrypt.hash(newPassword, salt);
+    
+    // Update password in database (you'll need to add this function to userModel.js)
+    await updateUserPassword(userId, hashedNewPassword);
+    
+    res.json({
+      success: true,
+      message: 'Password changed successfully'
+    });
+  } catch (error) {
+    console.error('Error changing password:', error);
+    res.status(500).json({ error: 'Failed to change password' });
   }
 }; 

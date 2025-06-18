@@ -80,6 +80,16 @@ export const searchUsers = async (query) => {
   return response.data;
 };
 
+export const updateProfile = async (profileData) => {
+  const response = await api.put('/users/profile', profileData);
+  return response.data;
+};
+
+export const changePassword = async (passwordData) => {
+  const response = await api.put('/users/change-password', passwordData);
+  return response.data;
+};
+
 // Messages API calls
 export const sendMessage = async (messageData) => {
   const response = await api.post('/messages/send', messageData);

@@ -4,7 +4,9 @@ import {
   loginUser, 
   getUser, 
   getUsers, 
-  getCurrentUser 
+  getCurrentUser,
+  updateProfile,
+  changePassword
 } from '../controllers/userController.js';
 import { verifyToken } from '../middleware/authMiddleware.js';
 
@@ -25,6 +27,8 @@ router.post('/login', loginUser);
 
 // Protected routes
 router.get('/me', verifyToken, getCurrentUser);
+router.put('/profile', verifyToken, updateProfile);
+router.put('/change-password', verifyToken, changePassword);
 router.get('/', getUsers);
 router.get('/:id', getUser);
 

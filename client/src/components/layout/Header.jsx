@@ -27,6 +27,7 @@ const Header = ({ isLoggedIn, onLogout }) => {
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-6">
             <Link to="/" className="text-gray-700 hover:text-primary font-medium">Home</Link>
+            <Link to="/jobs" className="text-gray-700 hover:text-primary font-medium">Jobs</Link>
             {isLoggedIn ? (
               <>
                 <Link to="/messages" className="text-gray-700 hover:text-primary font-medium">Messages</Link>
@@ -92,6 +93,13 @@ const Header = ({ isLoggedIn, onLogout }) => {
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Home
+            </Link>
+            <Link 
+              to="/jobs" 
+              className="block text-gray-700 hover:text-primary font-medium"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Jobs
             </Link>
             {isLoggedIn ? (
               <>

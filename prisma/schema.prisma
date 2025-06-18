@@ -21,6 +21,7 @@ model User {
   password  String
   messagesSent     Message[] @relation("SenderMessages")
   messagesReceived Message[] @relation("ReceiverMessages")
+  jobsPosted       Job[]     @relation("JobPoster")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -47,4 +48,57 @@ model AnonymousMessage {
   timestamp DateTime  @default(now())
 
   @@index([timestamp])
+}
+
+// Job Posting Models
+model Job {
+  id                  Int      @id @default(autoincrement())
+  title               String
+  companyName         String
+  companyWebsite      String?
+  companyDescription  String?
+  contactName         String
+  contactEmail        String
+  contactPhone        String?
+  description         String
+  locations           String
+  locationType        String   @default("On-site")
+  industry            String?
+  workplaceType       String
+  opportunityType     String
+  postedBy            String   // User ID who posted the job
+  user                User     @relation("JobPoster", fields: [postedBy], references: [id])
+  salary              Salary?
+  requirements        Requirements?
+  postedAt            DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  isOpen              Boolean  @default(true)
+
+  @@index([postedBy])
+}
+
+model Salary {
+  id         Int     @id @default(autoincrement())
+  currency   String  @default("INR")
+  type       String  @default("per year")
+  minAmount  Float?
+  maxAmount  Float?
+  job        Job     @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  jobId      Int     @unique
+}
+
+model Requirements {
+  id                       Int      @id @default(autoincrement())
+  skills                   String?
+  minExperience            Int?
+  maxExperience            Int?
+  education                String?
+  applicationDeadline      DateTime?
+  applicationMethod        String
+  applicationEmail         String?
+  applicationUrl           String?
+  applicationLink          String   // Required field for direct application link
+  applicationInPersonDetails String?
+  job                      Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  jobId                    Int      @unique
 }

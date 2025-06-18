@@ -9,6 +9,10 @@ import AnonymousPost from './pages/AnonymousPost';
 import JobListing from './pages/JobListing';
 import PostJob from './pages/PostJob';
 import ResourceSharing from './pages/ResourceSharing';
+import ResourceCategory from './pages/ResourceCategory';
+import ResourceYear from './pages/ResourceYear';
+import ResourceUpload from './pages/ResourceUpload';
+import ResourceBrowse from './pages/ResourceBrowse';
 import * as api from './services/api';
 import './index.css';
 
@@ -110,7 +114,13 @@ function App() {
         <Route path="/anonymous-post" element={isLoggedIn ? <AnonymousPost isLoggedIn={isLoggedIn} onLogout={handleLogout} currentUser={currentUser} /> : <Navigate to="/login" />} />
         <Route path="/jobs" element={<JobListing isLoggedIn={isLoggedIn} onLogout={handleLogout} currentUser={currentUser} />} />
         <Route path="/post-job" element={isLoggedIn ? <PostJob isLoggedIn={isLoggedIn} onLogout={handleLogout} currentUser={currentUser} /> : <Navigate to="/login" />} />
+        
+        {/* Resource Sharing Routes */}
         <Route path="/resources" element={<ResourceSharing isLoggedIn={isLoggedIn} onLogout={handleLogout} currentUser={currentUser} />} />
+        <Route path="/resources/browse" element={<ResourceBrowse isLoggedIn={isLoggedIn} onLogout={handleLogout} currentUser={currentUser} />} />
+        <Route path="/resources/upload" element={isLoggedIn ? <ResourceUpload isLoggedIn={isLoggedIn} onLogout={handleLogout} currentUser={currentUser} /> : <Navigate to="/login" />} />
+        <Route path="/resources/category/:categoryName" element={<ResourceCategory isLoggedIn={isLoggedIn} onLogout={handleLogout} currentUser={currentUser} />} />
+        <Route path="/resources/category/:categoryName/year/:year" element={<ResourceYear isLoggedIn={isLoggedIn} onLogout={handleLogout} currentUser={currentUser} />} />
       </Routes>
     </Router>
   );

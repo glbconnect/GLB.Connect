@@ -218,13 +218,6 @@ const Messages = ({ isLoggedIn, onLogout, currentUser }) => {
         return;
       }
       
-      // Get unique user IDs from messages
-      const userIds = new Set();
-      unseenMessages.forEach(msg => {
-        const otherUserId = msg.senderId === currentUser.id ? msg.receiverId : msg.senderId;
-        userIds.add(otherUserId);
-      });
-      
       // Create conversation map
       const conversationMap = new Map();
       
@@ -235,7 +228,18 @@ const Messages = ({ isLoggedIn, onLogout, currentUser }) => {
       
       // Process all messages to build conversations
       for (const msg of unseenMessages) {
+        // Skip messages where both sender and receiver are the current user
+        if (msg.senderId === currentUser.id && msg.receiverId === currentUser.id) {
+          continue;
+        }
+
+        // Get the ID of the other user (not the current user)
         const otherUserId = msg.senderId === currentUser.id ? msg.receiverId : msg.senderId;
+        
+        // Skip if the other user is the current user (shouldn't happen with proper data)
+        if (otherUserId === currentUser.id) {
+          continue;
+        }
         
         // Get user details from the userMap or from the message
         const userDetails = userMap.get(otherUserId) || {
@@ -245,7 +249,7 @@ const Messages = ({ isLoggedIn, onLogout, currentUser }) => {
           lastMessage: "",
           lastMessageTime: "",
           unreadCount: 0,
-          isAnonymous: msg.isAnonymous
+          isAnonymous: msg.isAnonymous && msg.senderId !== currentUser.id
         };
         
         // If this is a new conversation or a newer message
@@ -272,7 +276,10 @@ const Messages = ({ isLoggedIn, onLogout, currentUser }) => {
       
       // Convert map to array and format dates for display
       const conversationsArray = Array.from(conversationMap.values())
-        .filter(conv => conv.lastMessage) // Only include conversations with messages
+        .filter(conv => {
+          // Make sure we have a conversation with messages AND the user is not the current user
+          return conv.lastMessage && conv.userId !== currentUser.id;
+        })
         .map(conv => ({
           ...conv,
           lastMessageTime: typeof conv.lastMessageTime === 'string' ? 
@@ -573,6 +580,11 @@ const Messages = ({ isLoggedIn, onLogout, currentUser }) => {
     // Determine the other party of the conversation
     const otherUserId = message.senderId === currentUser.id ? message.receiverId : message.senderId;
     
+    // Skip if the other user is the current user (shouldn't happen with proper data)
+    if (otherUserId === currentUser.id) {
+      return;
+    }
+    
     setConversations(prevConversations => {
       // Create a copy of the conversations array
       const updatedConversations = [...prevConversations];
@@ -624,8 +636,13 @@ const Messages = ({ isLoggedIn, onLogout, currentUser }) => {
         }
       }
       
+      // Filter out any conversations with the current user
+      const filteredConversations = updatedConversations.filter(
+        conv => conv.userId !== currentUser.id
+      );
+      
       // Sort to bring active conversations to the top
-      return updatedConversations.sort((a, b) => {
+      return filteredConversations.sort((a, b) => {
         // If one has a lastMessageTime and the other doesn't
         if (!a.lastMessageTime) return 1;
         if (!b.lastMessageTime) return -1;

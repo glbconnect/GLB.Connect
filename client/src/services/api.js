@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 // Create axios instance
 const api = axios.create({
@@ -15,14 +15,38 @@ api.interceptors.request.use(
   (config) => {
     const authData = localStorage.getItem('auth');
     if (authData) {
-      const { token } = JSON.parse(authData);
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
+      try {
+        const { token } = JSON.parse(authData);
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
+      } catch (error) {
+        console.error('Error parsing auth token:', error);
+        localStorage.removeItem('auth');
       }
     }
     return config;
   },
   (error) => Promise.reject(error)
+);
+
+// Add response interceptor to handle auth errors
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    // Handle 403 Forbidden errors (invalid token)
+    if (error.response && (error.response.status === 403 || error.response.status === 401)) {
+      console.error('Authentication error:', error.response.data);
+      // Clear invalid auth data
+      if (error.config.url !== '/users/login' && error.config.url !== '/users/register') {
+        // Only clear if not trying to log in or register
+        localStorage.removeItem('auth');
+        // Redirect to login page if needed
+        window.location.href = '/login';
+      }
+    }
+    return Promise.reject(error);
+  }
 );
 
 // User API calls
@@ -74,6 +98,17 @@ export const getUnseenMessages = async (userId) => {
 
 export const markMessageAsSeen = async (messageId) => {
   const response = await api.put(`/messages/seen/${messageId}`);
+  return response.data;
+};
+
+// Anonymous Messages API calls
+export const getAnonymousMessages = async () => {
+  const response = await api.get('/anonymous-messages');
+  return response.data;
+};
+
+export const sendAnonymousMessage = async (messageData) => {
+  const response = await api.post('/anonymous-messages', messageData);
   return response.data;
 };
 

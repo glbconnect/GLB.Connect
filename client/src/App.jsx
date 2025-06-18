@@ -5,6 +5,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Messages from './pages/Messages';
 import Profile from './pages/Profile';
+import AnonymousPost from './pages/AnonymousPost';
 import * as api from './services/api';
 import './index.css';
 
@@ -30,15 +31,16 @@ function App() {
               setCurrentUser(currentUserData);
               setIsLoggedIn(true);
               
-              // Update localStorage with fresh data
+              // Update localStorage with fresh data and ensure token is properly stored
               localStorage.setItem('auth', JSON.stringify({
-                token,
+                token, // Keep the existing token
                 user: currentUserData
               }));
             } catch (error) {
               console.error('Error fetching current user:', error);
-              // If the token is invalid, log out
-              if (error.response?.status === 401) {
+              // If the token is invalid or expired, log out
+              if (error.response?.status === 401 || error.response?.status === 403) {
+                console.log('Authentication token expired or invalid. Logging out.');
                 handleLogout();
               }
             }
@@ -102,6 +104,7 @@ function App() {
         <Route path="/messages" element={isLoggedIn ? <Messages isLoggedIn={isLoggedIn} onLogout={handleLogout} currentUser={currentUser} /> : <Navigate to="/login" />} />
         <Route path="/messages/:userId" element={isLoggedIn ? <Messages isLoggedIn={isLoggedIn} onLogout={handleLogout} currentUser={currentUser} /> : <Navigate to="/login" />} />
         <Route path="/profile" element={isLoggedIn ? <Profile isLoggedIn={isLoggedIn} onLogout={handleLogout} currentUser={currentUser} onUpdateProfile={handleUpdateProfile} /> : <Navigate to="/login" />} />
+        <Route path="/anonymous-post" element={isLoggedIn ? <AnonymousPost isLoggedIn={isLoggedIn} onLogout={handleLogout} currentUser={currentUser} /> : <Navigate to="/login" />} />
       </Routes>
     </Router>
   );

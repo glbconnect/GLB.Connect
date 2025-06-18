@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 
-export const verifyToken = (req, res, next) => {
+export const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
 
@@ -17,23 +17,15 @@ export const verifyToken = (req, res, next) => {
   }
 };
 
-export const optionalAuth = (req, res, next) => {
-  const authHeader = req.headers.authorization;
-  
-  if (authHeader && authHeader.startsWith('Bearer ')) {
-    const token = authHeader.split(' ')[1];
-    
-    try {
-      const verified = jwt.verify(token, process.env.JWT_SECRET);
-      req.user = verified;
-    } catch (error) {
-      // Ignore token errors for optional auth
-    }
+export const verifyToken = async (token) => {
+  try {
+    return jwt.verify(token, process.env.JWT_SECRET);
+  } catch (error) {
+    throw new Error('Invalid token');
   }
-  
-  next();
 };
 
 export default {
+  authenticateToken,
   verifyToken
-}; 
+};

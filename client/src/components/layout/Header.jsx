@@ -16,9 +16,9 @@ const Header = ({ isLoggedIn, onLogout }) => {
   };
 
   return (
-    <header className="bg-white shadow">
-      <div className="container mx-auto px-4 py-4">
-        <div className="flex items-center justify-between">
+    <header className="bg-white shadow w-full">
+      <div className="w-full px-4 py-4">
+        <div className="flex items-center justify-between max-w-[1400px] mx-auto">
           {/* Logo */}
           <Link to="/" className="flex items-center">
             <span className="text-2xl font-bold text-primary">GLB.Connect</span>
@@ -85,7 +85,7 @@ const Header = ({ isLoggedIn, onLogout }) => {
 
         {/* Mobile Navigation */}
         {isMobileMenuOpen && (
-          <nav className="mt-4 px-2 pt-2 pb-4 md:hidden space-y-3">
+          <nav className="mt-4 px-2 pt-2 pb-4 md:hidden space-y-3 max-w-[1400px] mx-auto">
             <Link 
               to="/" 
               className="block text-gray-700 hover:text-primary font-medium"

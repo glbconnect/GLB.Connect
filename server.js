@@ -9,6 +9,7 @@ import messageRouter from './src/routes/messageRoutes.js';
 import userRouter from './src/routes/userRoutes.js';
 import batchRouter from './src/routes/batchroute.js';
 import jobRouter from './src/routes/jobRoutes.js';
+import resourceRouter from './src/routes/resourceRoutes.js';
 import { initializeSocket } from './src/sockets/chatSocket.js';
 import anonymousMessageRouter from './src/routes/anonymousMessageRoutes.js';
 
@@ -44,7 +45,11 @@ app.use('/api/messages', messageRouter);
 app.use('/api/users', userRouter);
 app.use('/api/batch', batchRouter);
 app.use('/api/jobs', jobRouter);
+app.use('/api/resources', resourceRouter);
 app.use('/api/anonymous-messages', anonymousMessageRouter);
+
+// Serve static files (for uploaded resources)
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Simple test endpoint
 app.get('/api/test', (req, res) => {

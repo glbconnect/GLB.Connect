@@ -32,6 +32,7 @@ const Header = ({ isLoggedIn, onLogout }) => {
               <>
                 <Link to="/messages" className="text-gray-700 hover:text-primary font-medium">Messages</Link>
                 <Link to="/anonymous-post" className="text-gray-700 hover:text-primary font-medium">Anonymous Chat</Link>
+                <Link to="/resources" className="text-gray-700 hover:text-primary font-medium">Resources</Link>
                 <Link to="/profile" className="text-gray-700 hover:text-primary font-medium">Profile</Link>
                 <Button 
                   variant="ghost" 
@@ -116,6 +117,13 @@ const Header = ({ isLoggedIn, onLogout }) => {
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Anonymous Chat
+                </Link>
+                <Link 
+                  to="/resources" 
+                  className="block text-gray-700 hover:text-primary font-medium"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Resources
                 </Link>
                 <Link 
                   to="/profile" 

@@ -90,6 +90,47 @@ export const changePassword = async (passwordData) => {
   return response.data;
 };
 
+// Resource Sharing API calls
+export const getResources = async (params = {}) => {
+  const queryString = new URLSearchParams(params).toString();
+  const response = await api.get(`/resources?${queryString}`);
+  return response.data;
+};
+
+export const getResourceById = async (id) => {
+  const response = await api.get(`/resources/${id}`);
+  return response.data;
+};
+
+export const createResource = async (formData) => {
+  const response = await api.post('/resources', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  });
+  return response.data;
+};
+
+export const updateResource = async (id, resourceData) => {
+  const response = await api.put(`/resources/${id}`, resourceData);
+  return response.data;
+};
+
+export const deleteResource = async (id) => {
+  const response = await api.delete(`/resources/${id}`);
+  return response.data;
+};
+
+export const getCategories = async () => {
+  const response = await api.get('/resources/categories');
+  return response.data;
+};
+
+export const getCategoryBySlug = async (slug) => {
+  const response = await api.get(`/resources/categories/${slug}`);
+  return response.data;
+};
+
 // Messages API calls
 export const sendMessage = async (messageData) => {
   const response = await api.post('/messages/send', messageData);

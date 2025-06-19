@@ -60,9 +60,11 @@ const ResourceItem = ({ resource }) => {
         
         <div className="flex space-x-2 ml-4">
           <a
-            href={resource.fileUrl}
+            href={`${import.meta.env.VITE_API_URL?.replace(/\/api$/, "") || ""}${resource.fileUrl}`}
             download
             className="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700 transition-colors"
+            target="_blank"
+            rel="noopener noreferrer"
           >
             Download
           </a>

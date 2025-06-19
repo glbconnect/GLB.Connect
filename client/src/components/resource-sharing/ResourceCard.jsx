@@ -73,18 +73,13 @@ const ResourceCard = ({ resource }) => {
           </div>
           
           <div className="flex space-x-2">
-            <Link
-              to={`/resources/${resource.id}`}
-              className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition-colors"
-            >
-              View Details
-            </Link>
             <a
-              href={resource.fileUrl}
-              download
-              className="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700 transition-colors"
+              href={`${import.meta.env.VITE_API_URL?.replace(/\/api$/, "") || ""}${resource.fileUrl}`}
+              className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition-colors"
+              target="_blank"
+              rel="noopener noreferrer"
             >
-              Download
+              View
             </a>
           </div>
         </div>

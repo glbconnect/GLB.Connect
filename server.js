@@ -51,6 +51,10 @@ app.use('/api/resources', resourceRouter);
 app.use('/api/anonymous-messages', anonymousMessageRouter);
 app.use('/api/events', eventRouter);
 
+app.get('/api/health', (req, res) => {
+  res.status(200).send('OK');
+});
+
 // Set up multer for file uploads
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {

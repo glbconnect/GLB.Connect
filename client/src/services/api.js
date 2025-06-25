@@ -62,9 +62,8 @@ export const login = async (credentials) => {
 };
 
 export const getCurrentUser = async () => {
-  const res = await fetch('/api/users/me');
-  if (!res.ok) throw new Error('Not authenticated');
-  return res.json();
+  const response = await api.get('/users/me');
+  return response.data;
 };
 
 export const getUserById = async (userId) => {

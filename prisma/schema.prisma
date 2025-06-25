@@ -152,6 +152,7 @@ model Event {
   organizerId       String
   organizer         User      @relation("EventOrganizer", fields: [organizerId], references: [id])
   registrations     EventRegistration[]
+  registrationLink  String?   // Google Form or registration URL
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 }

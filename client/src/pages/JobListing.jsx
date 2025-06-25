@@ -107,17 +107,17 @@ const JobListing = ({ isLoggedIn, onLogout, currentUser }) => {
 
   return (
     <Layout isLoggedIn={isLoggedIn} onLogout={onLogout} currentUser={currentUser}>
-      <div className="container mx-auto py-6 bg-gray-50">
-        {/* Post Job Button Section */}
-        <div className="mb-6 bg-white p-4 rounded-lg shadow-sm">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 py-8 px-2">
+        <div className="max-w-6xl mx-auto flex flex-col gap-8">
+          {/* Post Job Button Section */}
+          <div className="rounded-3xl shadow-2xl bg-white/80 backdrop-blur-md border border-blue-100 p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
-              <h1 className="text-2xl font-bold text-gray-800">Job Opportunities</h1>
-              <p className="text-gray-600 mt-1">Find and post job opportunities in the GLB community</p>
+              <h1 className="text-3xl font-extrabold text-blue-700 drop-shadow mb-1">Job Opportunities</h1>
+              <p className="text-blue-900/80 mt-1 text-base">Find and post job opportunities in the GLB community</p>
             </div>
             <button
               onClick={handlePostJob}
-              className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center gap-2"
+              className="bg-gradient-to-br from-blue-500 to-blue-600 text-white px-7 py-3 rounded-full shadow-lg hover:scale-105 hover:from-blue-600 hover:to-blue-700 transition-all font-semibold flex items-center gap-2"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
@@ -125,22 +125,22 @@ const JobListing = ({ isLoggedIn, onLogout, currentUser }) => {
               {isLoggedIn ? 'Post a Job' : 'Login to Post'}
             </button>
           </div>
-        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Filter sidebar */}
-          <div className="lg:col-span-1">
-            <FilterPanel 
-              onFilterChange={handleFilterChange} 
-              activeFilters={activeFilters}
-            />
-          </div>
-          
-          {/* Job listings */}
-          <div className="lg:col-span-3">
-            <div className="mb-4 bg-white p-4 rounded-lg shadow-sm">
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
-                <h2 className="text-xl font-medium text-gray-800">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            {/* Filter sidebar */}
+            <div className="lg:col-span-1">
+              <div className="sticky top-8">
+                <FilterPanel 
+                  onFilterChange={handleFilterChange} 
+                  activeFilters={activeFilters}
+                />
+              </div>
+            </div>
+            
+            {/* Job listings */}
+            <div className="lg:col-span-3">
+              <div className="mb-6 bg-white/80 backdrop-blur-md rounded-2xl shadow-lg border border-blue-100 p-5 flex flex-col md:flex-row justify-between items-start md:items-center">
+                <h2 className="text-2xl font-bold text-blue-800">
                   Showing {jobs.length} opportunities
                   {countActiveFilters() > 0 && (
                     <span className="ml-2 text-sm bg-blue-600 text-white px-2 py-1 rounded-full">
@@ -148,7 +148,6 @@ const JobListing = ({ isLoggedIn, onLogout, currentUser }) => {
                     </span>
                   )}
                 </h2>
-                
                 {searchQuery && (
                   <div className="mt-2 md:mt-0 bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm flex items-center">
                     <span>Search: {searchQuery}</span>
@@ -163,48 +162,68 @@ const JobListing = ({ isLoggedIn, onLogout, currentUser }) => {
                   </div>
                 )}
               </div>
-            </div>
-            
-            {loading ? (
-              <div className="flex justify-center items-center h-64 bg-white rounded-lg shadow-sm">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
-              </div>
-            ) : (
-              <div>
-                {jobs.length > 0 ? (
-                  jobs.map(job => (
-                    <JobCard key={job.id} job={job} />
-                  ))
+              <div className="max-h-[70vh] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-blue-300 scrollbar-track-blue-100 hover:scrollbar-thumb-blue-400 transition-all duration-200">
+                {loading ? (
+                  <div className="flex justify-center items-center h-64 bg-white/80 rounded-2xl shadow">
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
+                  </div>
                 ) : (
-                  <div className="text-center py-12 bg-white rounded-lg shadow-sm">
-                    <h3 className="text-lg font-medium text-gray-800">No jobs found</h3>
-                    <p className="text-gray-600 mb-4">Try adjusting your filters or search criteria to find more opportunities</p>
-                    <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                      <button 
-                        onClick={() => {
-                          setActiveFilters({});
-                          setSearchQuery('');
-                        }}
-                        className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"
-                      >
-                        Clear All Filters
-                      </button>
-                      {isLoggedIn && (
-                        <button 
-                          onClick={handlePostJob}
-                          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-                        >
-                          Post the First Job
-                        </button>
-                      )}
-                    </div>
+                  <div>
+                    {jobs.length > 0 ? (
+                      jobs.map(job => (
+                        <JobCard key={job.id} job={job} />
+                      ))
+                    ) : (
+                      <div className="text-center py-12 bg-white/80 rounded-2xl shadow">
+                        <h3 className="text-lg font-semibold text-blue-800">No jobs found</h3>
+                        <p className="text-blue-900/70 mb-4">Try adjusting your filters or search criteria to find more opportunities</p>
+                        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                          <button 
+                            onClick={() => {
+                              setActiveFilters({});
+                              setSearchQuery('');
+                            }}
+                            className="bg-gray-600 text-white px-4 py-2 rounded-full hover:bg-gray-700 transition-colors"
+                          >
+                            Clear All Filters
+                          </button>
+                          {isLoggedIn && (
+                            <button 
+                              onClick={handlePostJob}
+                              className="bg-gradient-to-br from-blue-500 to-blue-600 text-white px-4 py-2 rounded-full shadow hover:from-blue-600 hover:to-blue-700 transition-all"
+                            >
+                              Post the First Job
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
-            )}
+            </div>
           </div>
         </div>
       </div>
+      <style>{`
+        /* Custom scrollbar for job list */
+        .scrollbar-thin::-webkit-scrollbar {
+          width: 8px;
+          background: #e0e7ff;
+          border-radius: 8px;
+        }
+        .scrollbar-thin::-webkit-scrollbar-thumb {
+          background: #60a5fa;
+          border-radius: 8px;
+        }
+        .scrollbar-thin:hover::-webkit-scrollbar-thumb {
+          background: #2563eb;
+        }
+        .scrollbar-thin {
+          scrollbar-width: thin;
+          scrollbar-color: #60a5fa #e0e7ff;
+        }
+      `}</style>
     </Layout>
   )
 }

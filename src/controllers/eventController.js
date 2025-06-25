@@ -22,7 +22,7 @@ export async function getEventById(req, res) {
 
 export async function createEvent(req, res) {
   try {
-    const { title, description, date, location, eventType, registrationLimit, imageUrl } = req.body;
+    const { title, description, date, location, eventType, registrationLimit, imageUrl, registrationLink } = req.body;
     const dataToSave = {
       title,
       description,
@@ -31,6 +31,7 @@ export async function createEvent(req, res) {
       eventType,
       registrationLimit: registrationLimit ? parseInt(registrationLimit, 10) : null,
       imageUrl,
+      registrationLink,
       organizerId: req.user.id,
     };
     const event = await eventModel.createEvent(dataToSave);
@@ -44,7 +45,7 @@ export async function createEvent(req, res) {
 
 export async function updateEvent(req, res) {
   try {
-    const { title, description, date, location, eventType, registrationLimit, imageUrl } = req.body;
+    const { title, description, date, location, eventType, registrationLimit, imageUrl, registrationLink } = req.body;
     const dataToSave = {
       title,
       description,
@@ -53,6 +54,7 @@ export async function updateEvent(req, res) {
       eventType,
       registrationLimit: registrationLimit ? parseInt(registrationLimit, 10) : null,
       imageUrl,
+      registrationLink,
     };
     Object.keys(dataToSave).forEach(key => dataToSave[key] === undefined && delete dataToSave[key]);
     const event = await eventModel.updateEvent(req.params.id, dataToSave);

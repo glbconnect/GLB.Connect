@@ -23,6 +23,7 @@ const Messages = ({ isLoggedIn, onLogout, currentUser }) => {
   const [socket, setSocket] = useState(null);
   
   const messagesEndRef = useRef(null);
+  const messagesContainerRef = useRef(null);
   const typingTimeoutRef = useRef(null);
 
   // Keep track of active user details
@@ -144,10 +145,15 @@ const Messages = ({ isLoggedIn, onLogout, currentUser }) => {
     }
   }, [activeUserId, currentUser?.id]);
 
-  // Scroll to bottom when messages change
+  // Scroll to bottom of chat area only (not whole page)
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+    if (!isLoading && messages.length > 0 && messagesContainerRef.current) {
+      setTimeout(() => {
+        const container = messagesContainerRef.current;
+        container.scrollTop = container.scrollHeight;
+      }, 50);
+    }
+  }, [isLoading, messages]);
 
   // Update activeUserDetails when activeUserId or conversations change
   useEffect(() => {
@@ -185,139 +191,12 @@ const Messages = ({ isLoggedIn, onLogout, currentUser }) => {
   // Fetch user conversations
   const fetchConversations = async () => {
     if (!currentUser?.id) return;
-    
-    // Save current conversations state before fetching
-    const currentConversationsList = [...conversations];
-    
     try {
-      // First, get all users for reference
-      const allUsers = await api.searchUsers("");
-      const userMap = new Map();
-      
-      // Create map of all users by ID for quick lookup
-      allUsers.forEach(user => {
-        if (user.id !== currentUser.id) {
-          userMap.set(user.id, {
-            userId: user.id,
-            name: user.name,
-            email: user.email,
-            lastMessage: "",
-            lastMessageTime: "",
-            unreadCount: 0,
-            isAnonymous: false
-          });
-        }
-      });
-      
-      // Get chat history for all users (including past conversations)
-      // First, get unseen messages to find active conversation partners
-      const unseenMessages = await api.getUnseenMessages(currentUser.id);
-      
-      // If no messages returned, keep the current conversations list
-      if (!unseenMessages || unseenMessages.length === 0) {
-        return;
-      }
-      
-      // Create conversation map
-      const conversationMap = new Map();
-      
-      // First, add existing conversations to the map to preserve state
-      currentConversationsList.forEach(conv => {
-        conversationMap.set(conv.userId, {...conv});
-      });
-      
-      // Process all messages to build conversations
-      for (const msg of unseenMessages) {
-        // Skip messages where both sender and receiver are the current user
-        if (msg.senderId === currentUser.id && msg.receiverId === currentUser.id) {
-          continue;
-        }
-
-        // Get the ID of the other user (not the current user)
-        const otherUserId = msg.senderId === currentUser.id ? msg.receiverId : msg.senderId;
-        
-        // Skip if the other user is the current user (shouldn't happen with proper data)
-        if (otherUserId === currentUser.id) {
-          continue;
-        }
-        
-        // Get user details from the userMap or from the message
-        const userDetails = userMap.get(otherUserId) || {
-          userId: otherUserId,
-          name: msg.sender?.name || (msg.isAnonymous ? 'Anonymous' : 'User'),
-          email: msg.sender?.email || '',
-          lastMessage: "",
-          lastMessageTime: "",
-          unreadCount: 0,
-          isAnonymous: msg.isAnonymous && msg.senderId !== currentUser.id
-        };
-        
-        // If this is a new conversation or a newer message
-        if (!conversationMap.has(otherUserId) || 
-            !conversationMap.get(otherUserId).lastMessageTime ||
-            new Date(msg.timestamp) > new Date(conversationMap.get(otherUserId).lastMessageTime)) {
-          
-          // Update conversation with latest message
-          conversationMap.set(otherUserId, {
-            ...userDetails,
-            lastMessage: msg.content,
-            lastMessageTime: msg.timestamp,
-            unreadCount: (!msg.seen && msg.senderId !== currentUser.id) 
-              ? (conversationMap.get(otherUserId)?.unreadCount || 0) + 1 
-              : (conversationMap.get(otherUserId)?.unreadCount || 0),
-            isAnonymous: msg.isAnonymous && msg.senderId !== currentUser.id
-          });
-        } else if (!msg.seen && msg.senderId !== currentUser.id) {
-          // Just update unread count for older messages
-          const conv = conversationMap.get(otherUserId);
-          conv.unreadCount += 1;
-        }
-      }
-      
-      // Convert map to array and format dates for display
-      const conversationsArray = Array.from(conversationMap.values())
-        .filter(conv => {
-          // Make sure we have a conversation with messages AND the user is not the current user
-          return conv.lastMessage && conv.userId !== currentUser.id;
-        })
-        .map(conv => ({
-          ...conv,
-          lastMessageTime: typeof conv.lastMessageTime === 'string' ? 
-            conv.lastMessageTime : 
-            new Date(conv.lastMessageTime).toLocaleTimeString([], { 
-              hour: '2-digit', 
-              minute: '2-digit',
-              hour12: true
-            })
-        }));
-      
-      // Sort by message time (newest first)
-      const sortedConversations = conversationsArray.sort((a, b) => {
-        if (!a.lastMessageTime) return 1;
-        if (!b.lastMessageTime) return -1;
-        
-        // Handle different time formats
-        const aTime = typeof a.lastMessageTime === 'string' && a.lastMessageTime.includes(':') ? 
-          a.lastMessageTime : new Date(a.lastMessageTime).toISOString();
-        const bTime = typeof b.lastMessageTime === 'string' && b.lastMessageTime.includes(':') ? 
-          b.lastMessageTime : new Date(b.lastMessageTime).toISOString();
-        
-        return aTime < bTime ? 1 : -1;
-      });
-      
-      // Only update state if we have conversations to show
-      if (sortedConversations.length > 0) {
-        setConversations(sortedConversations);
-      } else {
-        // If no conversations found from API, keep the current list
-        setConversations(currentConversationsList);
-      }
-      
+      const conversations = await api.getAllConversations();
+      setConversations(conversations);
     } catch (error) {
       console.error('Error fetching conversations:', error);
       setError('Failed to load conversations');
-      // On error, keep the current conversations list
-      setConversations(currentConversationsList);
     }
   };
 
@@ -519,7 +398,19 @@ const Messages = ({ isLoggedIn, onLogout, currentUser }) => {
       
       // Send via socket first for quick updates
       socketService.sendMessage(messageData);
-      
+
+      // Fetch receiver details for sidebar conversation
+      api.getUserById(activeUserId).then(receiverData => {
+        const receiverName = receiverData?.name || 'User';
+        const receiverEmail = receiverData?.email || '';
+        // Immediately update conversations list for sidebar with correct user info
+        updateConversationsWithMessage({
+          ...optimisticMessage,
+          receiverName,
+          receiverEmail
+        });
+      });
+
       // Send via API in background
       api.sendMessage(messageData)
         .then(sentMessage => {
@@ -529,7 +420,10 @@ const Messages = ({ isLoggedIn, onLogout, currentUser }) => {
               msg.id === optimisticMessage.id ? {...msg, id: sentMessage.id} : msg
             )
           );
-          
+
+          // Refresh conversations from backend
+          fetchConversations();
+
           // Release lock
           sendingMessage = false;
         })
@@ -663,146 +557,161 @@ const Messages = ({ isLoggedIn, onLogout, currentUser }) => {
 
   return (
     <Layout isLoggedIn={isLoggedIn} onLogout={onLogout}>
-      <div className="h-[calc(100vh-200px)] overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm mt-8">
-        <div className="flex h-full">
-          {/* Sidebar - Conversation List */}
-          <div className="w-1/3 border-r border-gray-200 flex flex-col">
-            <div className="p-4 border-b border-gray-200 bg-white sticky top-0 z-10">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Messages</h2>
-              <UserSearch onSelectUser={(userId, userDetails) => {
-                // Set active user ID first (will trigger navigation effect)
-                setActiveUserId(userId);
-                
-                // Immediately update user details to avoid flickering
-                setActiveUserDetails(userDetails);
-                
-                // Navigate to the message view
-                navigate(`/messages/${userId}`);
-              }} />
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 flex items-center justify-center py-8 px-2">
+        <div className="w-full max-w-6xl flex flex-col gap-8 items-center justify-center">
+          <div className="flex rounded-3xl shadow-2xl bg-white/80 backdrop-blur-md border border-blue-100 overflow-hidden min-h-[70vh] max-h-[80vh] w-full" style={{ height: '70vh' }}>
+            {/* Sidebar - Conversation List */}
+            <div className="w-1/3 border-r border-blue-100 flex flex-col bg-white/70">
+              <div className="p-6 border-b border-blue-100 bg-white/80 sticky top-0 z-10">
+                <h2 className="text-2xl font-extrabold text-blue-700 mb-4 drop-shadow">Messages</h2>
+                <UserSearch onSelectUser={(userId, userDetails) => {
+                  setActiveUserId(userId);
+                  setActiveUserDetails(userDetails);
+                  navigate(`/messages/${userId}`);
+                }} />
+              </div>
+              <div className="flex-1 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-blue-300 scrollbar-track-blue-100 hover:scrollbar-thumb-blue-400 transition-all duration-200">
+                {conversations.length > 0 ? (
+                  <MessageList
+                    conversations={conversations}
+                    activeUserId={activeUserId}
+                    onSelectConversation={(userId, userDetails) => {
+                      setActiveUserId(userId);
+                      if (userDetails) setActiveUserDetails(userDetails);
+                      navigate(`/messages/${userId}`);
+                    }}
+                  />
+                ) : (
+                  <div className="p-6 text-center text-blue-400">No conversations yet. Use the search to find someone to message.</div>
+                )}
+              </div>
             </div>
-            
-            <div className="flex-1 overflow-y-auto">
-              {conversations.length > 0 ? (
-                <MessageList
-                  conversations={conversations}
-                  activeUserId={activeUserId}
-                  onSelectConversation={(userId, userDetails) => {
-                    // Update activeUserId which triggers navigation
-                    setActiveUserId(userId);
-                    
-                    // If userDetails are provided, update activeUserDetails immediately
-                    if (userDetails) {
-                      setActiveUserDetails(userDetails);
-                    }
-                    
-                    // Update URL
-                    navigate(`/messages/${userId}`);
-                  }}
-                />
+            {/* Main Content - Chat Area */}
+            <div className="flex flex-col w-2/3 relative bg-white/70">
+              {activeUserId ? (
+                <>
+                  {/* Chat Header */}
+                  <div className="border-b border-blue-100 p-6 flex items-center bg-white/80 shadow-md sticky top-0 z-10">
+                    <div className="flex items-center w-full">
+                      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-blue-400 text-white text-2xl font-bold mr-4 flex-shrink-0 shadow">
+                        {activeUserDetails.name ? activeUserDetails.name.charAt(0).toUpperCase() : 'U'}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <h3 className="font-bold text-blue-800 text-xl truncate">
+                          {activeUserDetails.isAnonymous ? 'Anonymous' : activeUserDetails.name}
+                        </h3>
+                        {activeUserDetails.email && !activeUserDetails.isAnonymous && (
+                          <p className="text-sm text-blue-500 truncate">{activeUserDetails.email}</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  {/* Messages Container */}
+                  <div
+                    ref={messagesContainerRef}
+                    className="flex-grow min-h-[300px] max-h-[calc(70vh-120px)] overflow-y-auto px-6 py-6 pb-20 bg-gradient-to-b from-blue-50/60 to-white relative scrollbar-thin scrollbar-thumb-blue-300 scrollbar-track-blue-100 hover:scrollbar-thumb-blue-400 transition-all duration-200"
+                    id="messages-container"
+                  >
+                    {isLoading ? (
+                      <div className="flex h-full items-center justify-center">
+                        <p>Loading messages...</p>
+                      </div>
+                    ) : error ? (
+                      <div className="flex h-full items-center justify-center">
+                        <p className="text-red-500">{error}</p>
+                      </div>
+                    ) : messages.length === 0 ? (
+                      <div className="flex h-full items-center justify-center">
+                        <p className="text-blue-400">No messages yet. Send a message to start the conversation.</p>
+                      </div>
+                    ) : (
+                      <>
+                        {messages.map((message) => (
+                          <div key={message.id} className="animate-fadeIn">
+                            <MessageBubble
+                              message={message}
+                              isOwn={message.senderId === currentUser.id}
+                            />
+                          </div>
+                        ))}
+                        {userTyping === activeUserId && (
+                          <div className="text-sm text-blue-400 italic mt-2">
+                            {activeUserDetails.isAnonymous ? 'Anonymous' : activeUserDetails.name} is typing...
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
+                  {/* Message Input */}
+                  <div className="border-t border-blue-100 bg-white/80 backdrop-blur-md p-6 sticky bottom-0 z-10">
+                    <form onSubmit={handleSendMessage} className="flex items-center gap-3">
+                      <div className="flex items-center mr-2">
+                        <input
+                          type="checkbox"
+                          id="anonymous"
+                          checked={isAnonymous}
+                          onChange={() => setIsAnonymous(!isAnonymous)}
+                          className="h-5 w-5 rounded border-blue-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        <label htmlFor="anonymous" className="ml-2 text-sm text-blue-700 font-medium select-none">
+                          Anonymous
+                        </label>
+                      </div>
+                      <Input
+                        type="text"
+                        placeholder="Type a message..."
+                        value={newMessage}
+                        onChange={handleInputChange}
+                        onKeyDown={handleKeyDown}
+                        className="flex-grow rounded-full border border-blue-200 px-5 py-3 focus:outline-none focus:border-blue-400 bg-white/90 shadow-sm text-base transition-all"
+                        autoComplete="off"
+                      />
+                      <button
+                        type="submit"
+                        className="bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-full p-3 w-12 h-12 flex items-center justify-center shadow-lg hover:scale-105 hover:from-blue-600 hover:to-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled={!newMessage.trim()}
+                        aria-label="Send"
+                      >
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                      </button>
+                    </form>
+                  </div>
+                </>
               ) : (
-                <div className="p-4 text-center text-gray-500">
-                  No conversations yet. Use the search to find someone to message.
+                <div className="flex h-full items-center justify-center">
+                  <p className="text-blue-400">Select a conversation or search for a user to message</p>
                 </div>
               )}
             </div>
           </div>
-          
-          {/* Main Content - Chat Area */}
-          <div className="flex flex-col w-2/3 relative">
-            {activeUserId ? (
-              <>
-                {/* Chat Header */}
-                <div className="border-b border-gray-200 p-4 flex items-center bg-white shadow-sm sticky top-0 z-10">
-                  <div className="flex items-center w-full">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-white mr-3 flex-shrink-0">
-                      {activeUserDetails.name ? activeUserDetails.name.charAt(0).toUpperCase() : 'U'}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <h3 className="font-semibold text-gray-900 text-lg truncate">
-                        {activeUserDetails.isAnonymous ? 'Anonymous' : activeUserDetails.name}
-                      </h3>
-                      {activeUserDetails.email && !activeUserDetails.isAnonymous && (
-                        <p className="text-sm text-gray-500 truncate">{activeUserDetails.email}</p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Messages Container */}
-                <div className="flex-grow overflow-y-auto p-4 pb-14">
-                  {isLoading ? (
-                    <div className="flex h-full items-center justify-center">
-                      <p>Loading messages...</p>
-                    </div>
-                  ) : error ? (
-                    <div className="flex h-full items-center justify-center">
-                      <p className="text-red-500">{error}</p>
-                    </div>
-                  ) : messages.length === 0 ? (
-                    <div className="flex h-full items-center justify-center">
-                      <p className="text-gray-500">No messages yet. Send a message to start the conversation.</p>
-                    </div>
-                  ) : (
-                    <>
-                      {messages.map((message) => (
-                        <MessageBubble
-                          key={message.id}
-                          message={message}
-                          isOwn={message.senderId === currentUser.id}
-                        />
-                      ))}
-                      {userTyping === activeUserId && (
-                        <div className="text-sm text-gray-500 italic mt-2">
-                          {activeUserDetails.isAnonymous ? 'Anonymous' : activeUserDetails.name} is typing...
-                        </div>
-                      )}
-                      <div ref={messagesEndRef} />
-                    </>
-                  )}
-                </div>
-                
-                {/* Message Input */}
-                <div className="border-t border-gray-200 p-4 bg-white sticky bottom-0 z-10">
-                  <form onSubmit={handleSendMessage} className="flex items-center">
-                    <div className="mr-2 flex items-center">
-                      <input
-                        type="checkbox"
-                        id="anonymous"
-                        checked={isAnonymous}
-                        onChange={() => setIsAnonymous(!isAnonymous)}
-                        className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-                      />
-                      <label htmlFor="anonymous" className="ml-1 text-sm text-gray-600">
-                        Anonymous
-                      </label>
-                    </div>
-                    
-                    <Input
-                      type="text"
-                      placeholder="Type a message..."
-                      value={newMessage}
-                      onChange={handleInputChange}
-                      onKeyDown={handleKeyDown}
-                      className="flex-grow"
-                    />
-                    
-                    <Button
-                      type="submit"
-                      className="ml-2"
-                      disabled={!newMessage.trim()}
-                    >
-                      Send
-                    </Button>
-                  </form>
-                </div>
-              </>
-            ) : (
-              <div className="flex h-full items-center justify-center">
-                <p className="text-gray-500">Select a conversation or search for a user to message</p>
-              </div>
-            )}
-          </div>
         </div>
+        <style>{`
+          @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+          .animate-fadeIn {
+            animation: fadeIn 0.4s;
+          }
+          .scrollbar-thin::-webkit-scrollbar {
+            width: 8px;
+            background: #e0e7ff;
+            border-radius: 8px;
+          }
+          .scrollbar-thin::-webkit-scrollbar-thumb {
+            background: #60a5fa;
+            border-radius: 8px;
+          }
+          .scrollbar-thin:hover::-webkit-scrollbar-thumb {
+            background: #2563eb;
+          }
+          .scrollbar-thin {
+            scrollbar-width: thin;
+            scrollbar-color: #60a5fa #e0e7ff;
+          }
+        `}</style>
       </div>
     </Layout>
   );

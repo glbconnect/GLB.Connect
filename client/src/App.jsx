@@ -17,11 +17,16 @@ import Events from './pages/Events';
 import QAThreads from './pages/QAThreads';
 import * as api from './services/api';
 import './index.css';
+import Header from './components/layout/Header';
+import * as socketService from './services/socket';
+import { useLocation } from 'react-router-dom';
 
-function App() {
+function AppRoutes() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [notificationCount, setNotificationCount] = useState(0);
+  const location = useLocation();
   
   // Check for saved auth and fetch current user on component mount
   useEffect(() => {
@@ -77,6 +82,36 @@ function App() {
     }
   };
 
+  // Socket notification logic
+  useEffect(() => {
+    if (!isLoggedIn || !currentUser?.id) return;
+    const socket = socketService.initializeSocket(currentUser.id);
+    // Listen for new messages
+    socketService.listenForMessages((message) => {
+      // Only notify if not on /messages or /messages/:userId and not sent by self
+      const isOnMessagesPage = location.pathname.startsWith('/messages');
+      if (!isOnMessagesPage && message.senderId !== currentUser.id) {
+        setNotificationCount((prev) => prev + 1);
+      }
+    });
+    return () => {
+      socketService.removeAllListeners();
+    };
+  }, [isLoggedIn, currentUser, location.pathname]);
+
+  // Reset notification count when visiting messages page
+  useEffect(() => {
+    if (location.pathname.startsWith('/messages')) {
+      setNotificationCount(0);
+    }
+  }, [location.pathname]);
+
+  const handleNotificationClick = () => {
+    setNotificationCount(0);
+    // Optionally, navigate to messages page
+    window.location.href = '/messages';
+  };
+
   if (isLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
@@ -86,7 +121,13 @@ function App() {
   }
 
   return (
-    <Router>
+    <>
+      <Header
+        isLoggedIn={isLoggedIn}
+        onLogout={handleLogout}
+        notificationCount={notificationCount}
+        onNotificationClick={handleNotificationClick}
+      />
       <Routes>
         <Route path="/" element={<Home isLoggedIn={isLoggedIn} onLogout={handleLogout} />} />
         <Route path="/login" element={isLoggedIn ? <Navigate to="/" /> : <Login onLogin={handleLogin} />} />
@@ -97,7 +138,6 @@ function App() {
         <Route path="/anonymous-post" element={isLoggedIn ? <AnonymousPost isLoggedIn={isLoggedIn} onLogout={handleLogout} currentUser={currentUser} /> : <Navigate to="/login" />} />
         <Route path="/jobs" element={<JobListing isLoggedIn={isLoggedIn} onLogout={handleLogout} currentUser={currentUser} />} />
         <Route path="/post-job" element={isLoggedIn ? <PostJob isLoggedIn={isLoggedIn} onLogout={handleLogout} currentUser={currentUser} /> : <Navigate to="/login" />} />
-        
         {/* Resource Sharing Routes */}
         <Route path="/resources" element={<ResourceSharing isLoggedIn={isLoggedIn} onLogout={handleLogout} currentUser={currentUser} />} />
         <Route path="/resources/browse" element={<ResourceBrowse isLoggedIn={isLoggedIn} onLogout={handleLogout} currentUser={currentUser} />} />
@@ -107,6 +147,14 @@ function App() {
         <Route path="/events" element={<Events isLoggedIn={isLoggedIn} onLogout={handleLogout} currentUser={currentUser} />} />
         <Route path="/qa-threads" element={isLoggedIn ? <QAThreads isLoggedIn={isLoggedIn} onLogout={handleLogout} currentUser={currentUser} /> : <Navigate to="/login" />} />
       </Routes>
+    </>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <AppRoutes />
     </Router>
   );
 }

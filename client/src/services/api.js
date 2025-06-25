@@ -222,4 +222,9 @@ export const getUsers = async () => {
   return response.data;
 };
 
+export const getAllConversations = async () => {
+  const response = await api.get('/messages/conversations');
+  return response.data;
+};
+
 export default api; 

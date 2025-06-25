@@ -1,10 +1,8 @@
 import React from 'react';
-import Header from './Header';
 
-const Layout = ({ children, isLoggedIn, onLogout }) => {
+const Layout = ({ children }) => {
   return (
     <div className="flex min-h-screen flex-col">
-      <Header isLoggedIn={isLoggedIn} onLogout={onLogout} />
       <main className="flex-1">
         {children}
       </main>

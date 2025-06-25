@@ -4,6 +4,9 @@ import {
   markMessageAsSeen,
   getUnseenMessages,
 } from '../models/messageModel.js';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 export const sendMessage = async (req, res) => {
   try {
@@ -68,5 +71,49 @@ export const getUnseen = async (req, res) => {
   } catch (error) {
     console.error('Error getting unseen messages:', error);
     res.status(500).json({ error: 'Failed to get unseen messages' });
+  }
+};
+
+export const getAllConversations = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    // Get all messages where the user is sender or receiver
+    const messages = await prisma.message.findMany({
+      where: {
+        OR: [
+          { senderId: userId },
+          { receiverId: userId }
+        ]
+      },
+      include: {
+        sender: true,
+        receiver: true
+      },
+      orderBy: {
+        timestamp: 'desc'
+      }
+    });
+
+    // Build a map of conversations keyed by the other user's id
+    const conversationMap = new Map();
+    for (const msg of messages) {
+      const otherUser = msg.senderId === userId ? msg.receiver : msg.sender;
+      if (!otherUser) continue;
+      if (!conversationMap.has(otherUser.id)) {
+        conversationMap.set(otherUser.id, {
+          userId: otherUser.id,
+          name: otherUser.name,
+          email: otherUser.email,
+          lastMessage: msg.content,
+          lastMessageTime: msg.timestamp,
+          isAnonymous: msg.isAnonymous && msg.senderId !== userId,
+          unreadCount: 0 // You can add logic for unread count if needed
+        });
+      }
+    }
+    res.json(Array.from(conversationMap.values()));
+  } catch (error) {
+    console.error('Error getting all conversations:', error);
+    res.status(500).json({ error: 'Failed to get conversations' });
   }
 }; 

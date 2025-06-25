@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import io from 'socket.io-client';
 import Header from '../components/layout/Header';
 import * as api from '../services/api';
+import { HiOutlineUserCircle, HiOutlinePaperAirplane } from 'react-icons/hi';
+import { FaMask } from 'react-icons/fa6';
 
 const AnonymousPost = ({ isLoggedIn, onLogout, currentUser }) => {
   const navigate = useNavigate();
@@ -27,20 +29,15 @@ const AnonymousPost = ({ isLoggedIn, onLogout, currentUser }) => {
       });
 
       newSocket.on('connect', () => {
-        console.log('Connected to WebSocket server');
-        // Join the anonymous chat room
         newSocket.emit('join-room', 'anonymous-chat');
       });
 
-      // Listen for new messages
       newSocket.on('anonymous-message', (message) => {
-        console.log('Received new message:', message);
         setMessages(prevMessages => [...prevMessages, message]);
       });
 
       setSocket(newSocket);
 
-      // Fetch existing messages
       const fetchMessages = async () => {
         try {
           const response = await api.getAnonymousMessages();
@@ -58,7 +55,6 @@ const AnonymousPost = ({ isLoggedIn, onLogout, currentUser }) => {
     }
   }, []);
 
-  // Scroll to bottom whenever messages update
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
@@ -74,10 +70,7 @@ const AnonymousPost = ({ isLoggedIn, onLogout, currentUser }) => {
     };
 
     try {
-      // Only save to database - the server will emit to all clients including this one
       await api.sendAnonymousMessage(messageData);
-      
-      // Clear input field immediately for better UX
       setNewMessage('');
     } catch (error) {
       console.error('Error sending message:', error);
@@ -85,60 +78,114 @@ const AnonymousPost = ({ isLoggedIn, onLogout, currentUser }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100">
       <Header isLoggedIn={isLoggedIn} onLogout={onLogout} />
-      
-      <div className="max-w-4xl mx-auto p-4">
-        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-          <div className="p-4 bg-blue-500 text-white flex justify-between items-center">
-            <h1 className="text-xl font-bold">Anonymous Posting</h1>
-            <div className="text-sm">Posting as: {guestId}</div>
+      <div className="max-w-3xl mx-auto p-4 flex flex-col min-h-[80vh]">
+        <div className="bg-white/80 backdrop-blur-md rounded-3xl shadow-2xl overflow-hidden flex flex-col flex-1 border border-blue-100">
+          {/* Chat Header */}
+          <div className="p-5 bg-gradient-to-r from-blue-600 via-blue-500 to-blue-400 text-white flex justify-between items-center shadow-md">
+            <div className="flex items-center gap-3">
+              <span className="text-2xl"><FaMask /></span>
+              <h1 className="text-2xl font-extrabold tracking-tight drop-shadow">Anonymous Posting</h1>
+            </div>
+            <div className="bg-white/20 px-4 py-1 rounded-full text-sm font-semibold flex items-center gap-2 shadow">
+              <HiOutlineUserCircle className="text-lg" />
+              <span>Posting as:</span>
+              <span className="font-bold">{guestId}</span>
+            </div>
           </div>
 
-          <div className="h-[600px] overflow-y-auto p-4 space-y-4" id="messages-container">
-            {messages.map((message, index) => (
-              <div
-                key={index}
-                className={`flex ${message.guestId === guestId ? 'justify-end' : 'justify-start'}`}
-              >
+          {/* Chat Messages */}
+          <div className="flex-1 min-h-[300px] max-h-[60vh] overflow-y-auto px-4 py-6 space-y-4 bg-gradient-to-b from-blue-50/60 to-white relative scrollbar-thin scrollbar-thumb-blue-300 scrollbar-track-blue-100 hover:scrollbar-thumb-blue-400 transition-all duration-200" id="messages-container">
+            {messages.map((message, index) => {
+              const isOwn = message.guestId === guestId;
+              return (
                 <div
-                  className={`max-w-[70%] rounded-lg p-3 ${
-                    message.guestId === guestId
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-gray-100'
-                  }`}
+                  key={index}
+                  className={`flex items-end gap-2 ${isOwn ? 'justify-end' : 'justify-start'} animate-fadeIn`}
                 >
-                  <div className="font-semibold mb-1">{message.guestId}</div>
-                  <p>{message.content}</p>
-                  <div className="text-xs mt-1 opacity-70">
-                    {new Date(message.timestamp).toLocaleTimeString()}
+                  {!isOwn && (
+                    <div className="flex-shrink-0">
+                      <div className="w-9 h-9 rounded-full bg-blue-200 flex items-center justify-center shadow">
+                        <FaMask className="text-blue-500 text-xl" />
+                      </div>
+                    </div>
+                  )}
+                  <div
+                    className={`max-w-[70%] rounded-2xl px-5 py-3 shadow-md relative transition-all duration-200 ${
+                      isOwn
+                        ? 'bg-gradient-to-br from-blue-500 to-blue-400 text-white rounded-br-none'
+                        : 'bg-white border border-blue-100 text-gray-800 rounded-bl-none'
+                    }`}
+                  >
+                    <div className={`font-semibold text-xs mb-1 ${isOwn ? 'text-blue-100' : 'text-blue-500'}`}>{message.guestId}</div>
+                    <p className="break-words leading-relaxed text-base">{message.content}</p>
+                    <div className="text-[10px] mt-2 opacity-60 text-right select-none">
+                      {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </div>
                   </div>
+                  {isOwn && (
+                    <div className="flex-shrink-0">
+                      <div className="w-9 h-9 rounded-full bg-blue-500 flex items-center justify-center shadow">
+                        <FaMask className="text-white text-xl" />
+                      </div>
+                    </div>
+                  )}
                 </div>
-              </div>
-            ))}
+              );
+            })}
             <div ref={messagesEndRef} />
           </div>
 
-          <div className="border-t p-4">
-            <form onSubmit={handleSendMessage} className="flex gap-2">
+          {/* Input Area */}
+          <div className="border-t bg-white/80 backdrop-blur-md p-4 sticky bottom-0 z-10">
+            <form onSubmit={handleSendMessage} className="flex gap-3 items-center">
               <input
                 type="text"
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
-                placeholder="Type a message..."
-                className="flex-1 rounded-full border px-4 py-2 focus:outline-none focus:border-blue-500"
+                placeholder="Type your anonymous message..."
+                className="flex-1 rounded-full border border-blue-200 px-5 py-3 focus:outline-none focus:border-blue-400 bg-white/90 shadow-sm text-base transition-all"
+                autoComplete="off"
               />
               <button
                 type="submit"
-                className="bg-blue-500 text-white rounded-full p-2 w-12 h-12 flex items-center justify-center hover:bg-blue-600 transition-colors"
+                className="bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-full p-3 w-12 h-12 flex items-center justify-center shadow-lg hover:scale-105 hover:from-blue-600 hover:to-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={!newMessage.trim()}
+                aria-label="Send"
               >
-                →
+                <HiOutlinePaperAirplane className="text-2xl rotate-45" />
               </button>
             </form>
           </div>
         </div>
       </div>
+      <style>{`
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fadeIn {
+          animation: fadeIn 0.4s;
+        }
+        /* Custom scrollbar for all browsers */
+        #messages-container::-webkit-scrollbar {
+          width: 8px;
+          background: #e0e7ff;
+          border-radius: 8px;
+        }
+        #messages-container::-webkit-scrollbar-thumb {
+          background: #60a5fa;
+          border-radius: 8px;
+        }
+        #messages-container:hover::-webkit-scrollbar-thumb {
+          background: #2563eb;
+        }
+        #messages-container {
+          scrollbar-width: thin;
+          scrollbar-color: #60a5fa #e0e7ff;
+        }
+      `}</style>
     </div>
   );
 };

@@ -3,6 +3,7 @@ import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import Button from '../ui/Button';
 import logo from '../../assets/logo.png';
 import { FaUserCircle } from 'react-icons/fa';
+import { FiBell } from 'react-icons/fi';
 
 const navLinks = [
   { to: '/', label: 'Home', public: true },
@@ -54,7 +55,7 @@ const MobileNavLinkItem = ({ to, children, onClick, isActive, disabled }) => (
   </NavLink>
 )
 
-const Header = ({ isLoggedIn, onLogout }) => {
+const Header = ({ isLoggedIn, onLogout, notificationCount, onNotificationClick }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showLoginMsg, setShowLoginMsg] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -115,11 +116,25 @@ const Header = ({ isLoggedIn, onLogout }) => {
             ))}
           </nav>
 
-          {/* Auth Buttons & Mobile Menu Toggle */}
+          {/* Auth Buttons, Notification, & Mobile Menu Toggle */}
           <div className="flex items-center space-x-3">
             <div className="hidden md:flex items-center space-x-2">
               {isLoggedIn ? (
                 <>
+                  {/* Notification Bell */}
+                  <button
+                    className="relative text-gray-600 hover:text-blue-600 focus:outline-none"
+                    title="Notifications"
+                    onClick={typeof onNotificationClick === 'function' ? onNotificationClick : undefined}
+                  >
+                    <FiBell size={26} />
+                    {notificationCount > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 font-bold animate-pulse">
+                        {notificationCount}
+                      </span>
+                    )}
+                  </button>
+                  {/* Profile Icon */}
                   <div className="relative" ref={profileMenuRef}>
                     <button
                       onClick={() => setShowProfileMenu((v) => !v)}
@@ -180,7 +195,20 @@ const Header = ({ isLoggedIn, onLogout }) => {
         <div className="md:hidden bg-white border-t border-gray-200">
           <nav className="container mx-auto px-4 pt-4 pb-4 space-y-2">
             {isLoggedIn && (
-              <div className="flex justify-end mb-2">
+              <div className="flex justify-end mb-2 items-center gap-2">
+                {/* Notification Bell (Mobile) */}
+                <button
+                  className="relative text-gray-600 hover:text-blue-600 focus:outline-none"
+                  title="Notifications"
+                  onClick={typeof onNotificationClick === 'function' ? onNotificationClick : undefined}
+                >
+                  <FiBell size={26} />
+                  {notificationCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 font-bold animate-pulse">
+                      {notificationCount}
+                    </span>
+                  )}
+                </button>
                 <button
                   onClick={() => { navigate('/profile'); closeMobileMenu(); }}
                   className="text-gray-600 hover:text-blue-600 focus:outline-none"

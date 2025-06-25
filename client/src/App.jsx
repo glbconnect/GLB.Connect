@@ -13,6 +13,8 @@ import ResourceCategory from './pages/ResourceCategory';
 import ResourceYear from './pages/ResourceYear';
 import ResourceUpload from './pages/ResourceUpload';
 import ResourceBrowse from './pages/ResourceBrowse';
+import Events from './pages/Events';
+import QAThreads from './pages/QAThreads';
 import * as api from './services/api';
 import './index.css';
 
@@ -25,42 +27,23 @@ function App() {
   useEffect(() => {
     const fetchCurrentUser = async () => {
       setIsLoading(true);
-      
       const savedAuth = localStorage.getItem('auth');
       if (savedAuth) {
         try {
           const { user, token } = JSON.parse(savedAuth);
-          
           if (user && token) {
-            // Fetch fresh user data to ensure we have the latest
-            try {
-              const currentUserData = await api.getCurrentUser();
-              setCurrentUser(currentUserData);
-              setIsLoggedIn(true);
-              
-              // Update localStorage with fresh data and ensure token is properly stored
-              localStorage.setItem('auth', JSON.stringify({
-                token, // Keep the existing token
-                user: currentUserData
-              }));
-            } catch (error) {
-              console.error('Error fetching current user:', error);
-              // If the token is invalid or expired, log out
-              if (error.response?.status === 401 || error.response?.status === 403) {
-                console.log('Authentication token expired or invalid. Logging out.');
-                handleLogout();
-              }
-            }
+            setCurrentUser(user);
+            setIsLoggedIn(true);
+            // Optionally, update localStorage with user and token
+            localStorage.setItem('auth', JSON.stringify({ token, user }));
           }
         } catch (error) {
           console.error('Error parsing auth data:', error);
           localStorage.removeItem('auth');
         }
       }
-      
       setIsLoading(false);
     };
-    
     fetchCurrentUser();
   }, []);
   
@@ -106,8 +89,8 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<Home isLoggedIn={isLoggedIn} onLogout={handleLogout} />} />
-        <Route path="/login" element={isLoggedIn ? <Navigate to="/messages" /> : <Login onLogin={handleLogin} />} />
-        <Route path="/register" element={isLoggedIn ? <Navigate to="/messages" /> : <Register onLogin={handleLogin} />} />
+        <Route path="/login" element={isLoggedIn ? <Navigate to="/" /> : <Login onLogin={handleLogin} />} />
+        <Route path="/register" element={isLoggedIn ? <Navigate to="/" /> : <Register onLogin={handleLogin} />} />
         <Route path="/messages" element={isLoggedIn ? <Messages isLoggedIn={isLoggedIn} onLogout={handleLogout} currentUser={currentUser} /> : <Navigate to="/login" />} />
         <Route path="/messages/:userId" element={isLoggedIn ? <Messages isLoggedIn={isLoggedIn} onLogout={handleLogout} currentUser={currentUser} /> : <Navigate to="/login" />} />
         <Route path="/profile" element={isLoggedIn ? <Profile isLoggedIn={isLoggedIn} onLogout={handleLogout} currentUser={currentUser} onUpdateProfile={handleUpdateProfile} /> : <Navigate to="/login" />} />
@@ -121,6 +104,8 @@ function App() {
         <Route path="/resources/upload" element={isLoggedIn ? <ResourceUpload isLoggedIn={isLoggedIn} onLogout={handleLogout} currentUser={currentUser} /> : <Navigate to="/login" />} />
         <Route path="/resources/category/:categoryName" element={<ResourceCategory isLoggedIn={isLoggedIn} onLogout={handleLogout} currentUser={currentUser} />} />
         <Route path="/resources/category/:categoryName/year/:year" element={<ResourceYear isLoggedIn={isLoggedIn} onLogout={handleLogout} currentUser={currentUser} />} />
+        <Route path="/events" element={<Events isLoggedIn={isLoggedIn} onLogout={handleLogout} currentUser={currentUser} />} />
+        <Route path="/qa-threads" element={isLoggedIn ? <QAThreads isLoggedIn={isLoggedIn} onLogout={handleLogout} currentUser={currentUser} /> : <Navigate to="/login" />} />
       </Routes>
     </Router>
   );

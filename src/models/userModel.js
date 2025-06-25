@@ -38,6 +38,9 @@ export const getUserById = async (id) => {
       id: true,
       name: true,
       email: true,
+      avatarUrl: true,
+      batchYear: true,
+      skills: true,
       createdAt: true,
       updatedAt: true
       // Exclude password
@@ -53,6 +56,7 @@ export const getUserByIdWithPassword = async (id) => {
       name: true,
       email: true,
       password: true,
+      avatarUrl: true,
       createdAt: true,
       updatedAt: true
     }
@@ -65,6 +69,9 @@ export const getAllUsers = async () => {
       id: true,
       name: true,
       email: true,
+      avatarUrl: true,
+      batchYear: true,
+      skills: true,
       createdAt: true,
       updatedAt: true
       // Exclude password
@@ -100,6 +107,9 @@ export const searchUsersByEmail = async (searchQuery) => {
       id: true,
       name: true,
       email: true,
+      avatarUrl: true,
+      batchYear: true,
+      skills: true,
       createdAt: true,
       updatedAt: true
       // Exclude password
@@ -116,6 +126,7 @@ export const updateUser = async (userId, updateData) => {
       name: true,
       email: true,
       password: true,
+      avatarUrl: true,
       createdAt: true,
       updatedAt: true
     }

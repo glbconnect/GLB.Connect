@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "User" ADD COLUMN     "batchYear" INTEGER NOT NULL DEFAULT 2020,
+ADD COLUMN     "skills" TEXT;

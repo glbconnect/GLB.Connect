@@ -6,7 +6,9 @@ import {
   getUsers, 
   getCurrentUser,
   updateProfile,
-  changePassword
+  changePassword,
+  uploadAvatar,
+  uploadAvatarMiddleware
 } from '../controllers/userController.js';
 import { verifyToken } from '../middleware/authMiddleware.js';
 
@@ -29,6 +31,7 @@ router.post('/login', loginUser);
 router.get('/me', verifyToken, getCurrentUser);
 router.put('/profile', verifyToken, updateProfile);
 router.put('/change-password', verifyToken, changePassword);
+router.put('/avatar', verifyToken, uploadAvatarMiddleware, uploadAvatar);
 router.get('/', getUsers);
 router.get('/:id', getUser);
 

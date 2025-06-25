@@ -11,13 +11,30 @@ import {
   updateUserPassword
 } from '../models/userModel.js';
 import bcrypt from 'bcryptjs';
+import path from 'path';
+import multer from 'multer';
+import { PrismaClient } from '@prisma/client';
+const prisma = new PrismaClient();
+
+// Set up multer storage for avatars
+const avatarStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, path.join(process.cwd(), 'uploads'));
+  },
+  filename: function (req, file, cb) {
+    const userId = req.user.id;
+    const ext = path.extname(file.originalname);
+    cb(null, `avatar-${userId}${ext}`);
+  }
+});
+export const uploadAvatarMiddleware = multer({ storage: avatarStorage }).single('avatar');
 
 export const registerUser = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, batchYear, skills } = req.body;
 
     // Validation
-    if (!name || !email || !password) {
+    if (!name || !email || !password || !batchYear) {
       return res.status(400).json({ error: 'Please provide all required fields' });
     }
 
@@ -28,7 +45,7 @@ export const registerUser = async (req, res) => {
     }
 
     // Create user
-    const user = await createUser({ name, email, password });
+    const user = await createUser({ name, email, password, batchYear: Number(batchYear), skills });
 
     // Generate token
     const token = generateToken(user.id);
@@ -202,5 +219,23 @@ export const changePassword = async (req, res) => {
   } catch (error) {
     console.error('Error changing password:', error);
     res.status(500).json({ error: 'Failed to change password' });
+  }
+};
+
+export const uploadAvatar = async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: 'No file uploaded' });
+  }
+  const userId = req.user.id;
+  const avatarUrl = `/uploads/${req.file.filename}`;
+  try {
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: { avatarUrl },
+    });
+    res.json({ success: true, avatarUrl });
+  } catch (error) {
+    console.error('Error updating avatar:', error);
+    res.status(500).json({ error: 'Failed to update avatar' });
   }
 }; 

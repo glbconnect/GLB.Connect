@@ -1,121 +1,91 @@
-import React, { useState } from "react";
+import React from 'react';
+import { motion } from 'framer-motion';
+import { useInView } from 'react-intersection-observer';
+
+import student1 from '../../assets/student1.png';
+import student2 from '../../assets/student2.png';
+import student3 from '../../assets/student3.png';
+
+const testimonials = [
+  {
+    quote: "GLB.Connect has been a game-changer. I found a mentor who guided me through my final year project and helped me land my first internship!",
+    name: "Priya Sharma",
+    role: "Computer Science, 4th Year",
+    avatar: student1
+  },
+  {
+    quote: "As a junior, I was overwhelmed. The anonymous Q&A feature allowed me to ask 'silly' questions without fear. It's an invaluable resource.",
+    name: "Rahul Verma",
+    role: "Mechanical Eng., 2nd Year",
+    avatar: student2
+  },
+  {
+    quote: "The resource sharing section is amazing. I found all the notes and previous year papers I needed for my exams. Highly recommended!",
+    name: "Anjali Singh",
+    role: "Electronics, 3rd Year",
+    avatar: student3
+  }
+];
+
+const cardVariants = {
+  hidden: { opacity: 0, scale: 0.9 },
+  visible: (i) => ({
+    opacity: 1,
+    scale: 1,
+    transition: {
+      duration: 0.5,
+      delay: i * 0.2,
+      ease: "easeOut"
+    }
+  })
+};
 
 const Testimonials = () => {
-  // Sample testimonials data
-  const testimonials = [
-    {
-      id: 1,
-      name: "Jessica Andrew",
-      initial: "J",
-      bgColor: "bg-purple-400",
-      rating: 5,
-      text: "My college journey has been much smoother thanks to the guidance I received on GLB.Connect.",
-    },
-    {
-      id: 2,
-      name: "Darlene Robertson",
-      initial: "D",
-      bgColor: "bg-blue-400",
-      rating: 5,
-      text: "The peer mentorship helped me improve my programming skills significantly. Seniors on the platform are very supportive.",
-    },
-    {
-      id: 3,
-      name: "Dianne Russell",
-      initial: "D",
-      bgColor: "bg-green-400",
-      rating: 5,
-      text: "Finding resources and getting advice on GLB.Connect has made a huge difference in my academic performance.",
-    },
-    {
-      id: 4,
-      name: "Robert Johnson",
-      initial: "R",
-      bgColor: "bg-yellow-400",
-      rating: 5,
-      text: "The mentorship program has been incredibly valuable for my academic growth. Highly recommend!",
-    },
-  ];
-
-  const [currentIndex, setCurrentIndex] = useState(0);
-
-  const nextTestimonial = () => {
-    setCurrentIndex((prevIndex) => 
-      prevIndex === testimonials.length - 3 ? 0 : prevIndex + 1
-    );
-  };
-
-  const prevTestimonial = () => {
-    setCurrentIndex((prevIndex) => 
-      prevIndex === 0 ? testimonials.length - 3 : prevIndex - 1
-    );
-  };
-
-  // Display 3 testimonials at a time on desktop, 1 on mobile
-  const visibleTestimonials = testimonials.slice(currentIndex, currentIndex + 3);
+  const { ref, inView } = useInView({
+    triggerOnce: true,
+    threshold: 0.2
+  });
 
   return (
-    <div className="bg-[#E4F1F6] py-16">
-      <div className="container mx-auto px-4">
-        <h2 className="text-4xl font-bold text-center mb-16">What do students say about GLB.Connect?</h2>
-        
-        <div className="relative">
-          <button 
-            className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-white rounded-full p-2 shadow-md z-10 hidden md:block"
-            onClick={prevTestimonial}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
-          
-          <div className="flex flex-col md:flex-row gap-6 overflow-hidden">
-            {visibleTestimonials.map((testimonial) => (
-              <div key={testimonial.id} className="bg-white rounded-lg p-6 shadow-md flex-1">
-                <div className="flex items-center mb-4">
-                  <div className={`w-12 h-12 rounded-full mr-4 ${testimonial.bgColor} flex items-center justify-center text-white font-bold text-lg`}>
-                    {testimonial.initial}
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-lg">{testimonial.name}</h3>
-                    <div className="flex text-yellow-400">
-                      {[...Array(testimonial.rating)].map((_, i) => (
-                        <svg key={i} xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                        </svg>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-                <p className="text-gray-600">{testimonial.text}</p>
-              </div>
-            ))}
-          </div>
-          
-          <button 
-            className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-white rounded-full p-2 shadow-md z-10 hidden md:block"
-            onClick={nextTestimonial}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
+    <section ref={ref} className="py-20 bg-gray-50 dark:bg-gray-900/50">
+      <div className="container mx-auto px-6">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl font-extrabold text-gray-800 dark:text-white mb-4">
+            Loved by Students
+          </h2>
+          <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+            Hear what our community members have to say about their experience on GLB.Connect.
+          </p>
         </div>
-        
-        {/* Mobile navigation dots */}
-        <div className="flex justify-center mt-6 md:hidden">
-          {testimonials.map((_, index) => (
-            <button
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {testimonials.map((testimonial, index) => (
+            <motion.div
               key={index}
-              className={`h-2 w-2 mx-1 rounded-full ${
-                index === currentIndex ? "bg-blue-600" : "bg-gray-300"
-              }`}
-              onClick={() => setCurrentIndex(index)}
-            />
+              custom={index}
+              initial="hidden"
+              animate={inView ? "visible" : "hidden"}
+              variants={cardVariants}
+              className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden flex flex-col p-8 transform transition-all duration-300 hover:scale-105 hover:shadow-2xl"
+            >
+              <div className="text-5xl text-blue-500 dark:text-blue-400 mb-6">
+                "
+              </div>
+              <blockquote className="flex-1 text-gray-600 dark:text-gray-300 italic mb-6">
+                {testimonial.quote}
+              </blockquote>
+              <div className="flex items-center">
+                <img className="w-14 h-14 rounded-full object-cover mr-4 border-2 border-blue-200 dark:border-blue-700" src={testimonial.avatar} alt={testimonial.name} />
+                <div>
+                  <p className="font-bold text-gray-800 dark:text-white">{testimonial.name}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{testimonial.role}</p>
+                </div>
+              </div>
+            </motion.div>
           ))}
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 

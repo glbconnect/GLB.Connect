@@ -140,6 +140,35 @@ export const clearMessageCache = () => {
 
 export const getSocket = () => socket;
 
+export function subscribeToEventUpdates(callbacks) {
+  if (!socket) return;
+  socket.on('event:new', callbacks.onNewEvent);
+  socket.on('event:update', callbacks.onUpdateEvent);
+  socket.on('event:delete', callbacks.onDeleteEvent);
+  socket.on('event:register', callbacks.onRegister);
+  socket.on('event:unregister', callbacks.onUnregister);
+}
+
+export function emitEventRegister(data) {
+  if (socket) socket.emit('event:register', data);
+}
+
+export function emitEventUnregister(data) {
+  if (socket) socket.emit('event:unregister', data);
+}
+
+export function emitEventNew(event) {
+  if (socket) socket.emit('event:new', event);
+}
+
+export function emitEventUpdate(event) {
+  if (socket) socket.emit('event:update', event);
+}
+
+export function emitEventDelete(event) {
+  if (socket) socket.emit('event:delete', event);
+}
+
 export default {
   initializeSocket,
   disconnectSocket,

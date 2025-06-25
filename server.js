@@ -12,6 +12,8 @@ import jobRouter from './src/routes/jobRoutes.js';
 import resourceRouter from './src/routes/resourceRoutes.js';
 import { initializeSocket } from './src/sockets/chatSocket.js';
 import anonymousMessageRouter from './src/routes/anonymousMessageRoutes.js';
+import eventRouter from './src/routes/eventRoutes.js';
+import multer from 'multer';
 
 dotenv.config();
 
@@ -47,6 +49,30 @@ app.use('/api/batch', batchRouter);
 app.use('/api/jobs', jobRouter);
 app.use('/api/resources', resourceRouter);
 app.use('/api/anonymous-messages', anonymousMessageRouter);
+app.use('/api/events', eventRouter);
+
+// Set up multer for file uploads
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, path.join(__dirname, 'uploads'));
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const ext = path.extname(file.originalname);
+    cb(null, 'event-' + uniqueSuffix + ext);
+  }
+});
+const upload = multer({ storage });
+
+// Handle file uploads
+app.post('/api/uploads', upload.single('file'), (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: 'No file uploaded' });
+  }
+  // The URL should be relative to the server root
+  const fileUrl = `/uploads/${req.file.filename}`;
+  res.json({ url: fileUrl });
+});
 
 // Serve static files (for uploaded resources)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));

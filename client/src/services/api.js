@@ -1,6 +1,7 @@
 import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+export const SERVER_URL = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : 'http://localhost:5000';
 
 // Create axios instance
 const api = axios.create({
@@ -61,8 +62,9 @@ export const login = async (credentials) => {
 };
 
 export const getCurrentUser = async () => {
-  const response = await api.get('/users/me');
-  return response.data;
+  const res = await fetch('/api/users/me');
+  if (!res.ok) throw new Error('Not authenticated');
+  return res.json();
 };
 
 export const getUserById = async (userId) => {
@@ -160,6 +162,64 @@ export const getAnonymousMessages = async () => {
 
 export const sendAnonymousMessage = async (messageData) => {
   const response = await api.post('/anonymous-messages', messageData);
+  return response.data;
+};
+
+// Events API calls
+export const getEvents = async () => {
+  const response = await api.get('/events');
+  return response.data;
+};
+
+export const getEventById = async (id) => {
+  const response = await api.get(`/events/${id}`);
+  return response.data;
+};
+
+export const createEvent = async (eventData) => {
+  const response = await api.post('/events', eventData);
+  return response.data;
+};
+
+export const updateEvent = async (id, eventData) => {
+  const response = await api.put(`/events/${id}`, eventData);
+  return response.data;
+};
+
+export const deleteEvent = async (id) => {
+  const response = await api.delete(`/events/${id}`);
+  return response.data;
+};
+
+export const registerForEvent = async (id) => {
+  const response = await api.post(`/events/${id}/register`);
+  return response.data;
+};
+
+export const unregisterFromEvent = async (id) => {
+  const response = await api.post(`/events/${id}/unregister`);
+  return response.data;
+};
+
+export const getEventRegistrations = async (id) => {
+  const response = await api.get(`/events/${id}/registrations`);
+  return response.data;
+};
+
+// Generic file upload
+export const uploadFile = async (file) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  const response = await api.post('/uploads', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+  return response.data;
+};
+
+export const getUsers = async () => {
+  const response = await api.get('/users');
   return response.data;
 };
 

@@ -1,169 +1,221 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import Button from '../ui/Button';
+import logo from '../../assets/logo.png';
+import { FaUserCircle } from 'react-icons/fa';
+
+const navLinks = [
+  { to: '/', label: 'Home', public: true },
+  { to: '/jobs', label: 'Jobs' },
+  { to: '/events', label: 'Events' },
+  { to: '/messages', label: 'Messages' },
+  { to: '/anonymous-post', label: 'Anonymous Chat' },
+  { to: '/resources', label: 'Resources' },
+  { to: '/qa-threads', label: 'Q&A Threads' },
+];
+
+const NavLinkItem = ({ to, children, onClick, isActive, disabled }) => (
+  <NavLink
+    to={to}
+    onClick={disabled ? (e) => { e.preventDefault(); onClick && onClick(e); } : onClick}
+    className={({ isActive: navActive }) =>
+      `px-4 py-2 rounded-full text-base font-normal transition-colors duration-200 ${
+        (isActive ?? navActive)
+          ? 'bg-blue-600 text-white shadow-sm'
+          : disabled
+            ? 'text-gray-400 cursor-not-allowed'
+            : 'text-gray-700 hover:bg-blue-500 hover:text-white'
+      }`
+    }
+    tabIndex={disabled ? -1 : 0}
+    aria-disabled={disabled}
+  >
+    {children}
+  </NavLink>
+);
+
+const MobileNavLinkItem = ({ to, children, onClick, isActive, disabled }) => (
+  <NavLink
+    to={to}
+    onClick={disabled ? (e) => { e.preventDefault(); onClick && onClick(e); } : onClick}
+    className={({ isActive: navActive }) =>
+      `block px-5 py-3 rounded-full text-base font-normal transition-colors duration-200 ${
+        (isActive ?? navActive)
+          ? 'bg-blue-600 text-white shadow-sm'
+          : disabled
+            ? 'text-gray-400 cursor-not-allowed'
+            : 'text-gray-700 hover:bg-blue-500 hover:text-white'
+      }`
+    }
+    tabIndex={disabled ? -1 : 0}
+    aria-disabled={disabled}
+  >
+    {children}
+  </NavLink>
+)
 
 const Header = ({ isLoggedIn, onLogout }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [showLoginMsg, setShowLoginMsg] = useState(false);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const profileMenuRef = useRef();
 
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
-  };
+  // Close dropdown on click outside
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target)) {
+        setShowProfileMenu(false);
+      }
+    }
+    if (showProfileMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+    } else {
+      document.removeEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showProfileMenu]);
 
   const handleLogout = () => {
     onLogout();
     navigate('/login');
+    setIsMobileMenuOpen(false);
+  };
+
+  const closeMobileMenu = () => setIsMobileMenuOpen(false);
+
+  // Show message for 2 seconds
+  const handleProtectedClick = (e) => {
+    setShowLoginMsg(true);
+    setTimeout(() => setShowLoginMsg(false), 2000);
   };
 
   return (
-    <header className="bg-white shadow w-full">
-      <div className="w-full px-4 py-4">
-        <div className="flex items-center justify-between max-w-[1400px] mx-auto">
+    <header className="sticky top-0 z-50 w-full bg-white/90 backdrop-blur-lg shadow-lg border-b border-gray-200/80">
+      <div className="container mx-auto px-4">
+        <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center">
-            <span className="text-2xl font-bold text-primary">GLB.Connect</span>
+            <img src={logo} alt="GLB.Connect" className="h-9 w-auto" />
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-6">
-            <Link to="/" className="text-gray-700 hover:text-primary font-medium">Home</Link>
-            <Link to="/jobs" className="text-gray-700 hover:text-primary font-medium">Jobs</Link>
-            {isLoggedIn ? (
-              <>
-                <Link to="/messages" className="text-gray-700 hover:text-primary font-medium">Messages</Link>
-                <Link to="/anonymous-post" className="text-gray-700 hover:text-primary font-medium">Anonymous Chat</Link>
-                <Link to="/resources" className="text-gray-700 hover:text-primary font-medium">Resources</Link>
-                <Link to="/profile" className="text-gray-700 hover:text-primary font-medium">Profile</Link>
-                <Button 
-                  variant="ghost" 
-                  onClick={handleLogout}
-                >
-                  Logout
-                </Button>
-              </>
-            ) : (
-              <>
-                <Link to="/login" className="text-gray-700 hover:text-primary font-medium">Login</Link>
-                <Button 
-                  variant="primary" 
-                  onClick={() => navigate('/register')}
-                >
-                  Register
-                </Button>
-              </>
-            )}
+          <nav className="hidden md:flex items-center space-x-2">
+            {navLinks.map((link) => (
+              <NavLinkItem
+                key={link.to}
+                to={link.to}
+                disabled={!isLoggedIn && !link.public}
+                onClick={!isLoggedIn && !link.public ? handleProtectedClick : undefined}
+                isActive={location.pathname === link.to}
+              >
+                {link.label}
+              </NavLinkItem>
+            ))}
           </nav>
 
-          {/* Mobile Menu Button */}
-          <button 
-            type="button" 
-            className="md:hidden rounded-md p-2 text-gray-500"
-            onClick={toggleMobileMenu}
-          >
-            <svg 
-              className="h-6 w-6" 
-              fill="none" 
-              viewBox="0 0 24 24" 
-              stroke="currentColor"
-            >
-              {isMobileMenuOpen ? (
-                <path 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
-                  strokeWidth={2} 
-                  d="M6 18L18 6M6 6l12 12" 
-                />
+          {/* Auth Buttons & Mobile Menu Toggle */}
+          <div className="flex items-center space-x-3">
+            <div className="hidden md:flex items-center space-x-2">
+              {isLoggedIn ? (
+                <>
+                  <div className="relative" ref={profileMenuRef}>
+                    <button
+                      onClick={() => setShowProfileMenu((v) => !v)}
+                      className="ml-2 text-gray-600 hover:text-blue-600 focus:outline-none"
+                      title="Profile"
+                    >
+                      <FaUserCircle size={32} />
+                    </button>
+                    {showProfileMenu && (
+                      <div className="absolute right-0 mt-2 w-40 bg-white rounded-xl shadow-lg border border-gray-100 z-50 py-2">
+                        <button
+                          className="w-full text-left px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-700 rounded-t-xl"
+                          onClick={() => { setShowProfileMenu(false); navigate('/profile'); }}
+                        >
+                          View Profile
+                        </button>
+                        <button
+                          className="w-full text-left px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-700 rounded-b-xl"
+                          onClick={() => { setShowProfileMenu(false); onLogout(); navigate('/login'); }}
+                        >
+                          Logout
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </>
               ) : (
-                <path 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
-                  strokeWidth={2} 
-                  d="M4 6h16M4 12h16M4 18h16" 
-                />
+                <>
+                  <Button variant="ghost" size="sm" onClick={() => navigate('/login')}>Login</Button>
+                  <Button size="sm" onClick={() => navigate('/register')}>Register</Button>
+                </>
               )}
-            </svg>
-          </button>
+            </div>
+            <button 
+              type="button" 
+              className="md:hidden rounded-md p-2 text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            >
+              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                {isMobileMenuOpen ? (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                ) : (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" />
+                )}
+              </svg>
+            </button>
+          </div>
         </div>
-
-        {/* Mobile Navigation */}
-        {isMobileMenuOpen && (
-          <nav className="mt-4 px-2 pt-2 pb-4 md:hidden space-y-3 max-w-[1400px] mx-auto">
-            <Link 
-              to="/" 
-              className="block text-gray-700 hover:text-primary font-medium"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Home
-            </Link>
-            <Link 
-              to="/jobs" 
-              className="block text-gray-700 hover:text-primary font-medium"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Jobs
-            </Link>
+      </div>
+      {/* Login required message */}
+      {showLoginMsg && (
+        <div className="fixed top-20 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white px-6 py-2 rounded-full shadow-lg z-50 text-base font-medium animate-fade-in-out">
+          Please log in first
+        </div>
+      )}
+      {/* Mobile Navigation */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden bg-white border-t border-gray-200">
+          <nav className="container mx-auto px-4 pt-4 pb-4 space-y-2">
+            {isLoggedIn && (
+              <div className="flex justify-end mb-2">
+                <button
+                  onClick={() => { navigate('/profile'); closeMobileMenu(); }}
+                  className="text-gray-600 hover:text-blue-600 focus:outline-none"
+                  title="Profile"
+                >
+                  <FaUserCircle size={32} />
+                </button>
+              </div>
+            )}
+            {navLinks.map((link) => (
+              <MobileNavLinkItem
+                key={link.to}
+                to={link.to}
+                disabled={!isLoggedIn && !link.public}
+                onClick={!isLoggedIn && !link.public ? handleProtectedClick : closeMobileMenu}
+                isActive={location.pathname === link.to}
+              >
+                {link.label}
+              </MobileNavLinkItem>
+            ))}
             {isLoggedIn ? (
-              <>
-                <Link 
-                  to="/messages" 
-                  className="block text-gray-700 hover:text-primary font-medium"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  Messages
-                </Link>
-                <Link 
-                  to="/anonymous-post" 
-                  className="block text-gray-700 hover:text-primary font-medium"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  Anonymous Chat
-                </Link>
-                <Link 
-                  to="/resources" 
-                  className="block text-gray-700 hover:text-primary font-medium"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  Resources
-                </Link>
-                <Link 
-                  to="/profile" 
-                  className="block text-gray-700 hover:text-primary font-medium"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  Profile
-                </Link>
-                <Button 
-                  variant="ghost" 
-                  onClick={() => {
-                    handleLogout();
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className="w-full justify-start"
-                >
+              <div className="border-t border-gray-200 mt-4 pt-4">
+                <Button variant="outline" className="w-full" onClick={handleLogout}>
                   Logout
                 </Button>
-              </>
+              </div>
             ) : (
-              <>
-                <Link 
-                  to="/login" 
-                  className="block text-gray-700 hover:text-primary font-medium"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  Login
-                </Link>
-                <Link 
-                  to="/register" 
-                  className="block text-gray-700 hover:text-primary font-medium"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  Register
-                </Link>
-              </>
+              <div className="border-t border-gray-200 mt-3 pt-3 flex items-center space-x-3">
+                <Button variant="outline" className="w-full" onClick={() => { navigate('/login'); closeMobileMenu(); }}>Login</Button>
+                <Button className="w-full" onClick={() => { navigate('/register'); closeMobileMenu(); }}>Register</Button>
+              </div>
             )}
           </nav>
-        )}
-      </div>
+        </div>
+      )}
     </header>
   );
 };

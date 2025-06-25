@@ -174,6 +174,23 @@ export const initializeSocket = (httpServer) => {
       console.log('User disconnected:', socket.id);
       socket.leave('anonymous-chat');
     });
+
+    // Event listeners for real-time events
+    socket.on('event:register', (data) => {
+      io.emit('event:register', data);
+    });
+    socket.on('event:unregister', (data) => {
+      io.emit('event:unregister', data);
+    });
+    socket.on('event:new', (event) => {
+      io.emit('event:new', event);
+    });
+    socket.on('event:update', (event) => {
+      io.emit('event:update', event);
+    });
+    socket.on('event:delete', (event) => {
+      io.emit('event:delete', event);
+    });
   });
 
   return io;

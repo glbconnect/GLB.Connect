@@ -1,8 +1,3 @@
-databases:
-  - name: glb-connect-db
-    databaseName: glb_connect
-    user: glb_user
-
 services:
   - type: web
     name: glb-connect-backend
@@ -14,10 +9,8 @@ services:
     buildCommand: "npm install && npx prisma migrate deploy && npx prisma generate"
     startCommand: "npm start"
     envVars:
-      - key: DATABASE_URL
-        fromDatabase:
-          name: glb-connect-db
-          property: connectionString
+      # You will need to add DATABASE_URL from your free database provider (e.g., Neon)
+      # in the Render dashboard environment settings for this service.
       - key: JWT_SECRET
         generateValue: true
       - key: CLIENT_URL

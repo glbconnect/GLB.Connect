@@ -7,7 +7,7 @@ services:
   - type: web
     name: glb-connect-backend
     env: node
-    repo: https://github.com/mb-aarfi/GLB.Connect.git # ❗IMPORTANT: Replace with your actual repo URL
+    repo: https://github.com/glbconnect/GLB.Connect.git # ❗IMPORTANT: Replace with your actual repo URL
     plan: free
     branch: main
     healthCheckPath: /api/health # You may need to create this simple endpoint
@@ -21,10 +21,7 @@ services:
       - key: JWT_SECRET
         generateValue: true
       - key: CLIENT_URL
-        fromService:
-          type: web
-          name: glb-connect-frontend
-          property: url
+        value: https://glb-connect-frontend.onrender.com
       - key: NODE_ENV
         value: production
 
@@ -32,13 +29,10 @@ services:
     name: glb-connect-frontend
     plan: free
     env: static
-    repo: https://github.com/mb-aarfi/GLB.Connect.git # ❗IMPORTANT: Replace with your actual repo URL
+    repo: https://github.com/glbconnect/GLB.Connect.git # ❗IMPORTANT: Replace with your actual repo URL
     branch: main
     staticPublishPath: ./client/dist
     buildCommand: "cd client && npm install && npm run build"
     envVars:
       - key: VITE_API_URL
-        fromService:
-          type: web
-          name: glb-connect-backend
-          property: url 
+        value: https://glb-connect-backend.onrender.com/api 

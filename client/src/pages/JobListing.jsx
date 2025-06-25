@@ -107,10 +107,10 @@ const JobListing = ({ isLoggedIn, onLogout, currentUser }) => {
 
   return (
     <Layout isLoggedIn={isLoggedIn} onLogout={onLogout} currentUser={currentUser}>
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 py-8 px-2">
-        <div className="max-w-6xl mx-auto flex flex-col gap-8">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 py-4 px-1 md:py-8 md:px-2">
+        <div className="max-w-6xl mx-auto flex flex-col gap-4 md:gap-8">
           {/* Post Job Button Section */}
-          <div className="rounded-3xl shadow-2xl bg-white/80 backdrop-blur-md border border-blue-100 p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div className="rounded-3xl shadow-2xl bg-white/80 backdrop-blur-md border border-blue-100 p-4 md:p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
               <h1 className="text-3xl font-extrabold text-blue-700 drop-shadow mb-1">Job Opportunities</h1>
               <p className="text-blue-900/80 mt-1 text-base">Find and post job opportunities in the GLB community</p>
@@ -126,9 +126,9 @@ const JobListing = ({ isLoggedIn, onLogout, currentUser }) => {
             </button>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
             {/* Filter sidebar */}
-            <div className="lg:col-span-1">
+            <div className="col-span-1">
               <div className="sticky top-8">
                 <FilterPanel 
                   onFilterChange={handleFilterChange} 
@@ -138,7 +138,7 @@ const JobListing = ({ isLoggedIn, onLogout, currentUser }) => {
             </div>
             
             {/* Job listings */}
-            <div className="lg:col-span-3">
+            <div className="col-span-1 md:col-span-1 lg:col-span-3">
               <div className="mb-6 bg-white/80 backdrop-blur-md rounded-2xl shadow-lg border border-blue-100 p-5 flex flex-col md:flex-row justify-between items-start md:items-center">
                 <h2 className="text-2xl font-bold text-blue-800">
                   Showing {jobs.length} opportunities
@@ -162,7 +162,7 @@ const JobListing = ({ isLoggedIn, onLogout, currentUser }) => {
                   </div>
                 )}
               </div>
-              <div className="max-h-[70vh] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-blue-300 scrollbar-track-blue-100 hover:scrollbar-thumb-blue-400 transition-all duration-200">
+              <div className="max-h-[70vh] overflow-y-auto pr-0 md:pr-2 scrollbar-thin scrollbar-thumb-blue-300 scrollbar-track-blue-100 hover:scrollbar-thumb-blue-400 transition-all duration-200">
                 {loading ? (
                   <div className="flex justify-center items-center h-64 bg-white/80 rounded-2xl shadow">
                     <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>

@@ -135,7 +135,7 @@ const PostJob = ({ isLoggedIn, onLogout, currentUser }) => {
   return (
     <Layout isLoggedIn={isLoggedIn} onLogout={onLogout} currentUser={currentUser}>
       <div className="container mx-auto py-8">
-        <div className="max-w-3xl mx-auto">
+        <div className="max-w-3xl mx-auto px-2 sm:px-4 md:px-8 py-4 md:py-8">
           <div className="bg-white p-6 rounded-lg shadow-sm">
             <h1 className="text-2xl font-semibold text-gray-800 mb-6">Post an Opportunity</h1>
             

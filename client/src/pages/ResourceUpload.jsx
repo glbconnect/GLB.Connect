@@ -127,7 +127,7 @@ const ResourceUpload = ({ isLoggedIn, onLogout, currentUser }) => {
 
   return (
     <Layout isLoggedIn={isLoggedIn} onLogout={onLogout}>
-      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-3xl mx-auto px-2 sm:px-4 md:px-8 py-4 md:py-8">
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">Upload Resource</h1>
           <p className="text-gray-600">

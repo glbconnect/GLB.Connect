@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import io from 'socket.io-client';
-import Header from '../components/layout/Header';
 import * as api from '../services/api';
 import { HiOutlineUserCircle, HiOutlinePaperAirplane } from 'react-icons/hi';
 import { FaMask } from 'react-icons/fa6';
@@ -78,12 +77,11 @@ const AnonymousPost = ({ isLoggedIn, onLogout, currentUser }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100">
-      <Header isLoggedIn={isLoggedIn} onLogout={onLogout} />
-      <div className="max-w-3xl mx-auto p-4 flex flex-col min-h-[80vh]">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 px-2 sm:px-4 md:px-8 py-4 md:py-8">
+      <div className="max-w-3xl mx-auto flex flex-col min-h-[80vh]">
         <div className="bg-white/80 backdrop-blur-md rounded-3xl shadow-2xl overflow-hidden flex flex-col flex-1 border border-blue-100">
           {/* Chat Header */}
-          <div className="p-5 bg-gradient-to-r from-blue-600 via-blue-500 to-blue-400 text-white flex justify-between items-center shadow-md">
+          <div className="p-3 md:p-4 bg-blue-500 text-white flex flex-col md:flex-row justify-between items-start md:items-center gap-2 md:gap-0">
             <div className="flex items-center gap-3">
               <span className="text-2xl"><FaMask /></span>
               <h1 className="text-2xl font-extrabold tracking-tight drop-shadow">Anonymous Posting</h1>
@@ -96,7 +94,7 @@ const AnonymousPost = ({ isLoggedIn, onLogout, currentUser }) => {
           </div>
 
           {/* Chat Messages */}
-          <div className="flex-1 min-h-[300px] max-h-[60vh] overflow-y-auto px-4 py-6 space-y-4 bg-gradient-to-b from-blue-50/60 to-white relative scrollbar-thin scrollbar-thumb-blue-300 scrollbar-track-blue-100 hover:scrollbar-thumb-blue-400 transition-all duration-200" id="messages-container">
+          <div className="h-[400px] md:h-[600px] overflow-y-auto p-2 md:p-4 space-y-4" id="messages-container">
             {messages.map((message, index) => {
               const isOwn = message.guestId === guestId;
               return (
@@ -138,8 +136,8 @@ const AnonymousPost = ({ isLoggedIn, onLogout, currentUser }) => {
           </div>
 
           {/* Input Area */}
-          <div className="border-t bg-white/80 backdrop-blur-md p-4 sticky bottom-0 z-10">
-            <form onSubmit={handleSendMessage} className="flex gap-3 items-center">
+          <div className="border-t p-3 md:p-4">
+            <form onSubmit={handleSendMessage} className="flex gap-2 flex-col sm:flex-row items-stretch sm:items-center">
               <input
                 type="text"
                 value={newMessage}

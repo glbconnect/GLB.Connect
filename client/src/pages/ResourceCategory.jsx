@@ -24,7 +24,7 @@ const ResourceCategory = ({ isLoggedIn, onLogout, currentUser }) => {
 
   return (
     <Layout isLoggedIn={isLoggedIn} onLogout={onLogout}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 md:px-8 py-4 md:py-8">
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">{title}</h1>
           <p className="text-xl text-gray-600">
@@ -32,7 +32,7 @@ const ResourceCategory = ({ isLoggedIn, onLogout, currentUser }) => {
           </p>
         </div>
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
           {yearData.map((item) => (
             <YearCard 
               key={item.year}

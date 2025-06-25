@@ -119,7 +119,7 @@ const Register = ({ onLogin }) => {
 
   return (
     <Layout>
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 relative overflow-hidden">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 relative overflow-hidden py-4 px-1 md:py-10 md:px-2">
         <div className="relative z-10 w-full max-w-4xl mx-auto">
           <div className="flex flex-col md:flex-row bg-white rounded-3xl shadow-2xl overflow-hidden min-h-[540px]">
             {/* Left Side: Same as Login */}

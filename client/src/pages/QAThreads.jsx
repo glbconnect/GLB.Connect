@@ -84,11 +84,11 @@ const QAThreads = ({ isLoggedIn, onLogout, currentUser }) => {
 
   return (
     <Layout isLoggedIn={isLoggedIn} onLogout={onLogout}>
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 px-2 sm:px-4 md:px-8 py-4 md:py-8">
         {/* Hero Section */}
         <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700 py-16">
           <div className="absolute inset-0 bg-black opacity-10"></div>
-          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="relative max-w-7xl mx-auto px-2 sm:px-4 md:px-8 text-center">
             <div className="flex items-center justify-center mb-4">
               <div className="bg-white bg-opacity-20 rounded-full p-3 mr-4">
                 <FaUsers className="text-white text-2xl" />

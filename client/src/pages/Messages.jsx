@@ -557,11 +557,11 @@ const Messages = ({ isLoggedIn, onLogout, currentUser }) => {
 
   return (
     <Layout isLoggedIn={isLoggedIn} onLogout={onLogout}>
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 flex items-center justify-center py-8 px-2">
-        <div className="w-full max-w-6xl flex flex-col gap-8 items-center justify-center">
-          <div className="flex rounded-3xl shadow-2xl bg-white/80 backdrop-blur-md border border-blue-100 overflow-hidden min-h-[70vh] max-h-[80vh] w-full" style={{ height: '70vh' }}>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 flex items-center justify-center py-4 px-1 md:py-8 md:px-2">
+        <div className="w-full max-w-6xl flex flex-col gap-4 md:gap-8 items-center justify-center">
+          <div className="flex flex-col md:flex-row rounded-3xl shadow-2xl bg-white/80 backdrop-blur-md border border-blue-100 overflow-hidden min-h-[70vh] max-h-[90vh] w-full" style={{ height: '70vh' }}>
             {/* Sidebar - Conversation List */}
-            <div className="w-1/3 border-r border-blue-100 flex flex-col bg-white/70">
+            <div className="w-full md:w-1/3 border-b md:border-b-0 md:border-r border-blue-100 flex flex-col bg-white/70 min-h-[200px] md:min-h-0">
               <div className="p-6 border-b border-blue-100 bg-white/80 sticky top-0 z-10">
                 <h2 className="text-2xl font-extrabold text-blue-700 mb-4 drop-shadow">Messages</h2>
                 <UserSearch onSelectUser={(userId, userDetails) => {
@@ -587,11 +587,11 @@ const Messages = ({ isLoggedIn, onLogout, currentUser }) => {
               </div>
             </div>
             {/* Main Content - Chat Area */}
-            <div className="flex flex-col w-2/3 relative bg-white/70">
+            <div className="flex flex-col w-full md:w-2/3 relative bg-white/70 min-h-[300px] md:min-h-0">
               {activeUserId ? (
                 <>
                   {/* Chat Header */}
-                  <div className="border-b border-blue-100 p-6 flex items-center bg-white/80 shadow-md sticky top-0 z-10">
+                  <div className="border-b border-blue-100 p-4 md:p-6 flex items-center bg-white/80 shadow-md sticky top-0 z-10">
                     <div className="flex items-center w-full">
                       <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-blue-400 text-white text-2xl font-bold mr-4 flex-shrink-0 shadow">
                         {activeUserDetails.name ? activeUserDetails.name.charAt(0).toUpperCase() : 'U'}
@@ -609,7 +609,7 @@ const Messages = ({ isLoggedIn, onLogout, currentUser }) => {
                   {/* Messages Container */}
                   <div
                     ref={messagesContainerRef}
-                    className="flex-grow min-h-[300px] max-h-[calc(70vh-120px)] overflow-y-auto px-6 py-6 pb-20 bg-gradient-to-b from-blue-50/60 to-white relative scrollbar-thin scrollbar-thumb-blue-300 scrollbar-track-blue-100 hover:scrollbar-thumb-blue-400 transition-all duration-200"
+                    className="flex-grow min-h-[200px] md:min-h-[300px] max-h-[calc(70vh-120px)] overflow-y-auto px-2 py-4 md:px-6 md:py-6 pb-24 md:pb-20 bg-gradient-to-b from-blue-50/60 to-white relative scrollbar-thin scrollbar-thumb-blue-300 scrollbar-track-blue-100 hover:scrollbar-thumb-blue-400 transition-all duration-200"
                     id="messages-container"
                   >
                     {isLoading ? (
@@ -643,7 +643,7 @@ const Messages = ({ isLoggedIn, onLogout, currentUser }) => {
                     )}
                   </div>
                   {/* Message Input */}
-                  <div className="border-t border-blue-100 bg-white/80 backdrop-blur-md p-6 sticky bottom-0 z-10">
+                  <div className="border-t border-blue-100 bg-white/80 backdrop-blur-md p-4 md:p-6 sticky bottom-0 z-10">
                     <form onSubmit={handleSendMessage} className="flex items-center gap-3">
                       <div className="flex items-center mr-2">
                         <input

@@ -18,7 +18,7 @@ services:
       - key: NODE_ENV
         value: production
 
-  - type: static
+  - type: static_site
     name: glb-connect-frontend
     repo: https://github.com/glbconnect/GLB.Connect.git # ❗IMPORTANT: Replace with your actual repo URL
     branch: main

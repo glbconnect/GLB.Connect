@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import UserCard from '../components/ui/UserCard';
+import UserAvatar from '../components/ui/UserAvatar';
 import * as api from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/layout/Layout';
@@ -252,19 +253,7 @@ const QAThreads = ({ isLoggedIn, onLogout, currentUser }) => {
                   {/* Left: Avatar & Main Info */}
                   <div className="lg:w-1/3 flex flex-col items-center">
                     <div className="relative">
-                      {selectedUser.avatarUrl ? (
-                        <img 
-                          src={selectedUser.avatarUrl} 
-                          alt={selectedUser.name} 
-                          className="w-40 h-40 rounded-full object-cover border-4 border-blue-100 shadow-xl"
-                          onError={(e) => {
-                            e.target.onerror = null;
-                            e.target.src = '/default-avatar.png';
-                          }}
-                        />
-                      ) : (
-                        <FaUserCircle className="w-40 h-40 text-gray-300 bg-white rounded-full border-4 border-blue-100 shadow-xl" />
-                      )}
+                      <UserAvatar user={selectedUser} size="2xl" className="border-4 border-blue-100 shadow-xl" />
                       <div className="absolute -bottom-2 -right-2 bg-green-500 w-8 h-8 rounded-full border-4 border-white"></div>
                     </div>
                     <h3 className="text-2xl font-bold text-gray-900 mt-6 mb-2 text-center">{selectedUser.name}</h3>

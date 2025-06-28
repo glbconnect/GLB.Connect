@@ -1,27 +1,23 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from "@prisma/client";
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient;
 
-export const createAnonymousMessage = async (messageData) => {
-  return prisma.anonymousMessage.create({
+export const createAnonymousMessage = async messageData => prisma.anonymousMessage.create({
     data: {
-      content: messageData.content,
-      guestId: messageData.guestId,
-      timestamp: new Date(messageData.timestamp)
+        content: messageData.content,
+        guestId: messageData.guestId,
+        timestamp: new Date(messageData.timestamp)
     }
-  });
-};
+});
 
-export const getAnonymousMessages = async (limit = 100) => {
-  return prisma.anonymousMessage.findMany({
+export const getAnonymousMessages = async (limit = 100) => prisma.anonymousMessage.findMany({
     orderBy: {
-      timestamp: 'desc'
+        timestamp: "desc"
     },
     take: limit
-  });
-};
+});
 
 export default {
-  createAnonymousMessage,
-  getAnonymousMessages
+    createAnonymousMessage: createAnonymousMessage,
+    getAnonymousMessages: getAnonymousMessages
 };

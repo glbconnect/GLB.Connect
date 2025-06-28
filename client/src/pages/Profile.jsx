@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/layout/Layout';
+import UserAvatar from '../components/ui/UserAvatar';
 import { FaUserCircle, FaStar, FaEnvelope, FaPhone, FaBirthdayCake, FaUserGraduate, FaMapMarkerAlt, FaCamera } from 'react-icons/fa';
 
 const Profile = ({ isLoggedIn, onLogout, currentUser, onUpdateProfile }) => {
@@ -117,11 +118,11 @@ const Profile = ({ isLoggedIn, onLogout, currentUser, onUpdateProfile }) => {
         <div className="w-full max-w-4xl mx-auto bg-white rounded-3xl shadow-2xl p-0 md:p-0 flex flex-col md:flex-row overflow-hidden">
           {/* Left: Avatar & Main Info */}
           <div className="md:w-1/3 bg-gradient-to-br from-blue-100 to-blue-50 flex flex-col items-center justify-center p-8">
-            {avatarPreview ? (
-              <img src={avatarPreview} alt="Avatar" className="w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg mb-4" />
-            ) : (
-              <FaUserCircle className="w-32 h-32 text-gray-300 bg-white rounded-full border-4 border-white shadow-lg mb-4" />
-            )}
+            <UserAvatar 
+              user={{ name: user.name, avatarUrl: avatarPreview }} 
+              size="2xl" 
+              className="border-4 border-white shadow-lg mb-4" 
+            />
             {isEditing && (
               <div className="mb-4 flex flex-col items-center">
                 <label className="cursor-pointer bg-blue-600 text-white px-4 py-2 rounded-full text-sm font-medium shadow hover:bg-blue-700 transition flex items-center gap-2">

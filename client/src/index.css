@@ -1,93 +1,77 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
+@import url(https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap);
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
 :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 250, 250, 250;
-  --background-end-rgb: 255, 255, 255;
-  --radius: 0.5rem;
+  --foreground-rgb: 0,0,0;
+  --background-start-rgb: 250,250,250;
+  --background-end-rgb: 255,255,255;
+  --radius: 0.5rem
 }
-
 * {
   box-sizing: border-box;
   padding: 0;
-  margin: 0;
+  margin: 0
 }
-
 body {
-  font-family: 'Inter', sans-serif;
+  font-family: Inter,sans-serif;
   color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-    to bottom,
-    rgb(var(--background-start-rgb)),
-    rgb(var(--background-end-rgb))
-  );
-  min-height: 100vh;
+  background: linear-gradient(to bottom,rgb(var(--background-start-rgb)),rgb(var(--background-end-rgb)));
+  min-height: 100vh
 }
-
 @layer base {
   h1 {
     @apply text-3xl font-bold;
+    
   }
   h2 {
     @apply text-2xl font-semibold;
+    
   }
   h3 {
     @apply text-xl font-semibold;
-  }
-  a {
-    @apply text-primary hover:text-primary/80;
+    
   }
   button {
     @apply transition-colors duration-200;
+    
   }
 }
-
-/* Custom toggle switch styling */
-input[type="checkbox"]:checked + .checkbox-toggle {
+input[type=checkbox]:checked + .checkbox-toggle {
   @apply bg-primary;
+  
 }
-
-input[type="checkbox"]:checked + .checkbox-toggle::before {
-  transform: translateX(1.5rem);
+input[type=checkbox]:checked + .checkbox-toggle::before {
+  transform: translateX(1.5rem)
 }
-
-/* College Scroller Animation */
 .scroller {
   width: 100%;
   overflow: hidden;
-  -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
-  mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+  -webkit-mask-image: linear-gradient(to right,transparent,black 10%,black 90%,transparent);
+  mask-image: linear-gradient(to right,transparent,black 10%,black 90%,transparent)
 }
-
 .scroller-inner {
   display: flex;
   width: fit-content;
-  animation: scroll 40s linear infinite;
+  animation: scroll 40s linear infinite
 }
-
 .scroller-inner span {
   white-space: nowrap;
-  padding: 0 2.5rem; /* Spacing between names */
-  font-size: 2rem; /* Increased font size */
-  font-weight: 700; /* font-bold */
-  color: #fff; /* White color */
-  letter-spacing: 0.05em;
-  text-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  padding: 0 2.5rem;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: .05em;
+  text-shadow: 0 2px 8px rgba(0,0,0,.15)
 }
-
 .dark .scroller-inner span {
-  color: #d1d5db; /* dark:text-gray-300 */
+  color: #d1d5db
 }
-
 @keyframes scroll {
   from {
-    transform: translateX(0);
+    transform: translateX(0)
   }
   to {
-    transform: translateX(-50%);
+    transform: translateX(-50%)
   }
 }

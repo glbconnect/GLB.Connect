@@ -77,11 +77,11 @@ const AnonymousPost = ({ isLoggedIn, onLogout, currentUser }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 px-2 sm:px-4 md:px-8 py-4 md:py-8">
-      <div className="max-w-3xl mx-auto flex flex-col min-h-[80vh]">
-        <div className="bg-white/80 backdrop-blur-md rounded-3xl shadow-2xl overflow-hidden flex flex-col flex-1 border border-blue-100">
+    <div className="h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 px-2 sm:px-4 md:px-8 pt-20 pb-2 md:pb-4 overflow-hidden relative z-10 flex items-center justify-center">
+      <div className="max-w-3xl w-full h-[85vh] flex flex-col">
+        <div className="bg-white/80 backdrop-blur-md rounded-3xl shadow-2xl overflow-hidden flex flex-col h-full border border-blue-100 relative z-20">
           {/* Chat Header */}
-          <div className="p-3 md:p-4 bg-blue-500 text-white flex flex-col md:flex-row justify-between items-start md:items-center gap-2 md:gap-0">
+          <div className="p-3 md:p-4 bg-blue-500 text-white flex flex-col md:flex-row justify-between items-start md:items-center gap-2 md:gap-0 flex-shrink-0">
             <div className="flex items-center gap-3">
               <span className="text-2xl"><FaMask /></span>
               <h1 className="text-2xl font-extrabold tracking-tight drop-shadow">Anonymous Posting</h1>
@@ -94,7 +94,7 @@ const AnonymousPost = ({ isLoggedIn, onLogout, currentUser }) => {
           </div>
 
           {/* Chat Messages */}
-          <div className="h-[400px] md:h-[600px] overflow-y-auto p-2 md:p-4 space-y-4" id="messages-container">
+          <div className="flex-1 overflow-y-auto p-2 md:p-4 space-y-4" id="messages-container">
             {messages.map((message, index) => {
               const isOwn = message.guestId === guestId;
               return (
@@ -136,7 +136,7 @@ const AnonymousPost = ({ isLoggedIn, onLogout, currentUser }) => {
           </div>
 
           {/* Input Area */}
-          <div className="border-t p-3 md:p-4">
+          <div className="border-t p-3 md:p-4 flex-shrink-0">
             <form onSubmit={handleSendMessage} className="flex gap-2 flex-col sm:flex-row items-stretch sm:items-center">
               <input
                 type="text"

@@ -27,4 +27,6 @@ services:
     buildCommand: "cd client && npm install && npm run build"
     envVars:
       - key: VITE_API_URL
-        value: https://glb-connect-backend.onrender.com/api 
+        value: https://glb-connect-backend.onrender.com/api
+      - key: VITE_SOCKET_URL
+        value: https://glb-connect-backend.onrender.com 

@@ -85,15 +85,26 @@ function AppRoutes() {
   // Socket notification logic
   useEffect(() => {
     if (!isLoggedIn || !currentUser?.id) return;
-    const socket = socketService.initializeSocket(currentUser.id);
-    // Listen for new messages
-    socketService.listenForMessages((message) => {
-      // Only notify if not on /messages or /messages/:userId and not sent by self
-      const isOnMessagesPage = location.pathname.startsWith('/messages');
-      if (!isOnMessagesPage && message.senderId !== currentUser.id) {
-        setNotificationCount((prev) => prev + 1);
+    
+    try {
+      const socket = socketService.initializeSocket(currentUser.id);
+      
+      // Only set up listeners if socket is available
+      if (socket) {
+        // Listen for new messages
+        socketService.listenForMessages((message) => {
+          // Only notify if not on /messages or /messages/:userId and not sent by self
+          const isOnMessagesPage = location.pathname.startsWith('/messages');
+          if (!isOnMessagesPage && message.senderId !== currentUser.id) {
+            setNotificationCount((prev) => prev + 1);
+          }
+        });
       }
-    });
+    } catch (error) {
+      // Silently handle socket connection errors - don't show to user
+      console.warn("Socket connection failed:", error.message);
+    }
+    
     return () => {
       socketService.removeAllListeners();
     };

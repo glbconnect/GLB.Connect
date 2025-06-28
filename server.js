@@ -35,10 +35,13 @@ const io = initializeSocket(httpServer);
 app.use(cors({
   origin: [
     process.env.CLIENT_URL || "http://localhost:5173",
+    "https://glb-connect-frontend.onrender.com",
     "https://glb-connect.vercel.app",
     "https://glb.connect"
   ],
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
 app.use(express.json());
 

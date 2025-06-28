@@ -29,7 +29,17 @@ export const initializeSocket = userId => {
         console.warn("No authentication token available for socket connection");
         return null;
     }
-    const socketUrl = import.meta.env.VITE_SOCKET_URL || "http://localhost:5000";
+    
+    // Get socket URL from environment or construct from API URL
+    let socketUrl = import.meta.env.VITE_SOCKET_URL;
+    if (!socketUrl) {
+        // Fallback: construct from API URL
+        const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+        socketUrl = apiUrl.replace('/api', '');
+    }
+    
+    console.log("Connecting to socket at:", socketUrl);
+    
     socket = io(socketUrl, {
         withCredentials: false,
         auth: {
@@ -37,21 +47,35 @@ export const initializeSocket = userId => {
         },
         reconnection: true,
         reconnectionAttempts: 5,
-        reconnectionDelay: 1e3
+        reconnectionDelay: 1e3,
+        timeout: 10000, // 10 second timeout
+        forceNew: true
     });
+    
     socket.on("connect", () => {
         console.log("Socket connected successfully");
         socket.emit("join", userId);
     });
+    
     socket.on("connect_error", error => {
         console.error("Socket connection error:", error);
+        // Don't show error to user if it's just a connection issue
+        if (error.message.includes('CORS') || error.message.includes('timeout')) {
+            console.warn("Socket connection failed due to CORS or timeout - this is expected in some environments");
+        }
     });
+    
     socket.on("error", error => {
         console.error("Socket error:", error);
         if (error.message === "Authentication required" || error.message === "Invalid token") {
             socket.close();
         }
     });
+    
+    socket.on("disconnect", (reason) => {
+        console.log("Socket disconnected:", reason);
+    });
+    
     return socket;
 };
 
@@ -62,8 +86,10 @@ export const disconnectSocket = () => {
 };
 
 export const sendMessage = data => {
-    if (socket) {
+    if (socket && socket.connected) {
         socket.emit("send_message", data);
+    } else {
+        console.warn("Socket not connected, cannot send message");
     }
 };
 
@@ -78,7 +104,7 @@ const addToMessageCache = messageId => {
 const isMessageCached = messageId => messageCache.has(messageId);
 
 export const listenForMessages = callback => {
-    if (socket) {
+    if (socket && socket.connected) {
         socket.off("receive_message");
         socket.on("receive_message", message => {
             if (message.id && !isMessageCached(message.id)) {
@@ -86,11 +112,13 @@ export const listenForMessages = callback => {
                 callback(message);
             }
         });
+    } else {
+        console.warn("Socket not connected, cannot listen for messages");
     }
 };
 
 export const listenForTyping = callback => {
-    if (socket) {
+    if (socket && socket.connected) {
         socket.off("user_typing");
         socket.on("user_typing", data => {
             callback(data);
@@ -99,7 +127,7 @@ export const listenForTyping = callback => {
 };
 
 export const emitTyping = data => {
-    if (socket) {
+    if (socket && socket.connected) {
         socket.emit("typing", data);
     }
 };
@@ -117,7 +145,10 @@ export const clearMessageCache = () => {
 export const getSocket = () => socket;
 
 export function subscribeToEventUpdates(callbacks) {
-    if (!socket) return;
+    if (!socket || !socket.connected) {
+        console.warn("Socket not connected, cannot subscribe to event updates");
+        return;
+    }
     socket.on("event:new", callbacks.onNewEvent);
     socket.on("event:update", callbacks.onUpdateEvent);
     socket.on("event:delete", callbacks.onDeleteEvent);
@@ -126,23 +157,23 @@ export function subscribeToEventUpdates(callbacks) {
 }
 
 export function emitEventRegister(data) {
-    if (socket) socket.emit("event:register", data);
+    if (socket && socket.connected) socket.emit("event:register", data);
 }
 
 export function emitEventUnregister(data) {
-    if (socket) socket.emit("event:unregister", data);
+    if (socket && socket.connected) socket.emit("event:unregister", data);
 }
 
 export function emitEventNew(event) {
-    if (socket) socket.emit("event:new", event);
+    if (socket && socket.connected) socket.emit("event:new", event);
 }
 
 export function emitEventUpdate(event) {
-    if (socket) socket.emit("event:update", event);
+    if (socket && socket.connected) socket.emit("event:update", event);
 }
 
 export function emitEventDelete(event) {
-    if (socket) socket.emit("event:delete", event);
+    if (socket && socket.connected) socket.emit("event:delete", event);
 }
 
 export default {

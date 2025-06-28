@@ -9,10 +9,16 @@ let ioInstance;
 export const initializeSocket = httpServer => {
     const io = new Server(httpServer, {
         cors: {
-            origin: process.env.CLIENT_URL || "http://localhost:5173",
-            methods: [ "GET", "POST" ],
-            credentials: true
-        }
+            origin: [
+                process.env.CLIENT_URL || "http://localhost:5173",
+                "https://glb-connect-frontend.onrender.com",
+                "https://glb-connect.vercel.app"
+            ],
+            methods: [ "GET", "POST", "OPTIONS" ],
+            credentials: true,
+            allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+        },
+        transports: ['polling', 'websocket']
     });
     ioInstance = io;
     io.use(async (socket, next) => {

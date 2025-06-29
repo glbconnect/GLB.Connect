@@ -8,7 +8,7 @@ import Button from '../components/ui/Button';
 import UserSearch from '../components/UserSearch';
 import * as api from '../services/api';
 import * as socketService from '../services/socket';
-import { PaperClipIcon, MicrophoneIcon } from '@heroicons/react/24/outline';
+import { PaperClipIcon, MicrophoneIcon, ArrowLeftIcon, Bars3Icon } from '@heroicons/react/24/outline';
 
 const Messages = ({ isLoggedIn, onLogout, currentUser }) => {
   const { userId } = useParams();
@@ -22,6 +22,7 @@ const Messages = ({ isLoggedIn, onLogout, currentUser }) => {
   const [error, setError] = useState('');
   const [userTyping, setUserTyping] = useState(null);
   const [socket, setSocket] = useState(null);
+  const [showSidebar, setShowSidebar] = useState(false); // For mobile sidebar toggle
   
   const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
@@ -34,6 +35,14 @@ const Messages = ({ isLoggedIn, onLogout, currentUser }) => {
     isAnonymous: false,
     userId: activeUserId
   });
+
+  // Close sidebar on mobile when conversation is selected
+  const handleSelectConversation = (userId, userDetails) => {
+    setActiveUserId(userId);
+    if (userDetails) setActiveUserDetails(userDetails);
+    navigate(`/messages/${userId}`);
+    setShowSidebar(false); // Close sidebar on mobile
+  };
 
   // Initialize socket connection
   useEffect(() => {
@@ -558,73 +567,147 @@ const Messages = ({ isLoggedIn, onLogout, currentUser }) => {
 
   return (
     <Layout isLoggedIn={isLoggedIn} onLogout={onLogout}>
-      <div className="flex flex-row flex-1 h-full w-full overflow-hidden">
+      <div className="flex flex-col lg:flex-row h-screen w-full overflow-hidden bg-gray-50">
+        {/* Mobile Header - Only visible on mobile when chat is active */}
+        {activeUserId && (
+          <div className="lg:hidden flex items-center justify-between p-4 bg-white border-b border-gray-200 shadow-sm">
+            <button
+              onClick={() => setShowSidebar(true)}
+              className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            >
+              <Bars3Icon className="w-6 h-6 text-gray-600" />
+            </button>
+            <div className="flex items-center flex-1 mx-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-blue-400 text-white text-lg font-bold mr-3 flex-shrink-0 shadow">
+                {activeUserDetails.name ? activeUserDetails.name.charAt(0).toUpperCase() : 'U'}
+              </div>
+              <div className="min-w-0 flex-1">
+                <h3 className="font-semibold text-gray-900 text-lg truncate">
+                  {activeUserDetails.isAnonymous ? 'Anonymous' : activeUserDetails.name}
+                </h3>
+                {activeUserDetails.email && !activeUserDetails.isAnonymous && (
+                  <p className="text-sm text-gray-500 truncate">{activeUserDetails.email}</p>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Sidebar - Conversation List */}
-        <div className="w-full md:w-1/3 h-full border-r border-blue-100 bg-white/80 flex flex-col overflow-y-auto flex-1">
-          <div className="p-6 border-b border-blue-100 bg-white/80 sticky top-0 z-10">
-            <h2 className="text-2xl font-extrabold text-blue-700 mb-4 drop-shadow">Messages</h2>
+        <div className={`
+          ${showSidebar ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+          lg:w-80 xl:w-96 w-full max-w-sm
+          h-full lg:h-screen
+          bg-white border-r border-gray-200
+          flex flex-col overflow-hidden
+          fixed lg:relative z-50 lg:z-auto
+          transition-transform duration-300 ease-in-out
+        `}>
+          {/* Sidebar Header */}
+          <div className="p-4 lg:p-6 border-b border-gray-200 bg-white flex-shrink-0">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl lg:text-2xl font-bold text-gray-900">Messages</h2>
+              {activeUserId && (
+                <button
+                  onClick={() => setShowSidebar(false)}
+                  className="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                >
+                  <ArrowLeftIcon className="w-5 h-5 text-gray-600" />
+                </button>
+              )}
+            </div>
             <UserSearch onSelectUser={(userId, userDetails) => {
-              setActiveUserId(userId);
-              setActiveUserDetails(userDetails);
-              navigate(`/messages/${userId}`);
+              handleSelectConversation(userId, userDetails);
             }} />
           </div>
-          <div className="flex-1 pr-1 scrollbar-thin scrollbar-thumb-blue-300 scrollbar-track-blue-100 hover:scrollbar-thumb-blue-400 transition-all duration-200">
+
+          {/* Conversations List */}
+          <div className="flex-1 overflow-y-auto">
             {conversations.length > 0 ? (
               <MessageList
                 conversations={conversations}
                 activeUserId={activeUserId}
-                onSelectConversation={(userId, userDetails) => {
-                  setActiveUserId(userId);
-                  if (userDetails) setActiveUserDetails(userDetails);
-                  navigate(`/messages/${userId}`);
-                }}
+                onSelectConversation={handleSelectConversation}
               />
             ) : (
-              <div className="p-6 text-center text-blue-400">No conversations yet. Use the search to find someone to message.</div>
+              <div className="p-6 text-center text-gray-500">
+                <div className="mb-4">
+                  <svg className="w-12 h-12 mx-auto text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                  </svg>
+                </div>
+                <p className="text-sm">No conversations yet.</p>
+                <p className="text-xs text-gray-400 mt-1">Use the search to find someone to message.</p>
+              </div>
             )}
           </div>
         </div>
+
+        {/* Mobile Overlay - Only visible when sidebar is open on mobile */}
+        {showSidebar && (
+          <div 
+            className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
+            onClick={() => setShowSidebar(false)}
+          />
+        )}
+
         {/* Main Content - Chat Area */}
-        <div className="flex flex-col w-full md:w-2/3 h-full min-h-0" style={{background: 'linear-gradient(135deg, #e0f7fa 0%, #e0ffe0 100%)'}}>
+        <div className={`
+          ${activeUserId ? 'flex' : 'hidden lg:flex'}
+          flex-col flex-1 h-full lg:h-screen
+          bg-gradient-to-br from-blue-50 to-indigo-50
+          relative
+        `}>
           {activeUserId ? (
             <>
-              {/* Chat Header */}
-              <div className="border-b border-blue-100 p-4 md:p-6 flex items-center bg-white/80 shadow-md flex-shrink-0">
+              {/* Desktop Chat Header */}
+              <div className="hidden lg:flex border-b border-gray-200 p-4 lg:p-6 items-center bg-white/95 backdrop-blur-sm shadow-sm flex-shrink-0">
                 <div className="flex items-center w-full">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-blue-400 text-white text-2xl font-bold mr-4 flex-shrink-0 shadow">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-blue-400 text-white text-xl font-bold mr-4 flex-shrink-0 shadow">
                     {activeUserDetails.name ? activeUserDetails.name.charAt(0).toUpperCase() : 'U'}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <h3 className="font-bold text-blue-800 text-xl truncate">
+                    <h3 className="font-semibold text-gray-900 text-lg truncate">
                       {activeUserDetails.isAnonymous ? 'Anonymous' : activeUserDetails.name}
                     </h3>
                     {activeUserDetails.email && !activeUserDetails.isAnonymous && (
-                      <p className="text-sm text-blue-500 truncate">{activeUserDetails.email}</p>
+                      <p className="text-sm text-gray-500 truncate">{activeUserDetails.email}</p>
                     )}
                   </div>
                 </div>
               </div>
+
               {/* Messages Container */}
               <div
                 ref={messagesContainerRef}
-                className="flex-1 min-h-0 overflow-y-auto px-2 py-4 md:px-6 md:py-6 bg-transparent relative"
+                className="flex-1 overflow-y-auto px-3 py-4 lg:px-6 lg:py-6 bg-transparent relative"
                 id="messages-container"
               >
                 {isLoading ? (
                   <div className="flex h-full items-center justify-center">
-                    <p>Loading messages...</p>
+                    <div className="flex items-center space-x-2">
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+                      <p className="text-gray-500">Loading messages...</p>
+                    </div>
                   </div>
                 ) : error ? (
                   <div className="flex h-full items-center justify-center">
-                    <p className="text-red-500">{error}</p>
+                    <p className="text-red-500 text-center px-4">{error}</p>
                   </div>
                 ) : messages.length === 0 ? (
                   <div className="flex h-full items-center justify-center">
-                    <p className="text-blue-400">No messages yet. Send a message to start the conversation.</p>
+                    <div className="text-center px-4">
+                      <div className="mb-4">
+                        <svg className="w-16 h-16 mx-auto text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                        </svg>
+                      </div>
+                      <p className="text-gray-500 text-lg font-medium">No messages yet</p>
+                      <p className="text-gray-400 text-sm mt-1">Send a message to start the conversation.</p>
+                    </div>
                   </div>
                 ) : (
-                  <>
+                  <div className="space-y-3">
                     {messages.map((message) => (
                       <div key={message.id} className="animate-fadeIn">
                         <MessageBubble
@@ -634,39 +717,56 @@ const Messages = ({ isLoggedIn, onLogout, currentUser }) => {
                       </div>
                     ))}
                     {userTyping === activeUserId && (
-                      <div className="text-sm text-blue-400 italic mt-2">
-                        {activeUserDetails.isAnonymous ? 'Anonymous' : activeUserDetails.name} is typing...
+                      <div className="flex items-center space-x-2 text-sm text-gray-500 italic mt-2 px-4">
+                        <div className="flex space-x-1">
+                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                        </div>
+                        <span>{activeUserDetails.isAnonymous ? 'Anonymous' : activeUserDetails.name} is typing...</span>
                       </div>
                     )}
-                  </>
+                  </div>
                 )}
               </div>
+
               {/* Message Input */}
-              <div className="p-4 md:p-6 bg-transparent flex-shrink-0">
-                <form onSubmit={handleSendMessage} className="flex items-center justify-center gap-3 border border-blue-100 bg-white/95 rounded-3xl shadow-lg px-4 py-2">
-                  <button type="button" className="p-2 text-blue-400 hover:text-blue-600 focus:outline-none">
-                    <PaperClipIcon className="w-6 h-6" />
+              <div className="p-3 lg:p-4 bg-white/95 backdrop-blur-sm border-t border-gray-200 flex-shrink-0">
+                <form onSubmit={handleSendMessage} className="flex items-center space-x-2 lg:space-x-3">
+                  <button 
+                    type="button" 
+                    className="p-2 lg:p-3 text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-200 rounded-lg transition-colors"
+                  >
+                    <PaperClipIcon className="w-5 h-5 lg:w-6 lg:h-6" />
                   </button>
-                  <Input
-                    type="text"
-                    placeholder="Type a message..."
-                    value={newMessage}
-                    onChange={handleInputChange}
-                    onKeyDown={handleKeyDown}
-                    className="flex-grow rounded-full border border-blue-200 px-5 py-3 focus:outline-none focus:border-blue-400 bg-white/90 shadow-sm text-base transition-all focus:ring-2 focus:ring-blue-200"
-                    autoComplete="off"
-                  />
-                  <button type="button" className="p-2 text-blue-400 hover:text-blue-600 focus:outline-none">
-                    <MicrophoneIcon className="w-6 h-6" />
+                  
+                  <div className="flex-1 relative">
+                    <Input
+                      type="text"
+                      placeholder="Type a message..."
+                      value={newMessage}
+                      onChange={handleInputChange}
+                      onKeyDown={handleKeyDown}
+                      className="w-full rounded-2xl border border-gray-200 px-4 py-3 lg:px-5 lg:py-3 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-200 bg-white shadow-sm text-sm lg:text-base transition-all resize-none"
+                      autoComplete="off"
+                    />
+                  </div>
+                  
+                  <button 
+                    type="button" 
+                    className="p-2 lg:p-3 text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-200 rounded-lg transition-colors"
+                  >
+                    <MicrophoneIcon className="w-5 h-5 lg:w-6 lg:h-6" />
                   </button>
+                  
                   <button
                     type="submit"
-                    className="bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-full p-3 w-12 h-12 flex items-center justify-center shadow-xl hover:scale-110 hover:from-blue-600 hover:to-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-full p-2 lg:p-3 w-10 h-10 lg:w-12 lg:h-12 flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-105 hover:from-blue-600 hover:to-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none focus:outline-none focus:ring-2 focus:ring-blue-200"
                     disabled={!newMessage.trim()}
-                    aria-label="Send"
+                    aria-label="Send message"
                   >
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                    <svg className="w-4 h-4 lg:w-5 lg:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
                     </svg>
                   </button>
                 </form>
@@ -674,34 +774,62 @@ const Messages = ({ isLoggedIn, onLogout, currentUser }) => {
             </>
           ) : (
             <div className="flex h-full items-center justify-center">
-              <p className="text-blue-400">Select a conversation or search for a user to message</p>
+              <div className="text-center px-4">
+                <div className="mb-6">
+                  <svg className="w-20 h-20 mx-auto text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">Welcome to Messages</h3>
+                <p className="text-gray-500 mb-4">Select a conversation or search for a user to start messaging</p>
+                <button
+                  onClick={() => setShowSidebar(true)}
+                  className="lg:hidden bg-blue-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-600 transition-colors"
+                >
+                  View Conversations
+                </button>
+              </div>
             </div>
           )}
         </div>
       </div>
+
       <style>{`
         @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(20px); }
+          from { opacity: 0; transform: translateY(10px); }
           to { opacity: 1; transform: translateY(0); }
         }
         .animate-fadeIn {
-          animation: fadeIn 0.4s;
+          animation: fadeIn 0.3s ease-out;
         }
-        .scrollbar-thin::-webkit-scrollbar {
-          width: 8px;
-          background: #e0e7ff;
-          border-radius: 8px;
+        
+        /* Custom scrollbar for webkit browsers */
+        .overflow-y-auto::-webkit-scrollbar {
+          width: 6px;
         }
-        .scrollbar-thin::-webkit-scrollbar-thumb {
-          background: #60a5fa;
-          border-radius: 8px;
+        .overflow-y-auto::-webkit-scrollbar-track {
+          background: transparent;
         }
-        .scrollbar-thin:hover::-webkit-scrollbar-thumb {
-          background: #2563eb;
+        .overflow-y-auto::-webkit-scrollbar-thumb {
+          background: rgba(156, 163, 175, 0.5);
+          border-radius: 3px;
         }
-        .scrollbar-thin {
+        .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+          background: rgba(156, 163, 175, 0.7);
+        }
+        
+        /* Firefox scrollbar */
+        .overflow-y-auto {
           scrollbar-width: thin;
-          scrollbar-color: #60a5fa #e0e7ff;
+          scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+        }
+        
+        /* Ensure proper height on mobile */
+        @media (max-width: 1024px) {
+          .h-screen {
+            height: 100vh;
+            height: 100dvh;
+          }
         }
       `}</style>
     </Layout>

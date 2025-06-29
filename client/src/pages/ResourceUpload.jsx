@@ -24,18 +24,25 @@ const ResourceUpload = ({ isLoggedIn, onLogout, currentUser }) => {
   const [categories, setCategories] = useState([]);
   const [previewUrl, setPreviewUrl] = useState('');
   const [isUploading, setIsUploading] = useState(false);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
     const fetchCategories = async () => {
       try {
+        setIsLoadingCategories(true);
         const response = await getCategories();
+        console.log('Categories response:', response); // Debug log
         if (response.success) {
-          setCategories(response.data);
+          setCategories(response.data || []);
+        } else {
+          setError('Failed to load categories');
         }
       } catch (err) {
         console.error('Error fetching categories:', err);
         setError('Failed to load categories');
+      } finally {
+        setIsLoadingCategories(false);
       }
     };
 
@@ -113,10 +120,17 @@ const ResourceUpload = ({ isLoggedIn, onLogout, currentUser }) => {
       <Layout isLoggedIn={isLoggedIn} onLogout={onLogout}>
         <div className="flex justify-center items-center min-h-screen">
           <div className="text-center">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">
+            <div className="text-6xl mb-6">🔒</div>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
               Please log in to upload resources
             </h2>
-            <Button onClick={() => navigate('/login')}>
+            <p className="text-gray-600 mb-8">
+              You need to be logged in to share resources with the community.
+            </p>
+            <Button 
+              onClick={() => navigate('/login')}
+              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300"
+            >
               Go to Login
             </Button>
           </div>
@@ -127,36 +141,53 @@ const ResourceUpload = ({ isLoggedIn, onLogout, currentUser }) => {
 
   return (
     <Layout isLoggedIn={isLoggedIn} onLogout={onLogout}>
-      <div className="max-w-3xl mx-auto px-2 sm:px-4 md:px-8 py-4 md:py-8">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Upload Resource</h1>
-          <p className="text-gray-600">
-            Share your academic resources with the community
-          </p>
+      {/* Hero Section */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+        <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
+          <div className="text-center">
+            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
+              Upload Resource
+            </h1>
+            <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
+              Share your academic resources with the community. Help your peers by uploading 
+              notes, study materials, and other educational content.
+            </p>
+          </div>
         </div>
-        
+      </div>
+
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {error && (
-          <div className="bg-red-50 text-red-600 p-4 mb-6 rounded-md">
+          <div className="bg-red-50 border border-red-200 text-red-700 p-6 mb-8 rounded-2xl flex items-center">
+            <svg className="w-6 h-6 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
             {error}
           </div>
         )}
         
-        <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6">
-          <div className="mb-6">
-            <Input
+        <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+          {/* Title Field */}
+          <div className="mb-8">
+            <label htmlFor="title" className="block text-gray-700 font-semibold mb-3">
+              Resource Title <span className="text-red-500">*</span>
+            </label>
+            <input
               type="text"
+              id="title"
               name="title"
-              label="Title"
               value={formData.title}
               onChange={handleChange}
-              placeholder="Enter resource title"
+              placeholder="Enter a descriptive title for your resource"
+              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
               required
-              fullWidth
             />
           </div>
           
-          <div className="mb-6">
-            <label htmlFor="description" className="block text-gray-700 font-medium mb-2">
+          {/* Description Field */}
+          <div className="mb-8">
+            <label htmlFor="description" className="block text-gray-700 font-semibold mb-3">
               Description
             </label>
             <textarea
@@ -164,36 +195,47 @@ const ResourceUpload = ({ isLoggedIn, onLogout, currentUser }) => {
               name="description"
               value={formData.description}
               onChange={handleChange}
-              rows="3"
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Describe your resource (optional)"
+              rows="4"
+              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 resize-none"
+              placeholder="Describe your resource to help others understand its content and value"
             ></textarea>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          {/* Category and Year Fields */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
             <div>
-              <label htmlFor="categoryId" className="block text-gray-700 font-medium mb-2">
+              <label htmlFor="categoryId" className="block text-gray-700 font-semibold mb-3">
                 Category <span className="text-red-500">*</span>
               </label>
-              <select
-                id="categoryId"
-                name="categoryId"
-                value={formData.categoryId}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              >
-                <option value="">Select Category</option>
-                {categories.map(category => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
-                ))}
-              </select>
+              {isLoadingCategories ? (
+                <div className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-50 flex items-center">
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 mr-3"></div>
+                  <span className="text-gray-500">Loading categories...</span>
+                </div>
+              ) : (
+                <select
+                  id="categoryId"
+                  name="categoryId"
+                  value={formData.categoryId}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 appearance-none bg-white"
+                  required
+                >
+                  <option value="">Select a category</option>
+                  {categories.map(category => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))}
+                </select>
+              )}
+              {categories.length === 0 && !isLoadingCategories && (
+                <p className="text-sm text-red-500 mt-2">No categories available. Please contact support.</p>
+              )}
             </div>
             
             <div>
-              <label htmlFor="year" className="block text-gray-700 font-medium mb-2">
+              <label htmlFor="year" className="block text-gray-700 font-semibold mb-3">
                 Year <span className="text-red-500">*</span>
               </label>
               <select
@@ -201,10 +243,10 @@ const ResourceUpload = ({ isLoggedIn, onLogout, currentUser }) => {
                 name="year"
                 value={formData.year}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 appearance-none bg-white"
                 required
               >
-                <option value="">Select Year</option>
+                <option value="">Select year</option>
                 {yearOptions.map(option => (
                   <option key={option.value} value={option.value}>
                     {option.label}
@@ -214,11 +256,12 @@ const ResourceUpload = ({ isLoggedIn, onLogout, currentUser }) => {
             </div>
           </div>
           
-          <div className="mb-6">
-            <label htmlFor="file" className="block text-gray-700 font-medium mb-2">
+          {/* File Upload Field */}
+          <div className="mb-8">
+            <label htmlFor="file" className="block text-gray-700 font-semibold mb-3">
               File <span className="text-red-500">*</span>
             </label>
-            <div className="border-2 border-dashed border-gray-300 rounded-md p-6 text-center">
+            <div className="border-2 border-dashed border-gray-300 rounded-2xl p-8 text-center hover:border-blue-400 transition-colors duration-200">
               <input
                 type="file"
                 id="file"
@@ -229,11 +272,11 @@ const ResourceUpload = ({ isLoggedIn, onLogout, currentUser }) => {
                 required
               />
               <label htmlFor="file" className="cursor-pointer">
-                <div className="text-4xl mb-4">📁</div>
-                <p className="text-gray-600 mb-2">
+                <div className="text-6xl mb-4">📁</div>
+                <p className="text-gray-600 mb-2 text-lg">
                   Click to select a file or drag and drop
                 </p>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-gray-500 mb-2">
                   Supported formats: PDF, DOC, PPT, XLS, TXT, ZIP, Images, Videos, Audio
                 </p>
                 <p className="text-sm text-gray-500">
@@ -242,42 +285,58 @@ const ResourceUpload = ({ isLoggedIn, onLogout, currentUser }) => {
               </label>
             </div>
             {formData.file && (
-              <div className="mt-4 p-3 bg-green-50 rounded-md">
-                <p className="text-green-700">
-                  Selected file: {formData.file.name}
-                </p>
+              <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-xl flex items-center">
+                <svg className="w-5 h-5 text-green-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                <div>
+                  <p className="text-green-700 font-medium">File selected successfully</p>
+                  <p className="text-green-600 text-sm">{formData.file.name}</p>
+                </div>
               </div>
             )}
           </div>
           
+          {/* File Preview */}
           {previewUrl && (
-            <div className="mb-6">
-              <label className="block text-gray-700 font-medium mb-2">
+            <div className="mb-8">
+              <label className="block text-gray-700 font-semibold mb-3">
                 File Preview
               </label>
-              <iframe
-                src={previewUrl}
-                className="w-full h-64 border border-gray-300 rounded-md"
-                title="File preview"
-              />
+              <div className="border border-gray-200 rounded-xl overflow-hidden">
+                <iframe
+                  src={previewUrl}
+                  className="w-full h-64"
+                  title="File preview"
+                />
+              </div>
             </div>
           )}
           
-          <div className="flex justify-end space-x-4">
+          {/* Submit Buttons */}
+          <div className="flex flex-col sm:flex-row justify-end space-y-4 sm:space-y-0 sm:space-x-4">
             <Button
               type="button"
               variant="outline"
               onClick={() => navigate('/resources')}
+              className="px-8 py-3 border-2 border-gray-200 text-gray-600 hover:bg-gray-50 rounded-xl transition-all duration-200"
             >
               Cancel
             </Button>
             <Button
               type="submit"
               loading={isUploading}
-              disabled={isUploading}
-              className="bg-blue-600 hover:bg-blue-700"
+              disabled={isUploading || isLoadingCategories}
+              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-3 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             >
-              {isUploading ? 'Uploading...' : 'Upload Resource'}
+              {isUploading ? (
+                <div className="flex items-center">
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3"></div>
+                  Uploading...
+                </div>
+              ) : (
+                'Upload Resource'
+              )}
             </Button>
           </div>
         </form>

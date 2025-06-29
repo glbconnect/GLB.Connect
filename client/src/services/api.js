@@ -1,7 +1,25 @@
 import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-export const SERVER_URL = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : 'http://localhost:5000';
+
+// Improved SERVER_URL construction for production
+const getServerUrl = () => {
+  const apiUrl = import.meta.env.VITE_API_URL;
+  
+  if (!apiUrl) {
+    return 'http://localhost:5000';
+  }
+  
+  // Handle different URL formats
+  if (apiUrl.includes('/api')) {
+    return apiUrl.replace('/api', '');
+  }
+  
+  // If it's already a base URL without /api
+  return apiUrl;
+};
+
+export const SERVER_URL = getServerUrl();
 
 // Create axios instance
 const api = axios.create({

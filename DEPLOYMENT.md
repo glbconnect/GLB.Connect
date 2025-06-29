@@ -230,4 +230,158 @@ If you encounter issues:
 1. Check the troubleshooting section above
 2. Review hosting platform documentation
 3. Check application logs
-4. Verify environment variables are set correctly 
+4. Verify environment variables are set correctly
+
+# GLB.CONNECT Deployment Guide
+
+## 🚀 Production Deployment
+
+### **Important: File Storage Considerations**
+
+⚠️ **CRITICAL**: The current implementation uses local file storage (`uploads/` folder). This will **NOT work** in production cloud environments because:
+
+1. **Ephemeral Storage**: Cloud platforms delete local files when servers restart
+2. **No File Persistence**: Files uploaded to one server instance won't be available on others
+3. **Storage Limitations**: Local storage is limited and not scalable
+
+### **Recommended Solutions for Production:**
+
+#### **Option 1: Cloud Storage (Recommended)**
+- **AWS S3**: Most popular and reliable
+- **Google Cloud Storage**: Good integration with Google services
+- **Cloudinary**: Specialized for media files
+- **Firebase Storage**: Easy integration with Firebase
+
+#### **Option 2: Database Storage (Small files only)**
+- Store files as BLOB in PostgreSQL (not recommended for large files)
+
+#### **Option 3: External File Hosting**
+- Use services like Dropbox, Google Drive API, or OneDrive
+
+### **Current Production Setup**
+
+The application is configured for deployment on:
+
+#### **Render.com**
+- Backend: `glb-connect-backend`
+- Frontend: `glb-connect-frontend`
+- Environment variables are configured in `render.yaml`
+
+#### **Railway.app**
+- Full-stack deployment
+- Configuration in `railway.json`
+
+### **Environment Variables Required**
+
+#### **Backend (.env)**
+```env
+# Database
+DATABASE_URL="postgresql://..."
+
+# JWT
+JWT_SECRET="your-secret-key"
+
+# Client URL
+CLIENT_URL="https://your-frontend-domain.com"
+
+# Environment
+NODE_ENV="production"
+
+# File Storage (if using cloud storage)
+CLOUD_STORAGE_BUCKET="your-bucket-name"
+CLOUD_STORAGE_KEY="your-access-key"
+CLOUD_STORAGE_SECRET="your-secret-key"
+```
+
+#### **Frontend (.env)**
+```env
+VITE_API_URL="https://your-backend-domain.com/api"
+VITE_SOCKET_URL="https://your-backend-domain.com"
+```
+
+### **File Viewing in Production**
+
+The file viewing functionality has been enhanced with:
+
+1. **Robust URL Construction**: Handles different environment configurations
+2. **Fallback Mechanisms**: Tries alternative URLs if primary fails
+3. **Error Handling**: Comprehensive error messages and debugging
+4. **CORS Support**: Proper headers for cross-origin file access
+5. **File Type Detection**: Different handling for PDFs vs other files
+
+### **Testing File Access**
+
+After deployment, test file access with:
+
+1. **Upload a test file** through the resource sharing interface
+2. **Check browser console** for URL construction logs
+3. **Test file viewing** with different file types (PDF, images, documents)
+4. **Verify CORS headers** are properly set
+
+### **Troubleshooting File Issues**
+
+#### **Common Issues:**
+
+1. **Files not accessible after deployment**
+   - Check if files are being stored in cloud storage
+   - Verify CORS headers are set correctly
+   - Check browser console for URL construction errors
+
+2. **CORS errors**
+   - Ensure backend CORS configuration includes frontend domain
+   - Check that file serving routes have proper CORS headers
+
+3. **File URLs not working**
+   - Verify environment variables are set correctly
+   - Check that SERVER_URL is constructed properly
+   - Test file access endpoints directly
+
+#### **Debug Steps:**
+
+1. **Check file existence**: Use `/api/files/test/:filename` endpoint
+2. **Verify URL construction**: Check browser console logs
+3. **Test direct access**: Try accessing file URL directly in browser
+4. **Check network tab**: Look for failed requests in browser dev tools
+
+### **Migration to Cloud Storage**
+
+To migrate from local storage to cloud storage:
+
+1. **Choose a cloud storage provider** (AWS S3 recommended)
+2. **Update file upload logic** in `src/controllers/resourceController.js`
+3. **Update file URL construction** in `client/src/utils/fileUtils.js`
+4. **Test thoroughly** before deploying to production
+
+### **Performance Optimization**
+
+1. **File Caching**: Implement proper cache headers for static files
+2. **CDN**: Use a CDN for faster file delivery
+3. **Image Optimization**: Compress images before storage
+4. **Lazy Loading**: Implement lazy loading for file previews
+
+### **Security Considerations**
+
+1. **File Validation**: Validate file types and sizes
+2. **Access Control**: Implement proper file access permissions
+3. **Virus Scanning**: Consider scanning uploaded files
+4. **Rate Limiting**: Limit file upload frequency
+
+### **Monitoring**
+
+1. **File Access Logs**: Monitor file access patterns
+2. **Error Tracking**: Track file access errors
+3. **Storage Usage**: Monitor storage consumption
+4. **Performance Metrics**: Track file loading times
+
+---
+
+## **Quick Start for Production**
+
+1. **Set up cloud storage** (AWS S3 recommended)
+2. **Configure environment variables**
+3. **Deploy backend** to your chosen platform
+4. **Deploy frontend** with correct API URLs
+5. **Test file upload and viewing**
+6. **Monitor and optimize**
+
+For immediate deployment without cloud storage, files will work temporarily but will be lost on server restarts. 

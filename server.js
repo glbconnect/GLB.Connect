@@ -14,6 +14,7 @@ import { initializeSocket } from './src/sockets/chatSocket.js';
 import anonymousMessageRouter from './src/routes/anonymousMessageRoutes.js';
 import eventRouter from './src/routes/eventRoutes.js';
 import multer from 'multer';
+import fs from 'fs';
 
 dotenv.config();
 
@@ -84,9 +85,56 @@ app.post('/api/uploads', upload.single('file'), (req, res) => {
 // Serve static files (for uploaded resources)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// Add CORS headers for file serving
+app.use('/uploads', (req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  next();
+});
+
+// Add file serving with proper headers
+app.get('/uploads/:filename', (req, res, next) => {
+  const filename = req.params.filename;
+  const filePath = path.join(__dirname, 'uploads', filename);
+  
+  // Check if file exists
+  if (!fs.existsSync(filePath)) {
+    return res.status(404).json({ error: 'File not found' });
+  }
+  
+  // Set proper headers for file serving
+  res.setHeader('Content-Disposition', 'inline');
+  res.setHeader('Cache-Control', 'public, max-age=3600'); // Cache for 1 hour
+  
+  next();
+});
+
 // Simple test endpoint
 app.get('/api/test', (req, res) => {
   res.json({ message: 'API is working!', timestamp: new Date().toISOString() });
+});
+
+// File access test endpoint
+app.get('/api/files/test/:filename', (req, res) => {
+  const filename = req.params.filename;
+  const filePath = path.join(__dirname, 'uploads', filename);
+  
+  if (fs.existsSync(filePath)) {
+    const stats = fs.statSync(filePath);
+    res.json({
+      exists: true,
+      size: stats.size,
+      path: filePath,
+      url: `/uploads/${filename}`
+    });
+  } else {
+    res.status(404).json({
+      exists: false,
+      error: 'File not found',
+      path: filePath
+    });
+  }
 });
 
 // Serve static files from the React app in production

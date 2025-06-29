@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/layout/Layout';
-import { createResource, getCategories } from '../services/api';
+import { createResource, getCategories, seedCategories } from '../services/api';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 
@@ -26,26 +26,56 @@ const ResourceUpload = ({ isLoggedIn, onLogout, currentUser }) => {
   const [isUploading, setIsUploading] = useState(false);
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
   const [error, setError] = useState('');
+  const [categoryError, setCategoryError] = useState('');
+
+  const fetchCategories = async (retryCount = 0) => {
+    try {
+      setIsLoadingCategories(true);
+      setCategoryError('');
+      const response = await getCategories();
+      console.log('Categories response:', response); // Debug log
+      if (response.success) {
+        setCategories(response.data || []);
+      } else {
+        setCategoryError('Failed to load categories');
+      }
+    } catch (err) {
+      console.error('Error fetching categories:', err);
+      setCategoryError('Failed to load categories');
+      
+      // Retry up to 3 times with exponential backoff
+      if (retryCount < 3) {
+        setTimeout(() => {
+          fetchCategories(retryCount + 1);
+        }, Math.pow(2, retryCount) * 1000); // 1s, 2s, 4s delays
+      }
+    } finally {
+      setIsLoadingCategories(false);
+    }
+  };
+
+  const handleSeedCategories = async () => {
+    try {
+      setIsLoadingCategories(true);
+      setCategoryError('');
+      
+      const result = await seedCategories();
+      
+      if (result.success) {
+        // Refetch categories after seeding
+        await fetchCategories();
+      } else {
+        setCategoryError('Failed to seed categories');
+      }
+    } catch (err) {
+      console.error('Error seeding categories:', err);
+      setCategoryError('Failed to seed categories');
+    } finally {
+      setIsLoadingCategories(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        setIsLoadingCategories(true);
-        const response = await getCategories();
-        console.log('Categories response:', response); // Debug log
-        if (response.success) {
-          setCategories(response.data || []);
-        } else {
-          setError('Failed to load categories');
-        }
-      } catch (err) {
-        console.error('Error fetching categories:', err);
-        setError('Failed to load categories');
-      } finally {
-        setIsLoadingCategories(false);
-      }
-    };
-
     fetchCategories();
   }, []);
 
@@ -212,7 +242,7 @@ const ResourceUpload = ({ isLoggedIn, onLogout, currentUser }) => {
                   <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 mr-3"></div>
                   <span className="text-gray-500">Loading categories...</span>
                 </div>
-              ) : (
+              ) : categories.length > 0 ? (
                 <select
                   id="categoryId"
                   name="categoryId"
@@ -228,9 +258,43 @@ const ResourceUpload = ({ isLoggedIn, onLogout, currentUser }) => {
                     </option>
                   ))}
                 </select>
+              ) : (
+                <div className="w-full px-4 py-3 border border-red-200 rounded-xl bg-red-50">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <svg className="w-5 h-5 text-red-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span className="text-red-700 text-sm">No categories available</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleSeedCategories}
+                      className="text-blue-600 hover:text-blue-800 text-sm font-medium underline"
+                    >
+                      Load Categories
+                    </button>
+                  </div>
+                </div>
               )}
-              {categories.length === 0 && !isLoadingCategories && (
-                <p className="text-sm text-red-500 mt-2">No categories available. Please contact support.</p>
+              {categoryError && (
+                <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <svg className="w-4 h-4 text-red-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span className="text-red-700 text-sm">{categoryError}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => fetchCategories()}
+                      className="text-blue-600 hover:text-blue-800 text-sm font-medium underline"
+                    >
+                      Retry
+                    </button>
+                  </div>
+                </div>
               )}
             </div>
             

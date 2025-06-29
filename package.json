@@ -8,7 +8,9 @@
     "server": "nodemon server.js",
     "build": "prisma generate",
     "postinstall": "prisma generate",
-    "postdeploy": "npx prisma migrate deploy"
+    "postdeploy": "npx prisma migrate deploy",
+    "seed": "node seed-production.js",
+    "seed:categories": "node seed-production.js"
   },
   "keywords": [],
   "author": "",

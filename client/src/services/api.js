@@ -145,6 +145,11 @@ export const getCategories = async () => {
   return response.data;
 };
 
+export const seedCategories = async () => {
+  const response = await api.post('/seed-categories');
+  return response.data;
+};
+
 export const getCategoryBySlug = async (slug) => {
   const response = await api.get(`/resources/categories/${slug}`);
   return response.data;

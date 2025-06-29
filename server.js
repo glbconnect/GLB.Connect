@@ -59,6 +59,75 @@ app.get('/api/health', (req, res) => {
   res.status(200).send('OK');
 });
 
+// Category seeding endpoint for production
+app.post('/api/seed-categories', async (req, res) => {
+  try {
+    const defaultCategories = [
+      {
+        name: "Academics Notes",
+        slug: "academics-notes",
+        description: "Lecture notes, study materials, and academic resources"
+      },
+      {
+        name: "Gate Notes",
+        slug: "gate-notes",
+        description: "GATE exam preparation materials and study guides"
+      },
+      {
+        name: "Quantum",
+        slug: "quantum",
+        description: "Quantum computing and quantum mechanics resources"
+      },
+      {
+        name: "Placement Resources",
+        slug: "placement-resources",
+        description: "Interview preparation, resume templates, and career resources"
+      },
+      {
+        name: "Others",
+        slug: "others",
+        description: "Miscellaneous resources and materials"
+      }
+    ];
+
+    console.log("🌱 Seeding categories...");
+    let createdCount = 0;
+    
+    for (const category of defaultCategories) {
+      const existingCategory = await prisma.category.findUnique({
+        where: {
+          slug: category.slug
+        }
+      });
+      
+      if (!existingCategory) {
+        await prisma.category.create({
+          data: category
+        });
+        console.log(`✅ Created category: ${category.name}`);
+        createdCount++;
+      } else {
+        console.log(`⏭️  Category already exists: ${category.name}`);
+      }
+    }
+    
+    console.log("🎉 Categories seeding completed!");
+    
+    res.json({
+      success: true,
+      message: `Categories seeded successfully. ${createdCount} new categories created.`,
+      createdCount
+    });
+  } catch (error) {
+    console.error("❌ Error seeding categories:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to seed categories",
+      error: error.message
+    });
+  }
+});
+
 // Set up multer for file uploads
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -156,6 +225,9 @@ async function startServer() {
     await prisma.$connect();
     console.log('✅ Database connected successfully!');
     
+    // Auto-seed categories if they don't exist
+    await seedCategoriesIfNeeded();
+    
     // Start the server
 httpServer.listen(port, () => {
       console.log(`🚀 Server is running on port ${port}`);
@@ -166,6 +238,60 @@ httpServer.listen(port, () => {
   } catch (error) {
     console.error('❌ Database connection failed:', error);
     process.exit(1);
+  }
+}
+
+// Function to seed categories if they don't exist
+async function seedCategoriesIfNeeded() {
+  try {
+    // Check if any categories exist
+    const existingCategories = await prisma.category.count();
+    
+    if (existingCategories === 0) {
+      console.log('🌱 No categories found. Auto-seeding categories...');
+      
+      const defaultCategories = [
+        {
+          name: "Academics Notes",
+          slug: "academics-notes",
+          description: "Lecture notes, study materials, and academic resources"
+        },
+        {
+          name: "Gate Notes",
+          slug: "gate-notes",
+          description: "GATE exam preparation materials and study guides"
+        },
+        {
+          name: "Quantum",
+          slug: "quantum",
+          description: "Quantum computing and quantum mechanics resources"
+        },
+        {
+          name: "Placement Resources",
+          slug: "placement-resources",
+          description: "Interview preparation, resume templates, and career resources"
+        },
+        {
+          name: "Others",
+          slug: "others",
+          description: "Miscellaneous resources and materials"
+        }
+      ];
+
+      for (const category of defaultCategories) {
+        await prisma.category.create({
+          data: category
+        });
+        console.log(`✅ Created category: ${category.name}`);
+      }
+      
+      console.log('🎉 Auto-seeding completed!');
+    } else {
+      console.log(`✅ Categories already exist (${existingCategories} found)`);
+    }
+  } catch (error) {
+    console.error('❌ Error during auto-seeding:', error);
+    // Don't exit the server if seeding fails
   }
 }
 

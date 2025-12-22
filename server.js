@@ -14,7 +14,6 @@ import { initializeSocket } from './src/sockets/chatSocket.js';
 import anonymousMessageRouter from './src/routes/anonymousMessageRoutes.js';
 import eventRouter from './src/routes/eventRoutes.js';
 import buzzRouter from './src/routes/buzzRoutes.js';
-import mentorshipRouter from './src/routes/mentorshipRoutes.js';
 import multer from 'multer';
 import fs from 'fs';
 
@@ -57,7 +56,6 @@ app.use('/api/resources', resourceRouter);
 app.use('/api/anonymous-messages', anonymousMessageRouter);
 app.use('/api/events', eventRouter);
 app.use('/api/buzz', buzzRouter);
-app.use('/api/mentorship', mentorshipRouter);
 
 app.get('/api/health', (req, res) => {
   res.status(200).send('OK');

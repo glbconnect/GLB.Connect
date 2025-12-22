@@ -37,10 +37,6 @@ model User {
   stories          Story[]
   followers        Follow[] @relation("UserFollowers")
   following        Follow[] @relation("UserFollowing")
-  mentorPolls      Poll[] @relation("MentorPolls")
-  pollVotes        PollVote[] @relation("UserPollVotes")
-  mentorSessions   MentorshipSession[] @relation("MentorSessions")
-  sessionEnrollments SessionEnrollment[] @relation("UserSessionEnrollments")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -259,80 +255,4 @@ model Follow {
   @@unique([followerId, followingId])
   @@index([followerId])
   @@index([followingId])
-}
-
-// Mentorship Models
-model Poll {
-  id          String     @id @default(uuid())
-  title       String
-  description String?
-  mentorId    String
-  mentor      User       @relation("MentorPolls", fields: [mentorId], references: [id], onDelete: Cascade)
-  expiresAt   DateTime
-  options     PollOption[]
-  votes       PollVote[]
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-
-  @@index([mentorId])
-  @@index([expiresAt])
-}
-
-model PollOption {
-  id        String    @id @default(uuid())
-  text      String
-  pollId    String
-  poll      Poll      @relation(fields: [pollId], references: [id], onDelete: Cascade)
-  votes     PollVote[]
-  createdAt DateTime  @default(now())
-
-  @@index([pollId])
-}
-
-model PollVote {
-  id        String     @id @default(uuid())
-  pollId    String
-  optionId  String
-  userId    String
-  poll      Poll       @relation(fields: [pollId], references: [id], onDelete: Cascade)
-  option    PollOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
-  user      User       @relation("UserPollVotes", fields: [userId], references: [id], onDelete: Cascade)
-  createdAt DateTime   @default(now())
-
-  @@unique([pollId, userId])
-  @@index([pollId])
-  @@index([userId])
-}
-
-model MentorshipSession {
-  id            String            @id @default(uuid())
-  title         String
-  topic         String
-  description   String?
-  mentorId      String
-  mentor        User              @relation("MentorSessions", fields: [mentorId], references: [id], onDelete: Cascade)
-  scheduledAt   DateTime
-  duration      Int               // Duration in minutes
-  maxParticipants Int
-  meetingLink   String
-  mode          String            @default("Online")
-  enrollments   SessionEnrollment[]
-  createdAt     DateTime          @default(now())
-  updatedAt     DateTime          @updatedAt
-
-  @@index([mentorId])
-  @@index([scheduledAt])
-}
-
-model SessionEnrollment {
-  id        String            @id @default(uuid())
-  sessionId String
-  userId    String
-  session   MentorshipSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  user      User              @relation("UserSessionEnrollments", fields: [userId], references: [id], onDelete: Cascade)
-  enrolledAt DateTime         @default(now())
-
-  @@unique([sessionId, userId])
-  @@index([sessionId])
-  @@index([userId])
 }

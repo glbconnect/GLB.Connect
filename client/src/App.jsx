@@ -16,7 +16,6 @@ import ResourceBrowse from './pages/ResourceBrowse';
 import Events from './pages/Events';
 import QAThreads from './pages/QAThreads';
 import Buzz from './pages/Buzz';
-import Mentorship from './pages/Mentorship';
 import * as api from './services/api';
 import './index.css';
 import Header from './components/layout/Header';
@@ -160,7 +159,6 @@ function AppRoutes() {
         <Route path="/events" element={<Events isLoggedIn={isLoggedIn} onLogout={handleLogout} currentUser={currentUser} />} />
         <Route path="/qa-threads" element={isLoggedIn ? <QAThreads isLoggedIn={isLoggedIn} onLogout={handleLogout} currentUser={currentUser} /> : <Navigate to="/login" />} />
         <Route path="/buzz" element={isLoggedIn ? <Buzz isLoggedIn={isLoggedIn} onLogout={handleLogout} currentUser={currentUser} /> : <Navigate to="/login" />} />
-        <Route path="/mentorship" element={isLoggedIn ? <Mentorship isLoggedIn={isLoggedIn} onLogout={handleLogout} currentUser={currentUser} /> : <Navigate to="/login" />} />
       </Routes>
     </>
   );

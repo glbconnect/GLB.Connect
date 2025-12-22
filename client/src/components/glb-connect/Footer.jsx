@@ -1,5 +1,9 @@
 import React from 'react';
-import { FaFacebook, FaTwitter, FaInstagram, FaLinkedin } from 'react-icons/fa';
+import { 
+  EnvelopeIcon, 
+  PhoneIcon,
+  MapPinIcon
+} from '@heroicons/react/24/outline';
 
 const Footer = () => {
   return (
@@ -36,15 +40,27 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Social Media */}
+          {/* Contact & Social Media */}
           <div>
-            <h4 className="font-bold text-lg text-gray-800 dark:text-white mb-4">Follow Us</h4>
-            <div className="flex justify-center md:justify-start space-x-6">
-              <a href="#" className="text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-white transition-colors"><FaFacebook size={24} /></a>
-              <a href="#" className="text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-white transition-colors"><FaTwitter size={24} /></a>
-              <a href="#" className="text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-white transition-colors"><FaInstagram size={24} /></a>
-              <a href="#" className="text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-white transition-colors"><FaLinkedin size={24} /></a>
-            </div>
+            <h4 className="font-bold text-lg text-gray-800 dark:text-white mb-4">Contact</h4>
+            <ul className="space-y-3">
+              <li className="flex items-center justify-center md:justify-start gap-2 text-gray-600 dark:text-gray-400">
+                <EnvelopeIcon className="w-5 h-5" />
+                <a href="mailto:contact@glbconnect.com" className="hover:text-blue-600 dark:hover:text-white transition-colors">
+                  contact@glbconnect.com
+                </a>
+              </li>
+              <li className="flex items-center justify-center md:justify-start gap-2 text-gray-600 dark:text-gray-400">
+                <PhoneIcon className="w-5 h-5" />
+                <a href="tel:+1234567890" className="hover:text-blue-600 dark:hover:text-white transition-colors">
+                  +1 (234) 567-890
+                </a>
+              </li>
+              <li className="flex items-center justify-center md:justify-start gap-2 text-gray-600 dark:text-gray-400">
+                <MapPinIcon className="w-5 h-5" />
+                <span>GL Bajaj Institute, Greater Noida</span>
+              </li>
+            </ul>
           </div>
         </div>
         

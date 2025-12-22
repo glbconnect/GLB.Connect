@@ -7,6 +7,7 @@ import Features from '../components/glb-connect/Features';
 import ExperiencedPeers from '../components/glb-connect/ExperiencedPeers';
 import Testimonials from '../components/glb-connect/Testimonials';
 import FeedbackSection from '../components/glb-connect/FeedbackSection';
+import Footer from '../components/glb-connect/Footer';
 
 const colleges = [
   'GL Bajaj', 
@@ -40,6 +41,7 @@ const Home = ({ isLoggedIn, onLogout }) => {
         <ExperiencedPeers />
         <Testimonials />
         <FeedbackSection />
+        <Footer />
         </div>
     </Layout>
   );

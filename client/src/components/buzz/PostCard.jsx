@@ -188,6 +188,18 @@ const PostCard = ({ post, onUpdate, currentUser, onDelete, onRepost }) => {
             src={post.image} 
             alt="Post content" 
             className="w-full h-auto object-cover"
+            onError={(e) => {
+              console.error('Failed to load image:', post.image);
+              e.target.style.display = 'none';
+              // Optionally show a placeholder
+              const parent = e.target.parentElement;
+              if (parent && !parent.querySelector('.image-error')) {
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'image-error bg-gray-100 dark:bg-gray-700 p-4 text-center text-sm text-gray-500 dark:text-gray-400';
+                errorDiv.textContent = 'Image not available';
+                parent.appendChild(errorDiv);
+              }
+            }}
           />
         </div>
       )}

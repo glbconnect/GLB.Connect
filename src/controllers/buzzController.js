@@ -96,23 +96,37 @@ export const getPosts = async (req, res) => {
     };
     const serverUrl = getServerUrl();
 
-    const postsWithStats = posts.map(post => ({
-      id: post.id,
-      content: post.content,
-      image: post.imageUrl ? `${serverUrl}${post.imageUrl}` : null,
-      user: {
-        id: post.user.id,
-        name: post.user.name,
-        avatarUrl: post.user.avatarUrl,
-        branch: post.user.branch || 'Computer Science',
-        year: post.user.year || calculateYear(post.user.batchYear)
-      },
-      likes: post.likes.length,
-      comments: post.comments.length,
-      shares: post.shares.length,
-      isLiked: userId ? post.likes.some(like => like.userId === userId) : false,
-      timestamp: post.createdAt
-    }));
+    const postsWithStats = posts.map(post => {
+      // Handle both full URLs (new) and relative paths (old posts)
+      let imageUrl = null;
+      if (post.imageUrl) {
+        if (post.imageUrl.startsWith('http://') || post.imageUrl.startsWith('https://')) {
+          // Already a full URL (new format)
+          imageUrl = post.imageUrl;
+        } else {
+          // Relative path (old format) - construct full URL
+          imageUrl = `${serverUrl}${post.imageUrl}`;
+        }
+      }
+      
+      return {
+        id: post.id,
+        content: post.content,
+        image: imageUrl,
+        user: {
+          id: post.user.id,
+          name: post.user.name,
+          avatarUrl: post.user.avatarUrl,
+          branch: post.user.branch || 'Computer Science',
+          year: post.user.year || calculateYear(post.user.batchYear)
+        },
+        likes: post.likes.length,
+        comments: post.comments.length,
+        shares: post.shares.length,
+        isLiked: userId ? post.likes.some(like => like.userId === userId) : false,
+        timestamp: post.createdAt
+      };
+    });
 
     res.json(postsWithStats);
   } catch (error) {
@@ -136,7 +150,19 @@ export const createPost = async (req, res) => {
     }
     
     const { content } = req.body;
-    const imageUrl = req.file ? `/uploads/posts/${req.file.filename}` : null;
+    
+    // Get server URL from request or environment - construct it BEFORE saving
+    const getServerUrl = () => {
+      if (process.env.SERVER_URL) return process.env.SERVER_URL;
+      if (req.protocol && req.get('host')) {
+        return `${req.protocol}://${req.get('host')}`;
+      }
+      return 'http://localhost:5000';
+    };
+    const serverUrl = getServerUrl();
+    
+    // Store FULL URL in database, not relative path
+    const imageUrl = req.file ? `${serverUrl}/uploads/posts/${req.file.filename}` : null;
 
     if (!content && !imageUrl) {
       return res.status(400).json({ error: "Post content or image is required" });
@@ -145,7 +171,7 @@ export const createPost = async (req, res) => {
     const post = await prisma.post.create({
       data: {
         content: content || "",
-        imageUrl: imageUrl,
+        imageUrl: imageUrl, // Store full URL
         userId: userId
       },
       include: {
@@ -165,20 +191,10 @@ export const createPost = async (req, res) => {
       }
     });
 
-    // Get server URL from request or environment
-    const getServerUrl = () => {
-      if (process.env.SERVER_URL) return process.env.SERVER_URL;
-      if (req.protocol && req.get('host')) {
-        return `${req.protocol}://${req.get('host')}`;
-      }
-      return 'http://localhost:5000';
-    };
-    const serverUrl = getServerUrl();
-
     const postWithStats = {
       id: post.id,
       content: post.content,
-      image: post.imageUrl ? `${serverUrl}${post.imageUrl}` : null,
+      image: post.imageUrl, // Already full URL
       user: {
         id: post.user.id,
         name: post.user.name,
@@ -376,10 +392,22 @@ export const sharePost = async (req, res) => {
     };
     const serverUrl = getServerUrl();
 
+    // Handle both full URLs (new) and relative paths (old posts)
+    let imageUrl = null;
+    if (repost.imageUrl) {
+      if (repost.imageUrl.startsWith('http://') || repost.imageUrl.startsWith('https://')) {
+        // Already a full URL (new format)
+        imageUrl = repost.imageUrl;
+      } else {
+        // Relative path (old format) - construct full URL
+        imageUrl = `${serverUrl}${repost.imageUrl}`;
+      }
+    }
+
     const repostWithStats = {
       id: repost.id,
       content: repost.content,
-      image: repost.imageUrl ? `${serverUrl}${repost.imageUrl}` : null,
+      image: imageUrl,
       user: {
         id: repost.user.id,
         name: repost.user.name,
@@ -427,9 +455,24 @@ export const deletePost = async (req, res) => {
 
     // Delete image file if exists
     if (post.imageUrl) {
-      const imagePath = path.join(process.cwd(), post.imageUrl);
-      if (fs.existsSync(imagePath)) {
-        fs.unlinkSync(imagePath);
+      try {
+        // Handle both full URLs and relative paths
+        let imagePath;
+        if (post.imageUrl.startsWith('http://') || post.imageUrl.startsWith('https://')) {
+          // Full URL - extract relative path
+          const urlParts = new URL(post.imageUrl);
+          imagePath = path.join(process.cwd(), urlParts.pathname);
+        } else {
+          // Relative path
+          imagePath = path.join(process.cwd(), post.imageUrl);
+        }
+        
+        if (fs.existsSync(imagePath)) {
+          fs.unlinkSync(imagePath);
+        }
+      } catch (error) {
+        console.error('Error deleting image file:', error);
+        // Continue even if file deletion fails
       }
     }
 
@@ -611,16 +654,25 @@ export const getStories = async (req, res) => {
     };
     const serverUrl = getServerUrl();
 
-    const formatted = stories.map(story => ({
-      id: story.id,
-      user: {
-        id: story.user.id,
-        name: story.user.name,
-        avatarUrl: story.user.avatarUrl
-      },
-      imageUrl: story.imageUrl.startsWith('http') ? story.imageUrl : `${serverUrl}${story.imageUrl}`,
-      createdAt: story.createdAt
-    }));
+    const formatted = stories.map(story => {
+      // Handle both full URLs (new) and relative paths (old stories)
+      let imageUrl = story.imageUrl;
+      if (imageUrl && !imageUrl.startsWith('http://') && !imageUrl.startsWith('https://')) {
+        // Relative path (old format) - construct full URL
+        imageUrl = `${serverUrl}${story.imageUrl}`;
+      }
+      
+      return {
+        id: story.id,
+        user: {
+          id: story.user.id,
+          name: story.user.name,
+          avatarUrl: story.user.avatarUrl
+        },
+        imageUrl: imageUrl,
+        createdAt: story.createdAt
+      };
+    });
 
     res.json(formatted);
   } catch (error) {
@@ -666,13 +718,24 @@ export const createStory = async (req, res) => {
       return res.status(400).json({ error: "Story image is required" });
     }
 
-    const imageUrl = `/uploads/stories/${req.file.filename}`;
+    // Get server URL from request or environment - construct it BEFORE saving
+    const getServerUrl = () => {
+      if (process.env.SERVER_URL) return process.env.SERVER_URL;
+      if (req.protocol && req.get('host')) {
+        return `${req.protocol}://${req.get('host')}`;
+      }
+      return 'http://localhost:5000';
+    };
+    const serverUrl = getServerUrl();
+    
+    // Store FULL URL in database, not relative path
+    const imageUrl = `${serverUrl}/uploads/stories/${req.file.filename}`;
     const expiresAt = new Date();
     expiresAt.setHours(expiresAt.getHours() + 24); // Stories expire after 24 hours
 
     const story = await prisma.story.create({
       data: {
-        imageUrl: imageUrl,
+        imageUrl: imageUrl, // Store full URL
         userId: userId,
         expiresAt: expiresAt
       },
@@ -687,20 +750,11 @@ export const createStory = async (req, res) => {
       }
     });
 
-    // Get server URL from request or environment
-    const getServerUrl = () => {
-      if (process.env.SERVER_URL) return process.env.SERVER_URL;
-      if (req.protocol && req.get('host')) {
-        return `${req.protocol}://${req.get('host')}`;
-      }
-      return 'http://localhost:5000';
-    };
-    const serverUrl = getServerUrl();
-
     res.status(201).json({
       id: story.id,
       user: story.user,
-      imageUrl: story.imageUrl.startsWith('http') ? story.imageUrl : `${serverUrl}${story.imageUrl}`
+      imageUrl: story.imageUrl, // Already full URL
+      createdAt: story.createdAt
     });
   } catch (error) {
     console.error("Error creating story:", error);

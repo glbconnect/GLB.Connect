@@ -13,6 +13,7 @@ import resourceRouter from './src/routes/resourceRoutes.js';
 import { initializeSocket } from './src/sockets/chatSocket.js';
 import anonymousMessageRouter from './src/routes/anonymousMessageRoutes.js';
 import eventRouter from './src/routes/eventRoutes.js';
+import buzzRouter from './src/routes/buzzRoutes.js';
 import multer from 'multer';
 import fs from 'fs';
 
@@ -54,6 +55,7 @@ app.use('/api/jobs', jobRouter);
 app.use('/api/resources', resourceRouter);
 app.use('/api/anonymous-messages', anonymousMessageRouter);
 app.use('/api/events', eventRouter);
+app.use('/api/buzz', buzzRouter);
 
 app.get('/api/health', (req, res) => {
   res.status(200).send('OK');

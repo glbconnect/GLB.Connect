@@ -250,4 +250,78 @@ export const getAllConversations = async () => {
   return response.data;
 };
 
+// Buzz API calls
+export const getBuzzPosts = async () => {
+  const response = await api.get('/buzz/posts');
+  return response.data;
+};
+
+export const createBuzzPost = async (formData) => {
+  const response = await api.post('/buzz/posts', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  });
+  return response.data;
+};
+
+export const togglePostLike = async (postId) => {
+  const response = await api.post(`/buzz/posts/${postId}/like`);
+  return response.data;
+};
+
+export const addPostComment = async (postId, content) => {
+  const response = await api.post(`/buzz/posts/${postId}/comment`, { content });
+  return response.data;
+};
+
+export const getPostComments = async (postId) => {
+  const response = await api.get(`/buzz/posts/${postId}/comments`);
+  return response.data;
+};
+
+export const shareBuzzPost = async (postId) => {
+  const response = await api.post(`/buzz/posts/${postId}/share`);
+  return response.data;
+};
+
+export const getBuzzUserStats = async () => {
+  const response = await api.get('/buzz/stats');
+  return response.data;
+};
+
+export const getSuggestedStudents = async () => {
+  const response = await api.get('/buzz/suggestions');
+  return response.data;
+};
+
+export const getTopContributors = async () => {
+  const response = await api.get('/buzz/top-contributors');
+  return response.data;
+};
+
+export const getTrendingPosts = async () => {
+  const response = await api.get('/buzz/trending');
+  return response.data;
+};
+
+export const getBuzzStories = async () => {
+  const response = await api.get('/buzz/stories');
+  return response.data;
+};
+
+export const createBuzzStory = async (formData) => {
+  const response = await api.post('/buzz/stories', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  });
+  return response.data;
+};
+
+export const toggleFollowUser = async (userId) => {
+  const response = await api.post(`/buzz/users/${userId}/follow`);
+  return response.data;
+};
+
 export default api; 

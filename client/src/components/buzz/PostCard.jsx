@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import UserAvatar from '../ui/UserAvatar';
 import { 
   HeartIcon, 
@@ -7,15 +7,69 @@ import {
   EllipsisHorizontalIcon
 } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid';
+import { togglePostLike, addPostComment, getPostComments, shareBuzzPost } from '../../services/api';
 
-const PostCard = ({ post }) => {
+const PostCard = ({ post, onUpdate }) => {
   const [isLiked, setIsLiked] = useState(post.isLiked || false);
   const [likesCount, setLikesCount] = useState(post.likes || 0);
+  const [commentsCount, setCommentsCount] = useState(post.comments || 0);
   const [showComments, setShowComments] = useState(false);
+  const [comments, setComments] = useState([]);
+  const [commentText, setCommentText] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleLike = () => {
-    setIsLiked(!isLiked);
-    setLikesCount(prev => isLiked ? prev - 1 : prev + 1);
+  useEffect(() => {
+    if (showComments && comments.length === 0) {
+      loadComments();
+    }
+  }, [showComments]);
+
+  const loadComments = async () => {
+    try {
+      const commentsData = await getPostComments(post.id);
+      setComments(commentsData);
+    } catch (error) {
+      console.error('Error loading comments:', error);
+    }
+  };
+
+  const handleLike = async () => {
+    try {
+      const result = await togglePostLike(post.id);
+      setIsLiked(result.liked);
+      setLikesCount(prev => result.liked ? prev + 1 : prev - 1);
+      if (onUpdate) onUpdate();
+    } catch (error) {
+      console.error('Error toggling like:', error);
+    }
+  };
+
+  const handleCommentSubmit = async (e) => {
+    e.preventDefault();
+    if (!commentText.trim() || isSubmitting) return;
+
+    try {
+      setIsSubmitting(true);
+      const newComment = await addPostComment(post.id, commentText);
+      setComments([newComment, ...comments]);
+      setCommentsCount(prev => prev + 1);
+      setCommentText('');
+      if (onUpdate) onUpdate();
+    } catch (error) {
+      console.error('Error adding comment:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleShare = async () => {
+    try {
+      await shareBuzzPost(post.id);
+      if (onUpdate) onUpdate();
+      // You could show a toast notification here
+    } catch (error) {
+      console.error('Error sharing post:', error);
+    }
   };
 
   const formatTimestamp = (timestamp) => {
@@ -78,8 +132,8 @@ const PostCard = ({ post }) => {
           {likesCount > 0 && (
             <span>{likesCount} {likesCount === 1 ? 'like' : 'likes'}</span>
           )}
-          {post.comments > 0 && (
-            <span>{post.comments} {post.comments === 1 ? 'comment' : 'comments'}</span>
+          {commentsCount > 0 && (
+            <span>{commentsCount} {commentsCount === 1 ? 'comment' : 'comments'}</span>
           )}
         </div>
       </div>
@@ -110,7 +164,10 @@ const PostCard = ({ post }) => {
           <span className="font-medium">Comment</span>
         </button>
         
-        <button className="flex items-center gap-2 px-4 py-2 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+        <button 
+          onClick={handleShare}
+          className="flex items-center gap-2 px-4 py-2 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+        >
           <ShareIcon className="w-5 h-5" />
           <span className="font-medium">Share</span>
         </button>
@@ -119,16 +176,51 @@ const PostCard = ({ post }) => {
       {/* Comments Section */}
       {showComments && (
         <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-          <div className="flex gap-3">
+          {/* Existing Comments */}
+          {comments.length > 0 && (
+            <div className="mb-4 space-y-3 max-h-64 overflow-y-auto">
+              {comments.map((comment) => (
+                <div key={comment.id} className="flex gap-3">
+                  <UserAvatar user={comment.user} size="sm" />
+                  <div className="flex-1">
+                    <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-2">
+                      <p className="text-sm font-medium text-gray-900 dark:text-white">
+                        {comment.user.name}
+                      </p>
+                      <p className="text-sm text-gray-700 dark:text-gray-300 mt-1">
+                        {comment.content}
+                      </p>
+                    </div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      {formatTimestamp(comment.createdAt)}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Comment Input */}
+          <form onSubmit={handleCommentSubmit} className="flex gap-3">
             <UserAvatar user={{ name: 'You' }} size="sm" />
             <div className="flex-1">
               <input
                 type="text"
+                value={commentText}
+                onChange={(e) => setCommentText(e.target.value)}
                 placeholder="Write a comment..."
                 className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                disabled={isSubmitting}
               />
             </div>
-          </div>
+            <button
+              type="submit"
+              disabled={!commentText.trim() || isSubmitting}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Post
+            </button>
+          </form>
         </div>
       )}
     </div>
@@ -136,4 +228,3 @@ const PostCard = ({ post }) => {
 };
 
 export default PostCard;
-

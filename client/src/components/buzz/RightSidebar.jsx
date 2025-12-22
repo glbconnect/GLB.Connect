@@ -1,9 +1,24 @@
-import React from 'react';
+import React, { useState } from 'react';
 import UserAvatar from '../ui/UserAvatar';
 import { Link } from 'react-router-dom';
 import { ArrowRightIcon, FireIcon } from '@heroicons/react/24/outline';
+import { toggleFollowUser } from '../../services/api';
 
 const RightSidebar = ({ suggestedStudents, topContributors, trendingPosts }) => {
+  const [followingStates, setFollowingStates] = useState({});
+
+  const handleFollow = async (studentId) => {
+    try {
+      const result = await toggleFollowUser(studentId);
+      setFollowingStates(prev => ({
+        ...prev,
+        [studentId]: result.following
+      }));
+    } catch (error) {
+      console.error('Error toggling follow:', error);
+    }
+  };
+
   return (
     <div className="hidden xl:block w-80 space-y-4">
       {/* Suggested Students */}
@@ -12,8 +27,8 @@ const RightSidebar = ({ suggestedStudents, topContributors, trendingPosts }) => 
           Suggested Students
         </h3>
         <div className="space-y-3">
-          {suggestedStudents?.slice(0, 5).map((student, index) => (
-            <div key={index} className="flex items-center justify-between">
+          {suggestedStudents?.slice(0, 5).map((student) => (
+            <div key={student.id} className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <UserAvatar user={student} size="md" />
                 <div>
@@ -25,8 +40,15 @@ const RightSidebar = ({ suggestedStudents, topContributors, trendingPosts }) => 
                   </p>
                 </div>
               </div>
-              <button className="text-blue-600 dark:text-blue-400 hover:underline text-sm font-medium">
-                Follow
+              <button 
+                onClick={() => handleFollow(student.id)}
+                className={`text-sm font-medium transition-colors ${
+                  followingStates[student.id]
+                    ? 'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
+                    : 'text-blue-600 dark:text-blue-400 hover:underline'
+                }`}
+              >
+                {followingStates[student.id] ? 'Following' : 'Follow'}
               </button>
             </div>
           ))}

@@ -21,6 +21,8 @@ model User {
   password  String
   avatarUrl String?   
   batchYear Int       @default(2020) 
+  branch    String?
+  year      String?
   skills    String?   
   messagesSent     Message[] @relation("SenderMessages")
   messagesReceived Message[] @relation("ReceiverMessages")
@@ -28,6 +30,13 @@ model User {
   resources        Resource[]
   eventsOrganized  Event[]   @relation("EventOrganizer")
   eventRegistrations EventRegistration[]
+  posts            Post[]
+  postLikes         PostLike[]
+  comments         Comment[]
+  shares           Share[]
+  stories          Story[]
+  followers        Follow[] @relation("UserFollowers")
+  following        Follow[] @relation("UserFollowing")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -166,4 +175,84 @@ model EventRegistration {
   registeredAt DateTime @default(now())
 
   @@unique([eventId, userId])
+}
+
+model Post {
+  id        String   @id @default(uuid())
+  content   String
+  imageUrl  String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  likes     PostLike[]
+  comments  Comment[]
+  shares    Share[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model PostLike {
+  id        String   @id @default(uuid())
+  postId    String
+  userId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([postId, userId])
+  @@index([postId])
+  @@index([userId])
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  content   String
+  postId    String
+  userId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([postId])
+  @@index([userId])
+}
+
+model Share {
+  id        String   @id @default(uuid())
+  postId    String
+  userId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([postId])
+  @@index([userId])
+}
+
+model Story {
+  id        String   @id @default(uuid())
+  imageUrl  String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model Follow {
+  id        String   @id @default(uuid())
+  followerId String
+  followingId String
+  follower  User     @relation("UserFollowers", fields: [followerId], references: [id], onDelete: Cascade)
+  following User     @relation("UserFollowing", fields: [followingId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([followerId, followingId])
+  @@index([followerId])
+  @@index([followingId])
 }

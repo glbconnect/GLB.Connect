@@ -7,6 +7,7 @@ import { FiBell } from 'react-icons/fi';
 
 const navLinks = [
   { to: '/', label: 'Home', public: true },
+  { to: '/buzz', label: 'Buzz' },
   { to: '/jobs', label: 'Jobs' },
   { to: '/events', label: 'Events' },
   { to: '/messages', label: 'Messages' },

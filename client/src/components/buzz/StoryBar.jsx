@@ -3,13 +3,19 @@ import UserAvatar from '../ui/UserAvatar';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import StoryUploadModal from './StoryUploadModal';
 
-const StoryBar = ({ stories, currentUser, onStoryCreated }) => {
+const StoryBar = ({ stories, currentUser, onStoryCreated, onStoryClick }) => {
   const [showStoryModal, setShowStoryModal] = useState(false);
 
   const handleStoryCreated = () => {
     setShowStoryModal(false);
     if (onStoryCreated) {
       onStoryCreated();
+    }
+  };
+
+  const handleStoryClick = (storyIndex) => {
+    if (onStoryClick) {
+      onStoryClick(storyIndex);
     }
   };
 
@@ -36,7 +42,8 @@ const StoryBar = ({ stories, currentUser, onStoryCreated }) => {
         {/* Stories */}
         {stories.map((story, index) => (
           <div
-            key={index}
+            key={story.id || index}
+            onClick={() => handleStoryClick(index)}
             className="flex flex-col items-center gap-2 min-w-[80px] cursor-pointer hover:opacity-80 transition-opacity"
           >
             <div className="relative">

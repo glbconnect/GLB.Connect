@@ -618,7 +618,8 @@ export const getStories = async (req, res) => {
         name: story.user.name,
         avatarUrl: story.user.avatarUrl
       },
-      imageUrl: story.imageUrl.startsWith('http') ? story.imageUrl : `${serverUrl}${story.imageUrl}`
+      imageUrl: story.imageUrl.startsWith('http') ? story.imageUrl : `${serverUrl}${story.imageUrl}`,
+      createdAt: story.createdAt
     }));
 
     res.json(formatted);

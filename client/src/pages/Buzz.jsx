@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Layout from '../components/layout/Layout';
 import PostCard from '../components/buzz/PostCard';
 import StoryBar from '../components/buzz/StoryBar';
+import StoryViewer from '../components/buzz/StoryViewer';
 import CreatePost from '../components/buzz/CreatePost';
 import LeftSidebar from '../components/buzz/LeftSidebar';
 import RightSidebar from '../components/buzz/RightSidebar';
@@ -24,6 +25,8 @@ const Buzz = ({ isLoggedIn, onLogout, currentUser }) => {
   const [userStats, setUserStats] = useState({ posts: 0, followers: 0, following: 0 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [showStoryViewer, setShowStoryViewer] = useState(false);
+  const [selectedStoryIndex, setSelectedStoryIndex] = useState(0);
 
   // Default current user if not provided
   const defaultUser = {
@@ -115,6 +118,15 @@ const Buzz = ({ isLoggedIn, onLogout, currentUser }) => {
     getBuzzUserStats().then(setUserStats).catch(console.error);
   };
 
+  const handleStoryClick = (storyIndex) => {
+    setSelectedStoryIndex(storyIndex);
+    setShowStoryViewer(true);
+  };
+
+  const handleCloseStoryViewer = () => {
+    setShowStoryViewer(false);
+  };
+
   if (loading) {
     return (
       <Layout isLoggedIn={isLoggedIn} onLogout={onLogout}>
@@ -150,6 +162,7 @@ const Buzz = ({ isLoggedIn, onLogout, currentUser }) => {
                 onStoryCreated={() => {
                   getBuzzStories().then(setStories).catch(console.error);
                 }}
+                onStoryClick={handleStoryClick}
               />
 
               {/* Create Post */}
@@ -185,6 +198,15 @@ const Buzz = ({ isLoggedIn, onLogout, currentUser }) => {
           </div>
         </div>
       </div>
+
+      {/* Story Viewer */}
+      {showStoryViewer && stories.length > 0 && (
+        <StoryViewer
+          stories={stories}
+          initialIndex={selectedStoryIndex}
+          onClose={handleCloseStoryViewer}
+        />
+      )}
     </Layout>
   );
 };

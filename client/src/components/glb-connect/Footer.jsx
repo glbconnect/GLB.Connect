@@ -47,13 +47,13 @@ const Footer = () => {
               <li className="flex items-center justify-center md:justify-start gap-2 text-gray-600 dark:text-gray-400">
                 <EnvelopeIcon className="w-5 h-5" />
                 <a href="mailto:contact@glbconnect.com" className="hover:text-blue-600 dark:hover:text-white transition-colors">
-                  contact@glbconnect.com
+                  glb.connect@gmail.com
                 </a>
               </li>
               <li className="flex items-center justify-center md:justify-start gap-2 text-gray-600 dark:text-gray-400">
                 <PhoneIcon className="w-5 h-5" />
                 <a href="tel:+1234567890" className="hover:text-blue-600 dark:hover:text-white transition-colors">
-                  +1 (234) 567-890
+                  +91-8933805699
                 </a>
               </li>
               <li className="flex items-center justify-center md:justify-start gap-2 text-gray-600 dark:text-gray-400">

@@ -6,6 +6,7 @@ import HeroSection from '../components/glb-connect/HeroSection';
 import Features from '../components/glb-connect/Features';
 import ExperiencedPeers from '../components/glb-connect/ExperiencedPeers';
 import Testimonials from '../components/glb-connect/Testimonials';
+import UpcomingFeatures from '../components/glb-connect/UpcomingFeatures';
 import FeedbackSection from '../components/glb-connect/FeedbackSection';
 import Footer from '../components/glb-connect/Footer';
 
@@ -40,6 +41,7 @@ const Home = ({ isLoggedIn, onLogout }) => {
         <Features />
         <ExperiencedPeers />
         <Testimonials />
+        <UpcomingFeatures />
         <FeedbackSection />
         <Footer />
         </div>

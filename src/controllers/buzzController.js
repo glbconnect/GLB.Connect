@@ -2,6 +2,7 @@ import { PrismaClient } from "@prisma/client";
 import path from "path";
 import multer from "multer";
 import fs from "fs";
+import { uploadToCloudinary, deleteFromCloudinary, isCloudinaryConfigured } from "../utils/cloudinary.js";
 
 const prisma = new PrismaClient();
 
@@ -150,19 +151,46 @@ export const createPost = async (req, res) => {
     }
     
     const { content } = req.body;
-    
-    // Get server URL from request or environment - construct it BEFORE saving
-    const getServerUrl = () => {
-      if (process.env.SERVER_URL) return process.env.SERVER_URL;
-      if (req.protocol && req.get('host')) {
-        return `${req.protocol}://${req.get('host')}`;
+    let imageUrl = null;
+
+    // Handle image upload - Cloudinary or local storage
+    if (req.file) {
+      if (isCloudinaryConfigured()) {
+        // Upload to Cloudinary
+        try {
+          const fileBuffer = fs.readFileSync(req.file.path);
+          const publicId = `post-${userId}-${Date.now()}`;
+          const uploadResult = await uploadToCloudinary(fileBuffer, 'posts', publicId);
+          imageUrl = uploadResult.url;
+          
+          // Delete local file after Cloudinary upload
+          fs.unlinkSync(req.file.path);
+        } catch (cloudinaryError) {
+          console.error('Cloudinary upload failed, falling back to local storage:', cloudinaryError);
+          // Fallback to local storage
+          const getServerUrl = () => {
+            if (process.env.SERVER_URL) return process.env.SERVER_URL;
+            if (req.protocol && req.get('host')) {
+              return `${req.protocol}://${req.get('host')}`;
+            }
+            return 'http://localhost:5000';
+          };
+          const serverUrl = getServerUrl();
+          imageUrl = `${serverUrl}/uploads/posts/${req.file.filename}`;
+        }
+      } else {
+        // Use local storage
+        const getServerUrl = () => {
+          if (process.env.SERVER_URL) return process.env.SERVER_URL;
+          if (req.protocol && req.get('host')) {
+            return `${req.protocol}://${req.get('host')}`;
+          }
+          return 'http://localhost:5000';
+        };
+        const serverUrl = getServerUrl();
+        imageUrl = `${serverUrl}/uploads/posts/${req.file.filename}`;
       }
-      return 'http://localhost:5000';
-    };
-    const serverUrl = getServerUrl();
-    
-    // Store FULL URL in database, not relative path
-    const imageUrl = req.file ? `${serverUrl}/uploads/posts/${req.file.filename}` : null;
+    }
 
     if (!content && !imageUrl) {
       return res.status(400).json({ error: "Post content or image is required" });
@@ -171,7 +199,7 @@ export const createPost = async (req, res) => {
     const post = await prisma.post.create({
       data: {
         content: content || "",
-        imageUrl: imageUrl, // Store full URL
+        imageUrl: imageUrl, // Store full URL (Cloudinary or local)
         userId: userId
       },
       include: {
@@ -456,19 +484,25 @@ export const deletePost = async (req, res) => {
     // Delete image file if exists
     if (post.imageUrl) {
       try {
-        // Handle both full URLs and relative paths
-        let imagePath;
-        if (post.imageUrl.startsWith('http://') || post.imageUrl.startsWith('https://')) {
-          // Full URL - extract relative path
-          const urlParts = new URL(post.imageUrl);
-          imagePath = path.join(process.cwd(), urlParts.pathname);
+        // Check if it's a Cloudinary URL
+        if (post.imageUrl.includes('cloudinary.com')) {
+          // Delete from Cloudinary
+          await deleteFromCloudinary(post.imageUrl);
         } else {
-          // Relative path
-          imagePath = path.join(process.cwd(), post.imageUrl);
-        }
-        
-        if (fs.existsSync(imagePath)) {
-          fs.unlinkSync(imagePath);
+          // Delete from local storage
+          let imagePath;
+          if (post.imageUrl.startsWith('http://') || post.imageUrl.startsWith('https://')) {
+            // Full URL - extract relative path
+            const urlParts = new URL(post.imageUrl);
+            imagePath = path.join(process.cwd(), urlParts.pathname);
+          } else {
+            // Relative path
+            imagePath = path.join(process.cwd(), post.imageUrl);
+          }
+          
+          if (fs.existsSync(imagePath)) {
+            fs.unlinkSync(imagePath);
+          }
         }
       } catch (error) {
         console.error('Error deleting image file:', error);
@@ -718,24 +752,51 @@ export const createStory = async (req, res) => {
       return res.status(400).json({ error: "Story image is required" });
     }
 
-    // Get server URL from request or environment - construct it BEFORE saving
-    const getServerUrl = () => {
-      if (process.env.SERVER_URL) return process.env.SERVER_URL;
-      if (req.protocol && req.get('host')) {
-        return `${req.protocol}://${req.get('host')}`;
+    let imageUrl = null;
+
+    // Handle image upload - Cloudinary or local storage
+    if (isCloudinaryConfigured()) {
+      // Upload to Cloudinary
+      try {
+        const fileBuffer = fs.readFileSync(req.file.path);
+        const publicId = `story-${userId}-${Date.now()}`;
+        const uploadResult = await uploadToCloudinary(fileBuffer, 'stories', publicId);
+        imageUrl = uploadResult.url;
+        
+        // Delete local file after Cloudinary upload
+        fs.unlinkSync(req.file.path);
+      } catch (cloudinaryError) {
+        console.error('Cloudinary upload failed, falling back to local storage:', cloudinaryError);
+        // Fallback to local storage
+        const getServerUrl = () => {
+          if (process.env.SERVER_URL) return process.env.SERVER_URL;
+          if (req.protocol && req.get('host')) {
+            return `${req.protocol}://${req.get('host')}`;
+          }
+          return 'http://localhost:5000';
+        };
+        const serverUrl = getServerUrl();
+        imageUrl = `${serverUrl}/uploads/stories/${req.file.filename}`;
       }
-      return 'http://localhost:5000';
-    };
-    const serverUrl = getServerUrl();
-    
-    // Store FULL URL in database, not relative path
-    const imageUrl = `${serverUrl}/uploads/stories/${req.file.filename}`;
+    } else {
+      // Use local storage
+      const getServerUrl = () => {
+        if (process.env.SERVER_URL) return process.env.SERVER_URL;
+        if (req.protocol && req.get('host')) {
+          return `${req.protocol}://${req.get('host')}`;
+        }
+        return 'http://localhost:5000';
+      };
+      const serverUrl = getServerUrl();
+      imageUrl = `${serverUrl}/uploads/stories/${req.file.filename}`;
+    }
+
     const expiresAt = new Date();
     expiresAt.setHours(expiresAt.getHours() + 24); // Stories expire after 24 hours
 
     const story = await prisma.story.create({
       data: {
-        imageUrl: imageUrl, // Store full URL
+        imageUrl: imageUrl, // Store full URL (Cloudinary or local)
         userId: userId,
         expiresAt: expiresAt
       },

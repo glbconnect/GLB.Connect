@@ -1,15 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import UserAvatar from '../ui/UserAvatar';
 import { 
   HeartIcon, 
   ChatBubbleLeftIcon, 
-  ShareIcon,
-  EllipsisHorizontalIcon
+  ArrowPathIcon,
+  EllipsisHorizontalIcon,
+  TrashIcon
 } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid';
-import { togglePostLike, addPostComment, getPostComments, shareBuzzPost } from '../../services/api';
+import { togglePostLike, addPostComment, getPostComments, repostBuzzPost, deleteBuzzPost } from '../../services/api';
 
-const PostCard = ({ post, onUpdate }) => {
+const PostCard = ({ post, onUpdate, currentUser, onDelete, onRepost }) => {
   const [isLiked, setIsLiked] = useState(post.isLiked || false);
   const [likesCount, setLikesCount] = useState(post.likes || 0);
   const [commentsCount, setCommentsCount] = useState(post.comments || 0);
@@ -17,12 +18,32 @@ const PostCard = ({ post, onUpdate }) => {
   const [comments, setComments] = useState([]);
   const [commentText, setCommentText] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const menuRef = useRef(null);
 
   useEffect(() => {
     if (showComments && comments.length === 0) {
       loadComments();
     }
   }, [showComments]);
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setShowMenu(false);
+      }
+    };
+
+    if (showMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showMenu]);
 
   const loadComments = async () => {
     try {
@@ -62,13 +83,37 @@ const PostCard = ({ post, onUpdate }) => {
     }
   };
 
-  const handleShare = async () => {
+  const handleRepost = async () => {
     try {
-      await shareBuzzPost(post.id);
+      const repostedPost = await repostBuzzPost(post.id);
+      if (onRepost) {
+        onRepost(repostedPost);
+      }
       if (onUpdate) onUpdate();
-      // You could show a toast notification here
     } catch (error) {
-      console.error('Error sharing post:', error);
+      console.error('Error reposting:', error);
+      alert('Failed to repost. Please try again.');
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!window.confirm('Are you sure you want to delete this post?')) {
+      return;
+    }
+
+    try {
+      setIsDeleting(true);
+      await deleteBuzzPost(post.id);
+      if (onDelete) {
+        onDelete(post.id);
+      }
+      if (onUpdate) onUpdate();
+    } catch (error) {
+      console.error('Error deleting post:', error);
+      alert('Failed to delete post. Please try again.');
+    } finally {
+      setIsDeleting(false);
+      setShowMenu(false);
     }
   };
 
@@ -83,6 +128,8 @@ const PostCard = ({ post, onUpdate }) => {
     if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d ago`;
     return postDate.toLocaleDateString();
   };
+
+  const isOwnPost = currentUser?.id === post.user?.id;
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 mb-4">
@@ -103,9 +150,28 @@ const PostCard = ({ post, onUpdate }) => {
             </div>
           </div>
         </div>
-        <button className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-          <EllipsisHorizontalIcon className="w-5 h-5" />
-        </button>
+        <div className="relative" ref={menuRef}>
+          <button 
+            onClick={() => setShowMenu(!showMenu)}
+            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+          >
+            <EllipsisHorizontalIcon className="w-5 h-5" />
+          </button>
+          {showMenu && (
+            <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-10">
+              {isOwnPost && (
+                <button
+                  onClick={handleDelete}
+                  disabled={isDeleting}
+                  className="w-full text-left px-4 py-2 text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 disabled:opacity-50 rounded-t-lg"
+                >
+                  <TrashIcon className="w-4 h-4" />
+                  {isDeleting ? 'Deleting...' : 'Delete Post'}
+                </button>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Post Content */}
@@ -165,11 +231,11 @@ const PostCard = ({ post, onUpdate }) => {
         </button>
         
         <button 
-          onClick={handleShare}
+          onClick={handleRepost}
           className="flex items-center gap-2 px-4 py-2 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
         >
-          <ShareIcon className="w-5 h-5" />
-          <span className="font-medium">Share</span>
+          <ArrowPathIcon className="w-5 h-5" />
+          <span className="font-medium">Repost</span>
         </button>
       </div>
 

@@ -54,7 +54,7 @@ const RightSidebar = ({ suggestedStudents, topContributors, trendingPosts }) => 
           ))}
         </div>
         <Link
-          to="#"
+          to="/qa-threads"
           className="flex items-center justify-center gap-2 mt-4 text-blue-600 dark:text-blue-400 hover:underline text-sm font-medium"
         >
           See all

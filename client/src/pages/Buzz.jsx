@@ -98,8 +98,21 @@ const Buzz = ({ isLoggedIn, onLogout, currentUser }) => {
   };
 
   const handlePostUpdate = () => {
-    // Refresh posts when a post is liked/commented/shared
+    // Refresh posts when a post is liked/commented/reposted
     getBuzzPosts().then(setPosts).catch(console.error);
+  };
+
+  const handlePostDelete = (postId) => {
+    setPosts(posts.filter(p => p.id !== postId));
+    // Refresh stats
+    getBuzzUserStats().then(setUserStats).catch(console.error);
+  };
+
+  const handleRepostSuccess = (repostedPost) => {
+    // Add the reposted post to the top of the feed
+    setPosts([repostedPost, ...posts]);
+    // Refresh stats
+    getBuzzUserStats().then(setUserStats).catch(console.error);
   };
 
   if (loading) {
@@ -131,7 +144,13 @@ const Buzz = ({ isLoggedIn, onLogout, currentUser }) => {
             {/* Main Feed */}
             <div className="flex-1 max-w-2xl">
               {/* Story Bar */}
-              <StoryBar stories={stories} currentUser={defaultUser} />
+              <StoryBar 
+                stories={stories} 
+                currentUser={defaultUser}
+                onStoryCreated={() => {
+                  getBuzzStories().then(setStories).catch(console.error);
+                }}
+              />
 
               {/* Create Post */}
               <CreatePost currentUser={defaultUser} onCreatePost={handleCreatePost} />
@@ -144,7 +163,14 @@ const Buzz = ({ isLoggedIn, onLogout, currentUser }) => {
                   </div>
                 ) : (
                   posts.map((post) => (
-                    <PostCard key={post.id} post={post} onUpdate={handlePostUpdate} />
+                    <PostCard 
+                      key={post.id} 
+                      post={post} 
+                      onUpdate={handlePostUpdate}
+                      currentUser={defaultUser}
+                      onDelete={handlePostDelete}
+                      onRepost={handleRepostSuccess}
+                    />
                   ))
                 )}
               </div>

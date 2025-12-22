@@ -307,23 +307,136 @@ export const getComments = async (req, res) => {
   }
 };
 
-// Share a post
+// Share a post (now used for repost)
 export const sharePost = async (req, res) => {
   try {
     const userId = req.user.id;
     const { postId } = req.params;
 
-    const share = await prisma.share.create({
+    // Get the original post
+    const originalPost = await prisma.post.findUnique({
+      where: { id: postId },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            avatarUrl: true,
+            branch: true,
+            year: true,
+            batchYear: true
+          }
+        }
+      }
+    });
+
+    if (!originalPost) {
+      return res.status(404).json({ error: "Post not found" });
+    }
+
+    // Create a repost (new post with reference to original)
+    const repost = await prisma.post.create({
+      data: {
+        content: `Reposted from ${originalPost.user.name}\n\n${originalPost.content}`,
+        imageUrl: originalPost.imageUrl,
+        userId: userId
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            avatarUrl: true,
+            branch: true,
+            year: true,
+            batchYear: true
+          }
+        },
+        likes: true,
+        comments: true,
+        shares: true
+      }
+    });
+
+    // Also create a share record
+    await prisma.share.create({
       data: {
         postId: postId,
         userId: userId
       }
     });
 
-    res.status(201).json(share);
+    // Get server URL
+    const getServerUrl = () => {
+      if (process.env.SERVER_URL) return process.env.SERVER_URL;
+      if (req.protocol && req.get('host')) {
+        return `${req.protocol}://${req.get('host')}`;
+      }
+      return 'http://localhost:5000';
+    };
+    const serverUrl = getServerUrl();
+
+    const repostWithStats = {
+      id: repost.id,
+      content: repost.content,
+      image: repost.imageUrl ? `${serverUrl}${repost.imageUrl}` : null,
+      user: {
+        id: repost.user.id,
+        name: repost.user.name,
+        avatarUrl: repost.user.avatarUrl,
+        branch: repost.user.branch || 'Computer Science',
+        year: repost.user.year || calculateYear(repost.user.batchYear)
+      },
+      likes: 0,
+      comments: 0,
+      shares: 0,
+      isLiked: false,
+      timestamp: repost.createdAt
+    };
+
+    res.status(201).json(repostWithStats);
   } catch (error) {
-    console.error("Error sharing post:", error);
-    res.status(500).json({ error: "Failed to share post" });
+    console.error("Error reposting:", error);
+    res.status(500).json({ error: "Failed to repost" });
+  }
+};
+
+// Delete a post
+export const deletePost = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { postId } = req.params;
+
+    // Check if post exists and belongs to user
+    const post = await prisma.post.findUnique({
+      where: { id: postId }
+    });
+
+    if (!post) {
+      return res.status(404).json({ error: "Post not found" });
+    }
+
+    if (post.userId !== userId) {
+      return res.status(403).json({ error: "You can only delete your own posts" });
+    }
+
+    // Delete the post (cascade will delete likes, comments, shares)
+    await prisma.post.delete({
+      where: { id: postId }
+    });
+
+    // Delete image file if exists
+    if (post.imageUrl) {
+      const imagePath = path.join(process.cwd(), post.imageUrl);
+      if (fs.existsSync(imagePath)) {
+        fs.unlinkSync(imagePath);
+      }
+    }
+
+    res.json({ success: true, message: "Post deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting post:", error);
+    res.status(500).json({ error: "Failed to delete post" });
   }
 };
 

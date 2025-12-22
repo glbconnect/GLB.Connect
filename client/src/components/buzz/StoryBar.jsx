@@ -1,13 +1,27 @@
-import React from 'react';
+import React, { useState } from 'react';
 import UserAvatar from '../ui/UserAvatar';
 import { PlusIcon } from '@heroicons/react/24/outline';
+import StoryUploadModal from './StoryUploadModal';
 
-const StoryBar = ({ stories, currentUser }) => {
+const StoryBar = ({ stories, currentUser, onStoryCreated }) => {
+  const [showStoryModal, setShowStoryModal] = useState(false);
+
+  const handleStoryCreated = () => {
+    setShowStoryModal(false);
+    if (onStoryCreated) {
+      onStoryCreated();
+    }
+  };
+
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 mb-4">
-      <div className="flex items-center gap-4 overflow-x-auto scrollbar-hide pb-2">
+    <>
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 mb-4">
+        <div className="flex items-center gap-4 overflow-x-auto scrollbar-hide pb-2">
         {/* Create Story */}
-        <div className="flex flex-col items-center gap-2 min-w-[80px] cursor-pointer">
+        <div 
+          onClick={() => setShowStoryModal(true)}
+          className="flex flex-col items-center gap-2 min-w-[80px] cursor-pointer hover:opacity-80 transition-opacity"
+        >
           <div className="relative">
             <UserAvatar user={currentUser} size="lg" />
             <div className="absolute bottom-0 right-0 bg-blue-600 rounded-full p-1.5 border-2 border-white dark:border-gray-800">
@@ -37,8 +51,15 @@ const StoryBar = ({ stories, currentUser }) => {
             </span>
           </div>
         ))}
+        </div>
       </div>
-    </div>
+
+      <StoryUploadModal
+        isOpen={showStoryModal}
+        onClose={() => setShowStoryModal(false)}
+        onSuccess={handleStoryCreated}
+      />
+    </>
   );
 };
 

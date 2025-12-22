@@ -6,6 +6,7 @@ import {
   addComment,
   getComments,
   sharePost,
+  deletePost,
   getUserStats,
   getSuggestedStudents,
   getTopContributors,
@@ -26,6 +27,7 @@ router.use(verifyToken);
 // Posts
 router.get("/posts", getPosts);
 router.post("/posts", uploadPostImageMiddleware, createPost);
+router.delete("/posts/:postId", deletePost);
 router.post("/posts/:postId/like", toggleLike);
 router.post("/posts/:postId/comment", addComment);
 router.get("/posts/:postId/comments", getComments);

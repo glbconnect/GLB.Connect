@@ -280,8 +280,13 @@ export const getPostComments = async (postId) => {
   return response.data;
 };
 
-export const shareBuzzPost = async (postId) => {
+export const repostBuzzPost = async (postId) => {
   const response = await api.post(`/buzz/posts/${postId}/share`);
+  return response.data;
+};
+
+export const deleteBuzzPost = async (postId) => {
+  const response = await api.delete(`/buzz/posts/${postId}`);
   return response.data;
 };
 

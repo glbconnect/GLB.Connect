@@ -7,10 +7,25 @@ import EventForm from '../components/events/EventForm';
 import EventCard from '../components/events/EventCard';
 import EventSlideshow from '../components/events/EventSlideshow';
 
-const transformEventImageUrl = (event) => ({
-  ...event,
-  imageUrl: event.imageUrl ? `${SERVER_URL}${event.imageUrl}` : null,
-});
+const transformEventImageUrl = (event) => {
+  let imageUrl = event.imageUrl;
+  if (imageUrl && imageUrl.trim() !== '') {
+    // If it's already a full URL (starts with http:// or https://), use it as is
+    if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+      return { ...event, imageUrl };
+    }
+    // If it starts with /, add SERVER_URL prefix
+    if (imageUrl.startsWith('/')) {
+      imageUrl = `${SERVER_URL}${imageUrl}`;
+    } else {
+      // If it doesn't start with /, add SERVER_URL and /
+      imageUrl = `${SERVER_URL}/${imageUrl}`;
+    }
+  } else {
+    imageUrl = null;
+  }
+  return { ...event, imageUrl };
+};
 
 const sortAndFilterEvents = (events) => {
   const now = new Date();
@@ -97,6 +112,8 @@ const Events = ({ isLoggedIn, onLogout, currentUser }) => {
       setShowCreate(false);
       setIsEditing(false);
       setSelectedEvent(null);
+      // Refresh events to ensure images are displayed correctly
+      await fetchAndSetEvents();
     } catch (err) {
       console.error('Detailed error saving event:', err);
       alert('Failed to save event. Check console for details.');

@@ -57,7 +57,14 @@ const Buzz = ({ isLoggedIn, onLogout, currentUser }) => {
         setError('');
       } catch (err) {
         console.error('Error fetching Buzz data:', err);
-        setError('Failed to load feed. Please try again.');
+        let errorMessage = err.response?.data?.error || err.message || 'Failed to load feed. Please try again.';
+        
+        // Check if it's a database migration issue
+        if (errorMessage.includes('does not exist') || errorMessage.includes('Database tables not found')) {
+          errorMessage = 'Database tables not found. Please run: npx prisma migrate dev --name add_buzz_models';
+        }
+        
+        setError(errorMessage);
       } finally {
         setLoading(false);
       }
@@ -76,13 +83,17 @@ const Buzz = ({ isLoggedIn, onLogout, currentUser }) => {
 
       const newPost = await createBuzzPost(formData);
       setPosts([newPost, ...posts]);
+      setError(''); // Clear any previous errors
       
       // Refresh stats
       const stats = await getBuzzUserStats();
       setUserStats(stats);
     } catch (err) {
       console.error('Error creating post:', err);
-      setError('Failed to create post. Please try again.');
+      const errorMessage = err.response?.data?.error || err.message || 'Failed to create post. Please try again.';
+      setError(errorMessage);
+      // Show error for 5 seconds then clear
+      setTimeout(() => setError(''), 5000);
     }
   };
 

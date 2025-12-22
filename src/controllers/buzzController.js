@@ -38,6 +38,10 @@ export const uploadPostImageMiddleware = multer({
 export const getPosts = async (req, res) => {
   try {
     const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ error: "User not authenticated" });
+    }
+    
     const posts = await prisma.post.findMany({
       include: {
         user: {
@@ -103,14 +107,24 @@ export const getPosts = async (req, res) => {
     res.json(postsWithStats);
   } catch (error) {
     console.error("Error getting posts:", error);
-    res.status(500).json({ error: "Failed to get posts" });
+    // Check if it's a table doesn't exist error
+    if (error.code === 'P2021' || error.message?.includes('does not exist')) {
+      return res.status(500).json({ 
+        error: "Database tables not found. Please run: npx prisma migrate dev --name add_buzz_models" 
+      });
+    }
+    res.status(500).json({ error: error.message || "Failed to get posts" });
   }
 };
 
 // Create a post
 export const createPost = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ error: "User not authenticated" });
+    }
+    
     const { content } = req.body;
     const imageUrl = req.file ? `/uploads/posts/${req.file.filename}` : null;
 
@@ -162,7 +176,13 @@ export const createPost = async (req, res) => {
     res.status(201).json(postWithStats);
   } catch (error) {
     console.error("Error creating post:", error);
-    res.status(500).json({ error: "Failed to create post" });
+    // Check if it's a table doesn't exist error
+    if (error.code === 'P2021' || error.message?.includes('does not exist')) {
+      return res.status(500).json({ 
+        error: "Database tables not found. Please run: npx prisma migrate dev --name add_buzz_models" 
+      });
+    }
+    res.status(500).json({ error: error.message || "Failed to create post" });
   }
 };
 

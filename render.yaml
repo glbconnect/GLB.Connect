@@ -6,7 +6,7 @@ services:
     plan: free
     branch: main
     healthCheckPath: /api/health # You may need to create this simple endpoint
-    buildCommand: "npm install && npx prisma migrate deploy && npx prisma generate"
+    buildCommand: "npm install && npx prisma@6.5.0 migrate deploy && npx prisma@6.5.0 generate"
     startCommand: "npm start"
     envVars:
       # You will need to add DATABASE_URL from your free database provider (e.g., Neon)

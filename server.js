@@ -153,10 +153,7 @@ app.post('/api/uploads', upload.single('file'), (req, res) => {
   res.json({ url: fileUrl });
 });
 
-// Serve static files (for uploaded resources)
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
-// Add CORS headers for file serving
+// Add CORS headers for file serving (before static middleware)
 app.use('/uploads', (req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
@@ -164,22 +161,16 @@ app.use('/uploads', (req, res, next) => {
   next();
 });
 
-// Add file serving with proper headers
-app.get('/uploads/:filename', (req, res, next) => {
-  const filename = req.params.filename;
-  const filePath = path.join(__dirname, 'uploads', filename);
-  
-  // Check if file exists
-  if (!fs.existsSync(filePath)) {
-    return res.status(404).json({ error: 'File not found' });
+// Serve static files (for uploaded resources) - handles subdirectories automatically
+app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
+  setHeaders: (res, filePath) => {
+    // Set proper headers for image files
+    if (filePath.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
+      res.setHeader('Content-Type', 'image/jpeg'); // Default, will be overridden by express.static
+      res.setHeader('Cache-Control', 'public, max-age=3600'); // Cache for 1 hour
+    }
   }
-  
-  // Set proper headers for file serving
-  res.setHeader('Content-Disposition', 'inline');
-  res.setHeader('Cache-Control', 'public, max-age=3600'); // Cache for 1 hour
-  
-  next();
-});
+}));
 
 // Simple test endpoint
 app.get('/api/test', (req, res) => {

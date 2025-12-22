@@ -86,10 +86,20 @@ export const getPosts = async (req, res) => {
       }
     });
 
+    // Get server URL from request or environment
+    const getServerUrl = () => {
+      if (process.env.SERVER_URL) return process.env.SERVER_URL;
+      if (req.protocol && req.get('host')) {
+        return `${req.protocol}://${req.get('host')}`;
+      }
+      return 'http://localhost:5000';
+    };
+    const serverUrl = getServerUrl();
+
     const postsWithStats = posts.map(post => ({
       id: post.id,
       content: post.content,
-      image: post.imageUrl ? `${process.env.SERVER_URL || 'http://localhost:5000'}${post.imageUrl}` : null,
+      image: post.imageUrl ? `${serverUrl}${post.imageUrl}` : null,
       user: {
         id: post.user.id,
         name: post.user.name,
@@ -155,10 +165,20 @@ export const createPost = async (req, res) => {
       }
     });
 
+    // Get server URL from request or environment
+    const getServerUrl = () => {
+      if (process.env.SERVER_URL) return process.env.SERVER_URL;
+      if (req.protocol && req.get('host')) {
+        return `${req.protocol}://${req.get('host')}`;
+      }
+      return 'http://localhost:5000';
+    };
+    const serverUrl = getServerUrl();
+
     const postWithStats = {
       id: post.id,
       content: post.content,
-      image: post.imageUrl ? `${process.env.SERVER_URL || 'http://localhost:5000'}${post.imageUrl}` : null,
+      image: post.imageUrl ? `${serverUrl}${post.imageUrl}` : null,
       user: {
         id: post.user.id,
         name: post.user.name,
@@ -468,6 +488,16 @@ export const getStories = async (req, res) => {
       take: 10
     });
 
+    // Get server URL from request or environment
+    const getServerUrl = () => {
+      if (process.env.SERVER_URL) return process.env.SERVER_URL;
+      if (req.protocol && req.get('host')) {
+        return `${req.protocol}://${req.get('host')}`;
+      }
+      return 'http://localhost:5000';
+    };
+    const serverUrl = getServerUrl();
+
     const formatted = stories.map(story => ({
       id: story.id,
       user: {
@@ -475,7 +505,7 @@ export const getStories = async (req, res) => {
         name: story.user.name,
         avatarUrl: story.user.avatarUrl
       },
-      imageUrl: `${process.env.SERVER_URL || 'http://localhost:5000'}${story.imageUrl}`
+      imageUrl: story.imageUrl.startsWith('http') ? story.imageUrl : `${serverUrl}${story.imageUrl}`
     }));
 
     res.json(formatted);
@@ -543,10 +573,20 @@ export const createStory = async (req, res) => {
       }
     });
 
+    // Get server URL from request or environment
+    const getServerUrl = () => {
+      if (process.env.SERVER_URL) return process.env.SERVER_URL;
+      if (req.protocol && req.get('host')) {
+        return `${req.protocol}://${req.get('host')}`;
+      }
+      return 'http://localhost:5000';
+    };
+    const serverUrl = getServerUrl();
+
     res.status(201).json({
       id: story.id,
       user: story.user,
-      imageUrl: `${process.env.SERVER_URL || 'http://localhost:5000'}${story.imageUrl}`
+      imageUrl: story.imageUrl.startsWith('http') ? story.imageUrl : `${serverUrl}${story.imageUrl}`
     });
   } catch (error) {
     console.error("Error creating story:", error);

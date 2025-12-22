@@ -329,4 +329,45 @@ export const toggleFollowUser = async (userId) => {
   return response.data;
 };
 
+// Mentorship API calls
+export const getActivePolls = async () => {
+  const response = await api.get('/mentorship/polls');
+  return response.data;
+};
+
+export const createPoll = async (pollData) => {
+  const response = await api.post('/mentorship/polls', pollData);
+  return response.data;
+};
+
+export const voteOnPoll = async (pollId, optionId) => {
+  const response = await api.post(`/mentorship/polls/${pollId}/vote`, { optionId });
+  return response.data;
+};
+
+export const getUpcomingSessions = async () => {
+  const response = await api.get('/mentorship/sessions');
+  return response.data;
+};
+
+export const createSession = async (sessionData) => {
+  const response = await api.post('/mentorship/sessions', sessionData);
+  return response.data;
+};
+
+export const enrollInSession = async (sessionId) => {
+  const response = await api.post(`/mentorship/sessions/${sessionId}/enroll`);
+  return response.data;
+};
+
+export const getMySessions = async () => {
+  const response = await api.get('/mentorship/sessions/my');
+  return response.data;
+};
+
+export const getMentorSessions = async () => {
+  const response = await api.get('/mentorship/sessions/mentor');
+  return response.data;
+};
+
 export default api; 

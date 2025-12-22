@@ -132,17 +132,17 @@ const PostCard = ({ post, onUpdate, currentUser, onDelete, onRepost }) => {
   const isOwnPost = currentUser?.id === post.user?.id;
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 mb-4">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-3 sm:p-4 mb-3 sm:mb-4">
       {/* Post Header */}
-      <div className="flex items-start justify-between mb-3">
-        <div className="flex items-center gap-3">
+      <div className="flex items-start justify-between mb-2 sm:mb-3">
+        <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
           <UserAvatar user={post.user} size="md" />
-          <div>
-            <h3 className="font-semibold text-gray-900 dark:text-white">
+          <div className="min-w-0 flex-1">
+            <h3 className="font-semibold text-sm sm:text-base text-gray-900 dark:text-white truncate">
               {post.user.name}
             </h3>
-            <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-              <span>{post.user.branch}</span>
+            <div className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm text-gray-500 dark:text-gray-400 flex-wrap">
+              <span className="truncate">{post.user.branch}</span>
               <span>•</span>
               <span>{post.user.year} Year</span>
               <span>•</span>
@@ -150,20 +150,20 @@ const PostCard = ({ post, onUpdate, currentUser, onDelete, onRepost }) => {
             </div>
           </div>
         </div>
-        <div className="relative" ref={menuRef}>
+        <div className="relative flex-shrink-0 ml-2" ref={menuRef}>
           <button 
             onClick={() => setShowMenu(!showMenu)}
-            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1"
           >
-            <EllipsisHorizontalIcon className="w-5 h-5" />
+            <EllipsisHorizontalIcon className="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
           {showMenu && (
-            <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-10">
+            <div className="absolute right-0 mt-2 w-40 sm:w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-10">
               {isOwnPost && (
                 <button
                   onClick={handleDelete}
                   disabled={isDeleting}
-                  className="w-full text-left px-4 py-2 text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 disabled:opacity-50 rounded-t-lg"
+                  className="w-full text-left px-3 sm:px-4 py-2 text-sm sm:text-base text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 disabled:opacity-50 rounded-t-lg"
                 >
                   <TrashIcon className="w-4 h-4" />
                   {isDeleting ? 'Deleting...' : 'Delete Post'}
@@ -175,15 +175,15 @@ const PostCard = ({ post, onUpdate, currentUser, onDelete, onRepost }) => {
       </div>
 
       {/* Post Content */}
-      <div className="mb-3">
-        <p className="text-gray-800 dark:text-gray-200 whitespace-pre-wrap">
+      <div className="mb-2 sm:mb-3">
+        <p className="text-sm sm:text-base text-gray-800 dark:text-gray-200 whitespace-pre-wrap break-words">
           {post.content}
         </p>
       </div>
 
       {/* Post Image */}
       {post.image && (
-        <div className="mb-3 rounded-lg overflow-hidden">
+        <div className="mb-2 sm:mb-3 rounded-lg overflow-hidden -mx-3 sm:-mx-4">
           <img 
             src={post.image} 
             alt="Post content" 
@@ -193,8 +193,8 @@ const PostCard = ({ post, onUpdate, currentUser, onDelete, onRepost }) => {
       )}
 
       {/* Post Stats */}
-      <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 mb-3 pb-3 border-b border-gray-200 dark:border-gray-700">
-        <div className="flex items-center gap-4">
+      <div className="flex items-center justify-between text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-2 sm:mb-3 pb-2 sm:pb-3 border-b border-gray-200 dark:border-gray-700">
+        <div className="flex items-center gap-3 sm:gap-4">
           {likesCount > 0 && (
             <span>{likesCount} {likesCount === 1 ? 'like' : 'likes'}</span>
           )}
@@ -205,10 +205,10 @@ const PostCard = ({ post, onUpdate, currentUser, onDelete, onRepost }) => {
       </div>
 
       {/* Post Actions */}
-      <div className="flex items-center justify-around pt-2">
+      <div className="flex items-center justify-around pt-2 gap-1 sm:gap-0">
         <button
           onClick={handleLike}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+          className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 rounded-lg transition-colors flex-1 justify-center sm:flex-initial ${
             isLiked
               ? 'text-blue-600 dark:text-blue-400'
               : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
@@ -219,41 +219,41 @@ const PostCard = ({ post, onUpdate, currentUser, onDelete, onRepost }) => {
           ) : (
             <HeartIcon className="w-5 h-5" />
           )}
-          <span className="font-medium">Like</span>
+          <span className="font-medium text-xs sm:text-base hidden sm:inline">Like</span>
         </button>
         
         <button
           onClick={() => setShowComments(!showComments)}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+          className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex-1 justify-center sm:flex-initial"
         >
           <ChatBubbleLeftIcon className="w-5 h-5" />
-          <span className="font-medium">Comment</span>
+          <span className="font-medium text-xs sm:text-base hidden sm:inline">Comment</span>
         </button>
         
         <button 
           onClick={handleRepost}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+          className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex-1 justify-center sm:flex-initial"
         >
           <ArrowPathIcon className="w-5 h-5" />
-          <span className="font-medium">Repost</span>
+          <span className="font-medium text-xs sm:text-base hidden sm:inline">Repost</span>
         </button>
       </div>
 
       {/* Comments Section */}
       {showComments && (
-        <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+        <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-200 dark:border-gray-700">
           {/* Existing Comments */}
           {comments.length > 0 && (
-            <div className="mb-4 space-y-3 max-h-64 overflow-y-auto">
+            <div className="mb-3 sm:mb-4 space-y-2 sm:space-y-3 max-h-48 sm:max-h-64 overflow-y-auto">
               {comments.map((comment) => (
-                <div key={comment.id} className="flex gap-3">
+                <div key={comment.id} className="flex gap-2 sm:gap-3">
                   <UserAvatar user={comment.user} size="sm" />
-                  <div className="flex-1">
-                    <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-2">
-                      <p className="text-sm font-medium text-gray-900 dark:text-white">
+                  <div className="flex-1 min-w-0">
+                    <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-2 sm:p-3">
+                      <p className="text-xs sm:text-sm font-medium text-gray-900 dark:text-white">
                         {comment.user.name}
                       </p>
-                      <p className="text-sm text-gray-700 dark:text-gray-300 mt-1">
+                      <p className="text-xs sm:text-sm text-gray-700 dark:text-gray-300 mt-1 break-words">
                         {comment.content}
                       </p>
                     </div>
@@ -267,22 +267,22 @@ const PostCard = ({ post, onUpdate, currentUser, onDelete, onRepost }) => {
           )}
 
           {/* Comment Input */}
-          <form onSubmit={handleCommentSubmit} className="flex gap-3">
+          <form onSubmit={handleCommentSubmit} className="flex gap-2 sm:gap-3">
             <UserAvatar user={{ name: 'You' }} size="sm" />
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <input
                 type="text"
                 value={commentText}
                 onChange={(e) => setCommentText(e.target.value)}
                 placeholder="Write a comment..."
-                className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 disabled={isSubmitting}
               />
             </div>
             <button
               type="submit"
               disabled={!commentText.trim() || isSubmitting}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-3 sm:px-4 py-2 text-sm sm:text-base bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
             >
               Post
             </button>

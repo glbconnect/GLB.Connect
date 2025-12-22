@@ -85,11 +85,11 @@ const StoryViewer = ({ stories, initialIndex = 0, onClose }) => {
   return (
     <div className="fixed inset-0 bg-black z-50 flex items-center justify-center">
       {/* Progress Bars */}
-      <div className="absolute top-4 left-4 right-4 flex gap-1 z-10">
+      <div className="absolute top-2 sm:top-4 left-2 sm:left-4 right-2 sm:right-4 flex gap-1 z-10">
         {stories.map((_, index) => (
           <div
             key={index}
-            className="flex-1 h-1 bg-white bg-opacity-30 rounded-full overflow-hidden cursor-pointer"
+            className="flex-1 h-0.5 sm:h-1 bg-white bg-opacity-30 rounded-full overflow-hidden cursor-pointer"
             onClick={() => handleProgressClick(index)}
           >
             <div
@@ -109,10 +109,10 @@ const StoryViewer = ({ stories, initialIndex = 0, onClose }) => {
       </div>
 
       {/* User Info */}
-      <div className="absolute top-14 left-4 right-4 flex items-center gap-3 z-10">
+      <div className="absolute top-8 sm:top-14 left-2 sm:left-4 right-2 sm:right-4 flex items-center gap-2 sm:gap-3 z-10">
         <UserAvatar user={currentStory.user} size="sm" />
-        <div className="flex-1">
-          <p className="text-white font-semibold text-sm">{currentStory.user.name}</p>
+        <div className="flex-1 min-w-0">
+          <p className="text-white font-semibold text-xs sm:text-sm truncate">{currentStory.user.name}</p>
           <p className="text-white text-opacity-70 text-xs">
             {currentStory.createdAt 
               ? new Date(currentStory.createdAt).toLocaleTimeString([], {
@@ -124,14 +124,14 @@ const StoryViewer = ({ stories, initialIndex = 0, onClose }) => {
         </div>
         <button
           onClick={onClose}
-          className="text-white hover:text-gray-300 transition-colors"
+          className="text-white hover:text-gray-300 transition-colors p-1 sm:p-2 flex-shrink-0"
         >
-          <XMarkIcon className="w-6 h-6" />
+          <XMarkIcon className="w-5 h-5 sm:w-6 sm:h-6" />
         </button>
       </div>
 
       {/* Story Image */}
-      <div className="w-full h-full flex items-center justify-center">
+      <div className="w-full h-full flex items-center justify-center px-2 sm:px-0">
         <img
           src={currentStory.imageUrl}
           alt={`Story by ${currentStory.user.name}`}
@@ -142,28 +142,29 @@ const StoryViewer = ({ stories, initialIndex = 0, onClose }) => {
         />
       </div>
 
-      {/* Navigation Buttons */}
-      <div className="absolute inset-0 flex items-center justify-between p-4">
+      {/* Navigation Buttons - Hidden on mobile, shown on desktop */}
+      <div className="absolute inset-0 hidden sm:flex items-center justify-between p-4 pointer-events-none">
         <button
           onClick={handlePrevious}
-          className="text-white hover:text-gray-300 transition-colors p-2"
+          className="text-white hover:text-gray-300 transition-colors p-2 pointer-events-auto"
           disabled={currentIndex === 0}
         >
           <ChevronLeftIcon className="w-8 h-8" />
         </button>
         <button
           onClick={handleNext}
-          className="text-white hover:text-gray-300 transition-colors p-2"
+          className="text-white hover:text-gray-300 transition-colors p-2 pointer-events-auto"
           disabled={currentIndex === stories.length - 1}
         >
           <ChevronRightIcon className="w-8 h-8" />
         </button>
       </div>
 
-      {/* Click Areas for Navigation */}
+      {/* Click Areas for Navigation - Full width on mobile for better touch targets */}
       <div className="absolute inset-0 flex">
         <div
           className="flex-1 cursor-pointer"
+          style={{ touchAction: 'manipulation' }}
           onClick={handlePrevious}
           onTouchStart={(e) => {
             e.preventDefault();
@@ -172,6 +173,7 @@ const StoryViewer = ({ stories, initialIndex = 0, onClose }) => {
         />
         <div
           className="flex-1 cursor-pointer"
+          style={{ touchAction: 'manipulation' }}
           onClick={handleNext}
           onTouchStart={(e) => {
             e.preventDefault();

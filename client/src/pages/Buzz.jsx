@@ -130,10 +130,10 @@ const Buzz = ({ isLoggedIn, onLogout, currentUser }) => {
   if (loading) {
     return (
       <Layout isLoggedIn={isLoggedIn} onLogout={onLogout}>
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-6 flex items-center justify-center">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-6 flex items-center justify-center px-4">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600 dark:text-gray-400">Loading feed...</p>
+            <div className="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">Loading feed...</p>
           </div>
         </div>
       </Layout>
@@ -142,19 +142,19 @@ const Buzz = ({ isLoggedIn, onLogout, currentUser }) => {
 
   return (
     <Layout isLoggedIn={isLoggedIn} onLogout={onLogout}>
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-6">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-3 sm:py-6">
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
           {error && (
-            <div className="mb-4 p-4 bg-red-100 dark:bg-red-900 border border-red-400 text-red-700 dark:text-red-200 rounded-lg">
+            <div className="mb-3 sm:mb-4 p-3 sm:p-4 bg-red-100 dark:bg-red-900 border border-red-400 text-red-700 dark:text-red-200 rounded-lg text-sm sm:text-base">
               {error}
             </div>
           )}
-          <div className="flex gap-6">
+          <div className="flex flex-col lg:flex-row gap-3 sm:gap-4 lg:gap-6">
             {/* Left Sidebar */}
             <LeftSidebar currentUser={defaultUser} stats={userStats} />
 
             {/* Main Feed */}
-            <div className="flex-1 max-w-2xl">
+            <div className="flex-1 w-full lg:max-w-2xl">
               {/* Story Bar */}
               <StoryBar 
                 stories={stories} 
@@ -171,8 +171,8 @@ const Buzz = ({ isLoggedIn, onLogout, currentUser }) => {
               {/* Posts Feed */}
               <div>
                 {posts.length === 0 ? (
-                  <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-8 text-center">
-                    <p className="text-gray-500 dark:text-gray-400">No posts yet. Be the first to share something!</p>
+                  <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 sm:p-8 text-center">
+                    <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400">No posts yet. Be the first to share something!</p>
                   </div>
                 ) : (
                   posts.map((post) => (

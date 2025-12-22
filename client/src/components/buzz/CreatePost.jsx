@@ -40,15 +40,15 @@ const CreatePost = ({ currentUser, onCreatePost }) => {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 mb-4">
-      <div className="flex gap-3 mb-3">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-3 sm:p-4 mb-3 sm:mb-4">
+      <div className="flex gap-2 sm:gap-3 mb-2 sm:mb-3">
         <UserAvatar user={currentUser} size="md" />
-        <div className="flex-1">
+        <div className="flex-1 min-w-0">
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
             placeholder="What's on your mind?"
-            className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+            className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
             rows="3"
           />
         </div>
@@ -56,26 +56,26 @@ const CreatePost = ({ currentUser, onCreatePost }) => {
 
       {/* Image Preview */}
       {imagePreview && (
-        <div className="relative mb-3 rounded-lg overflow-hidden">
+        <div className="relative mb-2 sm:mb-3 rounded-lg overflow-hidden -mx-3 sm:-mx-4">
           <img 
             src={imagePreview} 
             alt="Preview" 
-            className="w-full h-auto max-h-96 object-cover"
+            className="w-full h-auto max-h-64 sm:max-h-96 object-cover"
           />
           <button
             onClick={handleRemoveImage}
             className="absolute top-2 right-2 bg-black bg-opacity-50 hover:bg-opacity-70 rounded-full p-1.5 text-white transition-colors"
           >
-            <XMarkIcon className="w-5 h-5" />
+            <XMarkIcon className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
         </div>
       )}
 
       {/* Actions */}
-      <div className="flex items-center justify-between pt-3 border-t border-gray-200 dark:border-gray-700">
-        <label className="flex items-center gap-2 px-4 py-2 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition-colors">
-          <PhotoIcon className="w-5 h-5" />
-          <span className="font-medium">Photo</span>
+      <div className="flex items-center justify-between pt-2 sm:pt-3 border-t border-gray-200 dark:border-gray-700 gap-2">
+        <label className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition-colors">
+          <PhotoIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+          <span className="font-medium text-sm sm:text-base">Photo</span>
           <input
             type="file"
             accept="image/*"
@@ -89,6 +89,7 @@ const CreatePost = ({ currentUser, onCreatePost }) => {
           disabled={!content.trim() && !imageFile}
           variant="primary"
           size="md"
+          className="text-sm sm:text-base px-4 sm:px-6"
         >
           Post
         </Button>

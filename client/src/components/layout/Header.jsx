@@ -4,7 +4,6 @@ import Button from '../ui/Button';
 import logo from '../../assets/logo.png';
 import { FaUserCircle } from 'react-icons/fa';
 import { FiBell } from 'react-icons/fi';
-import NotificationDropdown from './NotificationDropdown';
 
 const navLinks = [
   { to: '/', label: 'Home', public: true },
@@ -57,40 +56,28 @@ const MobileNavLinkItem = ({ to, children, onClick, isActive, disabled }) => (
   </NavLink>
 )
 
-const Header = ({ isLoggedIn, onLogout, notificationCount, onNotificationClick, currentUser, onNotificationViewed }) => {
+const Header = ({ isLoggedIn, onLogout, notificationCount, onNotificationClick }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showLoginMsg, setShowLoginMsg] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
-  const [showNotifications, setShowNotifications] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const profileMenuRef = useRef();
-  const notificationRef = useRef();
 
-  // Close dropdowns on click outside
+  // Close dropdown on click outside
   useEffect(() => {
     function handleClickOutside(event) {
       if (profileMenuRef.current && !profileMenuRef.current.contains(event.target)) {
         setShowProfileMenu(false);
       }
-      if (notificationRef.current && !notificationRef.current.contains(event.target)) {
-        setShowNotifications(false);
-      }
     }
-    if (showProfileMenu || showNotifications) {
+    if (showProfileMenu) {
       document.addEventListener('mousedown', handleClickOutside);
     } else {
       document.removeEventListener('mousedown', handleClickOutside);
     }
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [showProfileMenu, showNotifications]);
-
-  const handleNotificationClick = () => {
-    setShowNotifications(!showNotifications);
-    if (onNotificationClick && typeof onNotificationClick === 'function') {
-      onNotificationClick();
-    }
-  };
+  }, [showProfileMenu]);
 
   const handleLogout = () => {
     onLogout();
@@ -136,26 +123,18 @@ const Header = ({ isLoggedIn, onLogout, notificationCount, onNotificationClick, 
               {isLoggedIn ? (
                 <>
                   {/* Notification Bell */}
-                  <div className="relative" ref={notificationRef}>
-                    <button
-                      className="relative text-gray-600 hover:text-blue-600 focus:outline-none transition-colors"
-                      title="Notifications"
-                      onClick={handleNotificationClick}
-                    >
-                      <FiBell size={26} />
-                      {notificationCount > 0 && (
-                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 font-bold animate-pulse min-w-[20px] text-center">
-                          {notificationCount > 99 ? '99+' : notificationCount}
-                        </span>
-                      )}
-                    </button>
-                    <NotificationDropdown
-                      isOpen={showNotifications}
-                      onClose={() => setShowNotifications(false)}
-                      currentUserId={currentUser?.id}
-                      onNotificationViewed={onNotificationViewed}
-                    />
-                  </div>
+                  <button
+                    className="relative text-gray-600 hover:text-blue-600 focus:outline-none"
+                    title="Notifications"
+                    onClick={typeof onNotificationClick === 'function' ? onNotificationClick : undefined}
+                  >
+                    <FiBell size={26} />
+                    {notificationCount > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 font-bold animate-pulse">
+                        {notificationCount}
+                      </span>
+                    )}
+                  </button>
                   {/* Profile Icon */}
                   <div className="relative" ref={profileMenuRef}>
                     <button
@@ -219,26 +198,18 @@ const Header = ({ isLoggedIn, onLogout, notificationCount, onNotificationClick, 
             {isLoggedIn && (
               <div className="flex justify-end mb-2 items-center gap-2">
                 {/* Notification Bell (Mobile) */}
-                <div className="relative" ref={notificationRef}>
-                  <button
-                    className="relative text-gray-600 hover:text-blue-600 focus:outline-none transition-colors"
-                    title="Notifications"
-                    onClick={handleNotificationClick}
-                  >
-                    <FiBell size={26} />
-                    {notificationCount > 0 && (
-                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 font-bold animate-pulse min-w-[20px] text-center">
-                        {notificationCount > 99 ? '99+' : notificationCount}
-                      </span>
-                    )}
-                  </button>
-                  <NotificationDropdown
-                    isOpen={showNotifications}
-                    onClose={() => setShowNotifications(false)}
-                    currentUserId={currentUser?.id}
-                    onNotificationViewed={onNotificationViewed}
-                  />
-                </div>
+                <button
+                  className="relative text-gray-600 hover:text-blue-600 focus:outline-none"
+                  title="Notifications"
+                  onClick={typeof onNotificationClick === 'function' ? onNotificationClick : undefined}
+                >
+                  <FiBell size={26} />
+                  {notificationCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 font-bold animate-pulse">
+                      {notificationCount}
+                    </span>
+                  )}
+                </button>
                 <button
                   onClick={() => { navigate('/profile'); closeMobileMenu(); }}
                   className="text-gray-600 hover:text-blue-600 focus:outline-none"

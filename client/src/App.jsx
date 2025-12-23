@@ -83,6 +83,23 @@ function AppRoutes() {
     }
   };
 
+  // Fetch initial notification count
+  useEffect(() => {
+    if (!isLoggedIn || !currentUser?.id) return;
+
+    const fetchNotificationCount = async () => {
+      try {
+        const { getUnseenMessages } = await import('./services/api');
+        const messages = await getUnseenMessages(currentUser.id);
+        setNotificationCount(messages?.length || 0);
+      } catch (error) {
+        console.error('Error fetching notification count:', error);
+      }
+    };
+
+    fetchNotificationCount();
+  }, [isLoggedIn, currentUser?.id]);
+
   // Socket notification logic
   useEffect(() => {
     if (!isLoggedIn || !currentUser?.id) return;
@@ -119,9 +136,8 @@ function AppRoutes() {
   }, [location.pathname]);
 
   const handleNotificationClick = () => {
-    setNotificationCount(0);
-    // Optionally, navigate to messages page
-    window.location.href = '/messages';
+    // Notification dropdown is handled in Header component
+    // This is kept for backward compatibility
   };
 
   if (isLoading) {
@@ -139,6 +155,8 @@ function AppRoutes() {
         onLogout={handleLogout}
         notificationCount={notificationCount}
         onNotificationClick={handleNotificationClick}
+        currentUser={currentUser}
+        onNotificationViewed={handleNotificationViewed}
       />
       <Routes>
         <Route path="/" element={<Home isLoggedIn={isLoggedIn} onLogout={handleLogout} />} />

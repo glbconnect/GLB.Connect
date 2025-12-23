@@ -98,15 +98,18 @@ export const getPosts = async (req, res) => {
     const serverUrl = getServerUrl();
 
     const postsWithStats = posts.map(post => {
-      // Handle both full URLs (new) and relative paths (old posts)
+      // Handle both full URLs (Cloudinary or local) and relative paths (old posts)
       let imageUrl = null;
       if (post.imageUrl) {
         if (post.imageUrl.startsWith('http://') || post.imageUrl.startsWith('https://')) {
-          // Already a full URL (new format)
+          // Already a full URL (Cloudinary or local server URL)
+          // Cloudinary URLs: https://res.cloudinary.com/...
+          // Local URLs: https://your-server.com/uploads/...
           imageUrl = post.imageUrl;
         } else {
           // Relative path (old format) - construct full URL
-          imageUrl = `${serverUrl}${post.imageUrl}`;
+          // This should only happen for very old posts
+          imageUrl = `${serverUrl}${post.imageUrl.startsWith('/') ? '' : '/'}${post.imageUrl}`;
         }
       }
       
@@ -155,31 +158,34 @@ export const createPost = async (req, res) => {
 
     // Handle image upload - Cloudinary or local storage
     if (req.file) {
-      if (isCloudinaryConfigured()) {
+      const cloudinaryConfigured = isCloudinaryConfigured();
+      console.log('Cloudinary configured:', cloudinaryConfigured);
+      
+      if (cloudinaryConfigured) {
         // Upload to Cloudinary
         try {
           const fileBuffer = fs.readFileSync(req.file.path);
           const publicId = `post-${userId}-${Date.now()}`;
+          console.log('Uploading to Cloudinary...', publicId);
           const uploadResult = await uploadToCloudinary(fileBuffer, 'posts', publicId);
           imageUrl = uploadResult.url;
+          console.log('Cloudinary upload successful:', imageUrl);
           
           // Delete local file after Cloudinary upload
-          fs.unlinkSync(req.file.path);
+          try {
+            fs.unlinkSync(req.file.path);
+          } catch (unlinkError) {
+            console.warn('Failed to delete local file:', unlinkError);
+          }
         } catch (cloudinaryError) {
-          console.error('Cloudinary upload failed, falling back to local storage:', cloudinaryError);
-          // Fallback to local storage
-          const getServerUrl = () => {
-            if (process.env.SERVER_URL) return process.env.SERVER_URL;
-            if (req.protocol && req.get('host')) {
-              return `${req.protocol}://${req.get('host')}`;
-            }
-            return 'http://localhost:5000';
-          };
-          const serverUrl = getServerUrl();
-          imageUrl = `${serverUrl}/uploads/posts/${req.file.filename}`;
+          console.error('Cloudinary upload failed:', cloudinaryError);
+          console.error('Error details:', cloudinaryError.message);
+          // Don't fallback - throw error so user knows Cloudinary failed
+          throw new Error('Failed to upload image to Cloudinary. Please try again.');
         }
       } else {
-        // Use local storage
+        // Use local storage (NOT RECOMMENDED for production)
+        console.warn('⚠️ Cloudinary not configured - using local storage (files will be lost on server restart)');
         const getServerUrl = () => {
           if (process.env.SERVER_URL) return process.env.SERVER_URL;
           if (req.protocol && req.get('host')) {
@@ -755,31 +761,34 @@ export const createStory = async (req, res) => {
     let imageUrl = null;
 
     // Handle image upload - Cloudinary or local storage
-    if (isCloudinaryConfigured()) {
+    const cloudinaryConfigured = isCloudinaryConfigured();
+    console.log('Cloudinary configured for story:', cloudinaryConfigured);
+    
+    if (cloudinaryConfigured) {
       // Upload to Cloudinary
       try {
         const fileBuffer = fs.readFileSync(req.file.path);
         const publicId = `story-${userId}-${Date.now()}`;
+        console.log('Uploading story to Cloudinary...', publicId);
         const uploadResult = await uploadToCloudinary(fileBuffer, 'stories', publicId);
         imageUrl = uploadResult.url;
+        console.log('Cloudinary upload successful:', imageUrl);
         
         // Delete local file after Cloudinary upload
-        fs.unlinkSync(req.file.path);
+        try {
+          fs.unlinkSync(req.file.path);
+        } catch (unlinkError) {
+          console.warn('Failed to delete local file:', unlinkError);
+        }
       } catch (cloudinaryError) {
-        console.error('Cloudinary upload failed, falling back to local storage:', cloudinaryError);
-        // Fallback to local storage
-        const getServerUrl = () => {
-          if (process.env.SERVER_URL) return process.env.SERVER_URL;
-          if (req.protocol && req.get('host')) {
-            return `${req.protocol}://${req.get('host')}`;
-          }
-          return 'http://localhost:5000';
-        };
-        const serverUrl = getServerUrl();
-        imageUrl = `${serverUrl}/uploads/stories/${req.file.filename}`;
+        console.error('Cloudinary upload failed:', cloudinaryError);
+        console.error('Error details:', cloudinaryError.message);
+        // Don't fallback - throw error so user knows Cloudinary failed
+        throw new Error('Failed to upload image to Cloudinary. Please try again.');
       }
     } else {
-      // Use local storage
+      // Use local storage (NOT RECOMMENDED for production)
+      console.warn('⚠️ Cloudinary not configured - using local storage (files will be lost on server restart)');
       const getServerUrl = () => {
         if (process.env.SERVER_URL) return process.env.SERVER_URL;
         if (req.protocol && req.get('host')) {

@@ -92,11 +92,21 @@ export const deleteFromCloudinary = async (publicId) => {
  * @returns {boolean}
  */
 export const isCloudinaryConfigured = () => {
-  return !!(
-    process.env.CLOUDINARY_CLOUD_NAME &&
-    process.env.CLOUDINARY_API_KEY &&
-    process.env.CLOUDINARY_API_SECRET &&
-    process.env.USE_CLOUDINARY === 'true'
-  );
+  const hasCloudName = !!process.env.CLOUDINARY_CLOUD_NAME;
+  const hasApiKey = !!process.env.CLOUDINARY_API_KEY;
+  const hasApiSecret = !!process.env.CLOUDINARY_API_SECRET;
+  const useCloudinary = process.env.USE_CLOUDINARY === 'true';
+  
+  const configured = hasCloudName && hasApiKey && hasApiSecret && useCloudinary;
+  
+  if (!configured) {
+    console.log('Cloudinary configuration check:');
+    console.log('  CLOUDINARY_CLOUD_NAME:', hasCloudName ? '✓ Set' : '✗ Missing');
+    console.log('  CLOUDINARY_API_KEY:', hasApiKey ? '✓ Set' : '✗ Missing');
+    console.log('  CLOUDINARY_API_SECRET:', hasApiSecret ? '✓ Set' : '✗ Missing');
+    console.log('  USE_CLOUDINARY:', useCloudinary ? '✓ true' : '✗ Not set to true');
+  }
+  
+  return configured;
 };
 

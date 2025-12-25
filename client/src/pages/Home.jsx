@@ -11,13 +11,7 @@ import FeedbackSection from '../components/glb-connect/FeedbackSection';
 import Footer from '../components/glb-connect/Footer';
 
 const colleges = [
-  'GL Bajaj', 
-  'Galgotia University', 
-  'NIET', 
-  'Jamia Millia Islamia', 
-  'Bennett University',
-  'Sharda University',
-  'Amity University'
+  'GL Bajaj Institute of Technology and Management'
 ];
 
 const Home = ({ isLoggedIn, onLogout }) => {

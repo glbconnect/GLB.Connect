@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 
 import student1 from '../../assets/aimad.png';
-import student2 from '../../assets/student2.png';
+import student2 from '../../assets/shawez.png';
 import student3 from '../../assets/priyanshu.png';
 
 const testimonials = [
@@ -15,8 +15,8 @@ const testimonials = [
   },
   {
     quote: "As a junior, I was overwhelmed. The anonymous Q&A feature allowed me to ask 'silly' questions without fear. It's an invaluable resource.",
-    name: "Rahul Verma",
-    role: "Mechanical Eng., 2nd Year",
+    name: "Shawez Noor",
+    role: "ECE, 4th Year",
     avatar: student2
   },
   {

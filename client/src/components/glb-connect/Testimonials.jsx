@@ -4,7 +4,7 @@ import { useInView } from 'react-intersection-observer';
 
 import student1 from '../../assets/aimad.png';
 import student2 from '../../assets/student2.png';
-import student3 from '../../assets/student3.png';
+import student3 from '../../assets/priyanshu.png';
 
 const testimonials = [
   {
@@ -21,8 +21,8 @@ const testimonials = [
   },
   {
     quote: "The resource sharing section is amazing. I found all the notes and previous year papers I needed for my exams. Highly recommended!",
-    name: "Anjali Singh",
-    role: "Electronics, 3rd Year",
+    name: "Priyanshu Tiwari",
+    role: "CSE, 3rd Year",
     avatar: student3
   }
 ];

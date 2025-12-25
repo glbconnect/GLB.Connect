@@ -2,15 +2,15 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 
-import student1 from '../../assets/student1.png';
+import student1 from '../../assets/aimad.jpg';
 import student2 from '../../assets/student2.png';
 import student3 from '../../assets/student3.png';
 
 const testimonials = [
   {
     quote: "GLB.Connect has been a game-changer. I found a mentor who guided me through my final year project and helped me land my first internship!",
-    name: "Priya Sharma",
-    role: "Computer Science, 4th Year",
+    name: "Aimad Sarwae",
+    role: "AIDS, 4th Year",
     avatar: student1
   },
   {

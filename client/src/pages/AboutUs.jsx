@@ -23,7 +23,6 @@ const TeamCard = ({ name, role, description, delay }) => (
     <div className="flex gap-3 mt-auto">
       <a href="#" className="text-gray-400 hover:text-blue-600 transition-colors"><Linkedin size={18} /></a>
       <a href="#" className="text-gray-400 hover:text-gray-800 transition-colors"><Github size={18} /></a>
-      <a href="#" className="text-gray-400 hover:text-blue-400 transition-colors"><Twitter size={18} /></a>
     </div>
   </motion.div>
 );
@@ -161,7 +160,7 @@ const AboutUs = () => {
           <TeamCard 
             name="Nisha Ahmad" 
             role="Core Team Member" 
-            description="Driving engagement and ensuring a seamless user experience."
+            description="Leading the technical development and ensuring a seamless user experience."
             delay={0.2}
           />
           <TeamCard 

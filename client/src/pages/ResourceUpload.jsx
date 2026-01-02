@@ -169,6 +169,30 @@ const ResourceUpload = ({ isLoggedIn, onLogout, currentUser }) => {
     );
   }
 
+  if (currentUser?.role !== 'ADMIN') {
+    return (
+      <Layout isLoggedIn={isLoggedIn} onLogout={onLogout}>
+        <div className="flex justify-center items-center min-h-screen">
+          <div className="text-center">
+            <div className="text-6xl mb-6">🚫</div>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              Access Denied
+            </h2>
+            <p className="text-gray-600 mb-8">
+              Only Admin users can upload resources. Please contact an administrator if you need to upload resources.
+            </p>
+            <Button 
+              onClick={() => navigate('/resources')}
+              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300"
+            >
+              Back to Resources
+            </Button>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
   return (
     <Layout isLoggedIn={isLoggedIn} onLogout={onLogout}>
       {/* Hero Section */}

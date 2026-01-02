@@ -87,12 +87,14 @@ const JobListing = ({ isLoggedIn, onLogout, currentUser }) => {
   }
 
   const handlePostJob = () => {
-    if (isLoggedIn) {
+    if (isLoggedIn && currentUser?.role === 'ADMIN') {
       navigate('/post-job')
-    } else {
+    } else if (!isLoggedIn) {
       navigate('/login')
     }
   }
+
+  const isAdmin = currentUser?.role === 'ADMIN'
 
   // Count active filters (for display)
   const countActiveFilters = () => {
@@ -115,15 +117,17 @@ const JobListing = ({ isLoggedIn, onLogout, currentUser }) => {
               <h1 className="text-3xl font-extrabold text-blue-700 drop-shadow mb-1">Job Opportunities</h1>
               <p className="text-blue-900/80 mt-1 text-base">Find and post job opportunities in the GLB community</p>
             </div>
-            <button
-              onClick={handlePostJob}
-              className="bg-gradient-to-br from-blue-500 to-blue-600 text-white px-7 py-3 rounded-full shadow-lg hover:scale-105 hover:from-blue-600 hover:to-blue-700 transition-all font-semibold flex items-center gap-2"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-              </svg>
-              {isLoggedIn ? 'Post a Job' : 'Login to Post'}
-            </button>
+            {isAdmin && (
+              <button
+                onClick={handlePostJob}
+                className="bg-gradient-to-br from-blue-500 to-blue-600 text-white px-7 py-3 rounded-full shadow-lg hover:scale-105 hover:from-blue-600 hover:to-blue-700 transition-all font-semibold flex items-center gap-2"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                </svg>
+                Post a Job
+              </button>
+            )}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
@@ -187,7 +191,7 @@ const JobListing = ({ isLoggedIn, onLogout, currentUser }) => {
                           >
                             Clear All Filters
                           </button>
-                          {isLoggedIn && (
+                          {isAdmin && (
                             <button 
                               onClick={handlePostJob}
                               className="bg-gradient-to-br from-blue-500 to-blue-600 text-white px-4 py-2 rounded-full shadow hover:from-blue-600 hover:to-blue-700 transition-all"

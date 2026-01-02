@@ -27,10 +27,16 @@ export const uploadAvatarMiddleware = multer({
 
 export const registerUser = async (req, res) => {
     try {
-        const {name: name, email: email, password: password, batchYear: batchYear, skills: skills} = req.body;
+        const {name: name, email: email, password: password, batchYear: batchYear, skills: skills, role: role} = req.body;
         if (!name || !email || !password || !batchYear) {
             return res.status(400).json({
                 error: "Please provide all required fields"
+            });
+        }
+        // Validate role if provided
+        if (role && !['ADMIN', 'STUDENT'].includes(role)) {
+            return res.status(400).json({
+                error: "Invalid role. Must be ADMIN or STUDENT"
             });
         }
         const existingUser = await findUserByEmail(email);
@@ -44,7 +50,8 @@ export const registerUser = async (req, res) => {
             email: email,
             password: password,
             batchYear: Number(batchYear),
-            skills: skills
+            skills: skills,
+            role: role || 'STUDENT'
         });
         const token = generateToken(user.id);
         const {password: removedPassword, ...userWithoutPassword} = user;

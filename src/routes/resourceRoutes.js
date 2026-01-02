@@ -10,7 +10,7 @@ import { fileURLToPath } from "url";
 
 import { getResources, getResourceById, createResource, updateResource, deleteResource, getCategories, getCategoryBySlug } from "../controllers/resourceController.js";
 
-import { verifyToken } from "../middleware/authMiddleware.js";
+import { verifyToken, requireAdmin } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
@@ -58,10 +58,10 @@ router.get("/categories/:slug", getCategoryBySlug);
 
 router.get("/:id", getResourceById);
 
-router.post("/", verifyToken, upload.single("file"), createResource);
+router.post("/", requireAdmin, upload.single("file"), createResource);
 
-router.put("/:id", verifyToken, updateResource);
+router.put("/:id", requireAdmin, updateResource);
 
-router.delete("/:id", verifyToken, deleteResource);
+router.delete("/:id", requireAdmin, deleteResource);
 
 export default router;

@@ -214,7 +214,7 @@ const ResourceBrowse = ({ isLoggedIn, onLogout, currentUser }) => {
             )}
           </div>
           
-          {isLoggedIn && (
+          {currentUser?.role === 'ADMIN' && (
             <Button
               onClick={handleUploadClick}
               className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-3 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300"

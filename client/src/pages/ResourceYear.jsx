@@ -98,7 +98,7 @@ const ResourceYear = ({ isLoggedIn, onLogout, currentUser }) => {
               <h2 className="text-2xl font-semibold text-gray-900">
                 Available Resources ({resources.length})
               </h2>
-              {isLoggedIn && (
+              {currentUser?.role === 'ADMIN' && (
                 <Button
                   onClick={handleUploadClick}
                   className="bg-blue-600 hover:bg-blue-700"

@@ -10,15 +10,12 @@ import EventSlideshow from '../components/events/EventSlideshow';
 const transformEventImageUrl = (event) => {
   let imageUrl = event.imageUrl;
   if (imageUrl && imageUrl.trim() !== '') {
-    // If it's already a full URL (starts with http:// or https://), use it as is
     if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
       return { ...event, imageUrl };
     }
-    // If it starts with /, add SERVER_URL prefix
     if (imageUrl.startsWith('/')) {
       imageUrl = `${SERVER_URL}${imageUrl}`;
     } else {
-      // If it doesn't start with /, add SERVER_URL and /
       imageUrl = `${SERVER_URL}/${imageUrl}`;
     }
   } else {
@@ -79,7 +76,7 @@ const Events = ({ isLoggedIn, onLogout, currentUser }) => {
   };
 
   const isUserRegistered = (event) => currentUser && (event.registrations || []).some(r => r.userId === currentUser.id);
-  const isAdminOrOrganizer = (event) => currentUser && (currentUser.role === 'admin' || event.organizerId === currentUser.id);
+  const isAdmin = currentUser?.role === 'ADMIN';
 
   const handleRegister = async (eventId) => {
     setRegistering({ ...registering, [eventId]: true });
@@ -112,7 +109,6 @@ const Events = ({ isLoggedIn, onLogout, currentUser }) => {
       setShowCreate(false);
       setIsEditing(false);
       setSelectedEvent(null);
-      // Refresh events to ensure images are displayed correctly
       await fetchAndSetEvents();
     } catch (err) {
       console.error('Detailed error saving event:', err);
@@ -167,7 +163,7 @@ const Events = ({ isLoggedIn, onLogout, currentUser }) => {
                     onEdit={openEditModal} 
                     onDelete={handleDelete} 
                     isRegistered={isUserRegistered(event)} 
-                    isOrganizer={isAdminOrOrganizer(event)} 
+                    isOrganizer={isAdmin} 
                     registering={registering[event.id]} 
                   />
                 ))}
@@ -206,7 +202,7 @@ const Events = ({ isLoggedIn, onLogout, currentUser }) => {
                     onEdit={openEditModal} 
                     onDelete={handleDelete} 
                     isRegistered={isUserRegistered(event)} 
-                    isOrganizer={isAdminOrOrganizer(event)} 
+                    isOrganizer={isAdmin} 
                     registering={registering[event.id]} 
                   />
                 ))}
@@ -222,7 +218,7 @@ const Events = ({ isLoggedIn, onLogout, currentUser }) => {
 
           {/* Create Event Button - Moved to bottom center */}
           <div className="flex justify-center items-center mb-12">
-            {currentUser && (
+            {isAdmin && (
               <Button 
                 onClick={openCreateModal}
                 className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 hover:from-blue-700 hover:via-purple-700 hover:to-indigo-700 text-white px-10 py-4 text-lg font-bold rounded-2xl shadow-2xl hover:shadow-3xl transform hover:-translate-y-2 transition-all duration-500 border-0 relative overflow-hidden group"

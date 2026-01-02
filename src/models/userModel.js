@@ -21,6 +21,18 @@ export const createUser = async userData => {
 export const findUserByEmail = async email => prisma.user.findUnique({
     where: {
         email: email
+    },
+    select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        password: true,
+        avatarUrl: true,
+        batchYear: true,
+        skills: true,
+        createdAt: true,
+        updatedAt: true
     }
 });
 
@@ -40,6 +52,7 @@ export const getUserById = async id => prisma.user.findUnique({
         id: true,
         name: true,
         email: true,
+        role: true,
         avatarUrl: true,
         batchYear: true,
         skills: true,
@@ -56,6 +69,7 @@ export const getUserByIdWithPassword = async id => prisma.user.findUnique({
         id: true,
         name: true,
         email: true,
+        role: true,
         password: true,
         avatarUrl: true,
         createdAt: true,
@@ -68,6 +82,7 @@ export const getAllUsers = async () => prisma.user.findMany({
         id: true,
         name: true,
         email: true,
+        role: true,
         avatarUrl: true,
         batchYear: true,
         skills: true,
@@ -99,6 +114,7 @@ export const searchUsersByEmail = async searchQuery => prisma.user.findMany({
         id: true,
         name: true,
         email: true,
+        role: true,
         avatarUrl: true,
         batchYear: true,
         skills: true,

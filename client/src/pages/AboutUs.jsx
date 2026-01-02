@@ -39,7 +39,6 @@ const Section = ({ children, className = "" }) => (
 const AboutUs = () => {
   return (
     <div className="min-h-screen bg-gray-50 font-sans text-gray-800">
-      <Header isLoggedIn={false} />
       
       {/* Hero Section */}
       <div className="bg-gradient-to-b from-blue-50 to-white pt-20 pb-16 px-4 text-center">

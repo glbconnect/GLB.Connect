@@ -16,6 +16,7 @@ import ResourceBrowse from './pages/ResourceBrowse';
 import Events from './pages/Events';
 import QAThreads from './pages/QAThreads';
 import Buzz from './pages/Buzz';
+import AboutUs from './pages/AboutUs';
 import Sessions from './pages/Sessions';
 import * as api from './services/api';
 import './index.css';
@@ -143,6 +144,7 @@ function AppRoutes() {
       />
       <Routes>
         <Route path="/" element={<Home isLoggedIn={isLoggedIn} onLogout={handleLogout} />} />
+        <Route path="/about-us" element={<AboutUs />} />
         <Route path="/login" element={isLoggedIn ? <Navigate to="/" /> : <Login onLogin={handleLogin} />} />
         <Route path="/register" element={isLoggedIn ? <Navigate to="/" /> : <Register onLogin={handleLogin} />} />
         <Route path="/messages" element={isLoggedIn ? <Messages isLoggedIn={isLoggedIn} onLogout={handleLogout} currentUser={currentUser} /> : <Navigate to="/login" />} />

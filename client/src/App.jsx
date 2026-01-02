@@ -16,6 +16,7 @@ import ResourceBrowse from './pages/ResourceBrowse';
 import Events from './pages/Events';
 import QAThreads from './pages/QAThreads';
 import Buzz from './pages/Buzz';
+import Sessions from './pages/Sessions';
 import * as api from './services/api';
 import './index.css';
 import Header from './components/layout/Header';
@@ -157,6 +158,7 @@ function AppRoutes() {
         <Route path="/resources/category/:categoryName" element={<ResourceCategory isLoggedIn={isLoggedIn} onLogout={handleLogout} currentUser={currentUser} />} />
         <Route path="/resources/category/:categoryName/year/:year" element={<ResourceYear isLoggedIn={isLoggedIn} onLogout={handleLogout} currentUser={currentUser} />} />
         <Route path="/events" element={<Events isLoggedIn={isLoggedIn} onLogout={handleLogout} currentUser={currentUser} />} />
+        <Route path="/sessions" element={isLoggedIn ? <Sessions isLoggedIn={isLoggedIn} onLogout={handleLogout} currentUser={currentUser} /> : <Navigate to="/login" />} />
         <Route path="/qa-threads" element={isLoggedIn ? <QAThreads isLoggedIn={isLoggedIn} onLogout={handleLogout} currentUser={currentUser} /> : <Navigate to="/login" />} />
         <Route path="/buzz" element={isLoggedIn ? <Buzz isLoggedIn={isLoggedIn} onLogout={handleLogout} currentUser={currentUser} /> : <Navigate to="/login" />} />
       </Routes>

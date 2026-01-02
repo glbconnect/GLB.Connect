@@ -228,6 +228,52 @@ export const getEventRegistrations = async (id) => {
   return response.data;
 };
 
+// Sessions API calls
+export const getSessions = async () => {
+  const response = await api.get('/sessions');
+  return response.data;
+};
+
+export const getUpcomingSessions = async () => {
+  const response = await api.get('/sessions/upcoming');
+  return response.data;
+};
+
+export const getLiveSessions = async () => {
+  const response = await api.get('/sessions/live');
+  return response.data;
+};
+
+export const getSessionById = async (id) => {
+  const response = await api.get(`/sessions/${id}`);
+  return response.data;
+};
+
+export const createSession = async (sessionData) => {
+  const response = await api.post('/sessions', sessionData);
+  return response.data;
+};
+
+export const updateSession = async (id, sessionData) => {
+  const response = await api.put(`/sessions/${id}`, sessionData);
+  return response.data;
+};
+
+export const deleteSession = async (id) => {
+  const response = await api.delete(`/sessions/${id}`);
+  return response.data;
+};
+
+export const startSession = async (id, joinUrl = null) => {
+  const response = await api.post(`/sessions/${id}/start`, { joinUrl });
+  return response.data;
+};
+
+export const endSession = async (id) => {
+  const response = await api.post(`/sessions/${id}/end`);
+  return response.data;
+};
+
 // Generic file upload
 export const uploadFile = async (file) => {
   const formData = new FormData();

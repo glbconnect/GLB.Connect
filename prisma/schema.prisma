@@ -19,6 +19,12 @@ enum Role {
   STUDENT
 }
 
+enum SessionStatus {
+  SCHEDULED
+  LIVE
+  ENDED
+}
+
 model User {
   id        String    @id @default(uuid())
   name      String
@@ -36,6 +42,7 @@ model User {
   resources        Resource[]
   eventsOrganized  Event[]   @relation("EventOrganizer")
   eventRegistrations EventRegistration[]
+  sessionsCreated  Session[] @relation("SessionCreator")
   posts            Post[]
   postLikes         PostLike[]
   comments         Comment[]
@@ -261,4 +268,24 @@ model Follow {
   @@unique([followerId, followingId])
   @@index([followerId])
   @@index([followingId])
+}
+
+model Session {
+  id          String        @id @default(uuid())
+  title       String
+  description String?
+  scheduledAt DateTime
+  status      SessionStatus @default(SCHEDULED)
+  joinUrl     String?
+  sessionId   String        @unique
+  createdBy   String
+  creator     User          @relation("SessionCreator", fields: [createdBy], references: [id], onDelete: Cascade)
+  startedAt   DateTime?
+  endedAt     DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([status])
+  @@index([scheduledAt])
+  @@index([createdBy])
 }

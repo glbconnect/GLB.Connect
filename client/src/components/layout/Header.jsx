@@ -10,6 +10,7 @@ const navLinks = [
   { to: '/buzz', label: 'Buzz' },
   { to: '/jobs', label: 'Jobs' },
   { to: '/events', label: 'Events' },
+  { to: '/sessions', label: 'Sessions' },
   { to: '/messages', label: 'Messages' },
   { to: '/anonymous-post', label: 'Anonymous Chat' },
   { to: '/resources', label: 'Resources' },

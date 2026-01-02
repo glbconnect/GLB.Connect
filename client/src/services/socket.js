@@ -176,6 +176,72 @@ export function emitEventDelete(event) {
     if (socket && socket.connected) socket.emit("event:delete", event);
 }
 
+export function subscribeToSessionUpdates(callbacks) {
+    if (!socket || !socket.connected) {
+        console.warn("Socket not connected, initializing...");
+        const authData = localStorage.getItem("auth");
+        if (authData) {
+            try {
+                const { user } = JSON.parse(authData);
+                if (user && user.id) {
+                    initializeSocket(user.id);
+                    // Wait a bit for connection, then subscribe
+                    setTimeout(() => {
+                        if (socket && socket.connected) {
+                            socket.on("session:new", callbacks.onNewSession);
+                            socket.on("session:update", callbacks.onUpdateSession);
+                            socket.on("session:delete", callbacks.onDeleteSession);
+                            socket.on("session:start", callbacks.onStartSession);
+                            socket.on("session:end", callbacks.onEndSession);
+                        }
+                    }, 500);
+                    return () => {
+                        if (socket) {
+                            socket.off("session:new");
+                            socket.off("session:update");
+                            socket.off("session:delete");
+                            socket.off("session:start");
+                            socket.off("session:end");
+                        }
+                    };
+                }
+            } catch (error) {
+                console.error("Error initializing socket for sessions:", error);
+            }
+        }
+        return () => {}; // Return empty cleanup function
+    }
+    
+    socket.on("session:new", callbacks.onNewSession);
+    socket.on("session:update", callbacks.onUpdateSession);
+    socket.on("session:delete", callbacks.onDeleteSession);
+    socket.on("session:start", callbacks.onStartSession);
+    socket.on("session:end", callbacks.onEndSession);
+    
+    // Return cleanup function
+    return () => {
+        if (socket) {
+            socket.off("session:new");
+            socket.off("session:update");
+            socket.off("session:delete");
+            socket.off("session:start");
+            socket.off("session:end");
+        }
+    };
+}
+
+export function joinSession(sessionId) {
+    if (socket && socket.connected) {
+        socket.emit("session:join", sessionId);
+    }
+}
+
+export function leaveSession(sessionId) {
+    if (socket && socket.connected) {
+        socket.emit("session:leave", sessionId);
+    }
+}
+
 export default {
     initializeSocket: initializeSocket,
     disconnectSocket: disconnectSocket,

@@ -112,6 +112,23 @@ export const initializeSocket = httpServer => {
         socket.on("event:delete", event => {
             io.emit("event:delete", event);
         });
+        // Session-related socket events
+        socket.on("session:join", sessionId => {
+            socket.join(`session:${sessionId}`);
+            console.log(`User ${socket.id} joined session ${sessionId}`);
+            io.to(`session:${sessionId}`).emit("session:user_joined", {
+                userId: socket.userId,
+                socketId: socket.id
+            });
+        });
+        socket.on("session:leave", sessionId => {
+            socket.leave(`session:${sessionId}`);
+            console.log(`User ${socket.id} left session ${sessionId}`);
+            io.to(`session:${sessionId}`).emit("session:user_left", {
+                userId: socket.userId,
+                socketId: socket.id
+            });
+        });
     });
     return io;
 };

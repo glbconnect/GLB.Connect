@@ -2,11 +2,21 @@ import React from 'react';
 import Button from '../ui/Button';
 import { formatDistanceToNow, format } from 'date-fns';
 
-const SessionCard = ({ session, isAdmin, onStart, onEnd, onEdit, onDelete, onJoin }) => {
+const SessionCard = ({ session, isAdmin, onStart, onEnd, onEdit, onDelete, onJoin, onViewDetails }) => {
   const isLive = session.status === 'LIVE';
   const isScheduled = session.status === 'SCHEDULED';
   const isEnded = session.status === 'ENDED';
   const isCreator = isAdmin && session.creator?.id;
+
+  const handleCardClick = (e) => {
+    // Don't trigger if clicking on buttons or action elements
+    if (e.target.closest('button') || e.target.closest('a')) {
+      return;
+    }
+    if (onViewDetails) {
+      onViewDetails(session);
+    }
+  };
 
   const getStatusBadge = () => {
     if (isLive) {
@@ -54,7 +64,10 @@ const SessionCard = ({ session, isAdmin, onStart, onEnd, onEdit, onDelete, onJoi
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden">
+    <div 
+      className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden cursor-pointer"
+      onClick={handleCardClick}
+    >
       <div className="p-6">
         <div className="flex justify-between items-start mb-4">
           <div className="flex-1">

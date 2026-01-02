@@ -23,6 +23,8 @@ const Sessions = ({ isLoggedIn, onLogout, currentUser }) => {
   const [error, setError] = useState('');
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingSession, setEditingSession] = useState(null);
+  const [showDetail, setShowDetail] = useState(false);
+  const [selectedSession, setSelectedSession] = useState(null);
   const [activeTab, setActiveTab] = useState('all'); // 'all', 'live', 'upcoming'
 
   const isAdmin = currentUser?.role === 'ADMIN';
@@ -226,6 +228,16 @@ const Sessions = ({ isLoggedIn, onLogout, currentUser }) => {
     }
   };
 
+  const handleViewDetails = (session) => {
+    setSelectedSession(session);
+    setShowDetail(true);
+  };
+
+  const closeDetail = () => {
+    setSelectedSession(null);
+    setShowDetail(false);
+  };
+
   const getDisplayedSessions = () => {
     switch (activeTab) {
       case 'live':
@@ -316,6 +328,226 @@ const Sessions = ({ isLoggedIn, onLogout, currentUser }) => {
             </div>
           </div>
 
+          {/* Session Detail Modal */}
+          {showDetail && selectedSession && (
+            <div className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+              <div className="bg-white rounded-2xl p-8 w-full max-w-3xl relative max-h-[90vh] overflow-y-auto shadow-2xl transform transition-all duration-300">
+                <button
+                  onClick={closeDetail}
+                  className="absolute top-4 right-4 text-3xl font-bold text-gray-400 hover:text-gray-600 transition-colors duration-200 z-10"
+                >
+                  ×
+                </button>
+                
+                <div className="space-y-6">
+                  {/* Header */}
+                  <div className="border-b border-gray-200 pb-4">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex-1">
+                        <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+                          {selectedSession.title}
+                        </h2>
+                        <div className="flex items-center gap-3 mt-2">
+                          {selectedSession.status === 'LIVE' && (
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-red-100 text-red-800 animate-pulse">
+                              <span className="w-2 h-2 bg-red-500 rounded-full mr-2"></span>
+                              LIVE
+                            </span>
+                          )}
+                          {selectedSession.status === 'SCHEDULED' && (
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
+                              Scheduled
+                            </span>
+                          )}
+                          {selectedSession.status === 'ENDED' && (
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-gray-100 text-gray-800">
+                              Ended
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Session Details Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-5 rounded-xl">
+                      <div className="flex items-center mb-2">
+                        <svg className="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <span className="font-semibold text-blue-800">Scheduled Date & Time</span>
+                      </div>
+                      <p className="text-blue-700 text-lg">
+                        {new Date(selectedSession.scheduledAt).toLocaleString('en-US', {
+                          weekday: 'long',
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </p>
+                    </div>
+
+                    {selectedSession.startedAt && (
+                      <div className="bg-gradient-to-br from-green-50 to-green-100 p-5 rounded-xl">
+                        <div className="flex items-center mb-2">
+                          <svg className="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          <span className="font-semibold text-green-800">Started At</span>
+                        </div>
+                        <p className="text-green-700 text-lg">
+                          {new Date(selectedSession.startedAt).toLocaleString('en-US', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </p>
+                      </div>
+                    )}
+
+                    {selectedSession.endedAt && (
+                      <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-5 rounded-xl">
+                        <div className="flex items-center mb-2">
+                          <svg className="w-5 h-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 10h6v4H9z" />
+                          </svg>
+                          <span className="font-semibold text-gray-800">Ended At</span>
+                        </div>
+                        <p className="text-gray-700 text-lg">
+                          {new Date(selectedSession.endedAt).toLocaleString('en-US', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </p>
+                      </div>
+                    )}
+
+                    {selectedSession.creator && (
+                      <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-5 rounded-xl">
+                        <div className="flex items-center mb-2">
+                          <svg className="w-5 h-5 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                          </svg>
+                          <span className="font-semibold text-purple-800">Session Host</span>
+                        </div>
+                        <p className="text-purple-700 text-lg">{selectedSession.creator.name}</p>
+                        {selectedSession.creator.email && (
+                          <p className="text-purple-600 text-sm mt-1">{selectedSession.creator.email}</p>
+                        )}
+                      </div>
+                    )}
+
+                    {selectedSession.joinUrl && (
+                      <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 p-5 rounded-xl">
+                        <div className="flex items-center mb-2">
+                          <svg className="w-5 h-5 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                          </svg>
+                          <span className="font-semibold text-indigo-800">Join Link</span>
+                        </div>
+                        <a
+                          href={selectedSession.joinUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-indigo-700 hover:text-indigo-900 text-sm break-all underline"
+                        >
+                          {selectedSession.joinUrl}
+                        </a>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Description */}
+                  {selectedSession.description && (
+                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-xl border border-blue-100">
+                      <h3 className="font-bold text-blue-800 mb-3 text-lg flex items-center">
+                        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        Topic / Description
+                      </h3>
+                      <p className="text-blue-700 leading-relaxed text-base whitespace-pre-wrap">
+                        {selectedSession.description}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Action Buttons */}
+                  <div className="flex gap-3 pt-4 border-t border-gray-200">
+                    {isAdmin && selectedSession.createdBy === currentUser?.id && selectedSession.status === 'SCHEDULED' && (
+                      <Button
+                        onClick={() => {
+                          closeDetail();
+                          handleStartSession(selectedSession);
+                        }}
+                        className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 flex items-center gap-2"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Start Session
+                      </Button>
+                    )}
+
+                    {isAdmin && selectedSession.createdBy === currentUser?.id && selectedSession.status === 'LIVE' && (
+                      <Button
+                        onClick={() => {
+                          closeDetail();
+                          handleEndSession(selectedSession.id);
+                        }}
+                        className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 flex items-center gap-2"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 10h6v4H9z" />
+                        </svg>
+                        End Session
+                      </Button>
+                    )}
+
+                    {selectedSession.status === 'LIVE' && selectedSession.createdBy !== currentUser?.id && (
+                      <Button
+                        onClick={() => {
+                          closeDetail();
+                          handleJoinSession(selectedSession);
+                        }}
+                        className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 flex items-center gap-2 flex-1 justify-center"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                        Join Session Now
+                      </Button>
+                    )}
+
+                    {selectedSession.joinUrl && selectedSession.status === 'LIVE' && (
+                      <Button
+                        onClick={() => window.open(selectedSession.joinUrl, '_blank')}
+                        className="bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 flex items-center gap-2"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
+                        Open Join Link
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Create/Edit Form Modal */}
           {(showCreateForm || editingSession) && (
             <div className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -367,6 +599,7 @@ const Sessions = ({ isLoggedIn, onLogout, currentUser }) => {
                       }}
                       onDelete={handleDeleteSession}
                       onJoin={handleJoinSession}
+                      onViewDetails={handleViewDetails}
                     />
                   ))}
                 </div>

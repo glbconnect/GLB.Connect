@@ -300,7 +300,7 @@ export const removeSession = async (req, res) => {
             });
         }
 
-        if (existingSession.createdBy !== userId) {
+        if (existingSession.createdBy !== userId && req.user.role !== 'ADMIN') {
             return res.status(403).json({
                 success: false,
                 message: "You don't have permission to delete this session"

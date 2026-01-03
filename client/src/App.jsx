@@ -140,8 +140,7 @@ function AppRoutes() {
         isLoggedIn={isLoggedIn}
         onLogout={handleLogout}
         notificationCount={notificationCount}
-        notifications={notifications}
-        onMarkAsRead={handleMarkAsRead}
+        onNotificationClick={handleNotificationClick}
       />
       <Routes>
         <Route path="/" element={<Home isLoggedIn={isLoggedIn} onLogout={handleLogout} />} />

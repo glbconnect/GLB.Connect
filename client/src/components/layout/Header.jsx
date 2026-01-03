@@ -200,27 +200,18 @@ const Header = ({ isLoggedIn, onLogout, notificationCount, onNotificationClick }
             {isLoggedIn && (
               <div className="flex justify-end mb-2 items-center gap-2">
                 {/* Notification Bell (Mobile) */}
-                <div className="relative" ref={notificationRef}>
-                  <button
-                    className="relative text-gray-600 hover:text-blue-600 focus:outline-none"
-                    title="Notifications"
-                    onClick={() => setShowNotifications(!showNotifications)}
-                  >
-                    <FiBell size={26} />
-                    {notificationCount > 0 && (
-                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 font-bold animate-pulse">
-                        {notificationCount}
-                      </span>
-                    )}
-                  </button>
-                  {showNotifications && (
-                      <NotificationDropdown 
-                        notifications={notifications} 
-                        onMarkAsRead={onMarkAsRead}
-                        onClose={() => setShowNotifications(false)}
-                      />
-                    )}
-                </div>
+                <button
+                  className="relative text-gray-600 hover:text-blue-600 focus:outline-none"
+                  title="Notifications"
+                  onClick={typeof onNotificationClick === 'function' ? onNotificationClick : undefined}
+                >
+                  <FiBell size={26} />
+                  {notificationCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 font-bold animate-pulse">
+                      {notificationCount}
+                    </span>
+                  )}
+                </button>
                 <button
                   onClick={() => { navigate('/profile'); closeMobileMenu(); }}
                   className="text-gray-600 hover:text-blue-600 focus:outline-none"

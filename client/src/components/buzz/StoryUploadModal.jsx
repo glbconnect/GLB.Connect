@@ -69,15 +69,15 @@ const StoryUploadModal = ({ isOpen, onClose, onSuccess }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-2 sm:p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between p-3 sm:p-4 border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-800 z-10">
-          <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
+        <div className="flex items-center justify-between p-3 sm:p-4 border-b border-gray-200 sticky top-0 bg-white z-10">
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-900">
             Create Your Story
           </h2>
           <button
             onClick={handleClose}
-            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1"
+            className="text-gray-400 hover:text-gray-600 p-1"
           >
             <XMarkIcon className="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
@@ -86,15 +86,15 @@ const StoryUploadModal = ({ isOpen, onClose, onSuccess }) => {
         {/* Content */}
         <div className="p-3 sm:p-4">
           {error && (
-            <div className="mb-3 sm:mb-4 p-2 sm:p-3 bg-red-100 dark:bg-red-900 border border-red-400 text-red-700 dark:text-red-200 rounded-lg text-xs sm:text-sm">
+            <div className="mb-3 sm:mb-4 p-2 sm:p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg text-xs sm:text-sm">
               {error}
             </div>
           )}
 
           {!imagePreview ? (
-            <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 sm:p-8 text-center">
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 sm:p-8 text-center">
               <PhotoIcon className="w-10 h-10 sm:w-12 sm:h-12 text-gray-400 mx-auto mb-3 sm:mb-4" />
-              <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-3 sm:mb-4">
+              <p className="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4">
                 Upload an image for your story
               </p>
               <label className="inline-block px-4 sm:px-6 py-2 text-sm sm:text-base bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer">
@@ -106,7 +106,7 @@ const StoryUploadModal = ({ isOpen, onClose, onSuccess }) => {
                   className="hidden"
                 />
               </label>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+              <p className="text-xs text-gray-500 mt-2">
                 Story will expire after 24 hours
               </p>
             </div>
@@ -125,7 +125,7 @@ const StoryUploadModal = ({ isOpen, onClose, onSuccess }) => {
                   <XMarkIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                 </button>
               </div>
-              <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 text-center">
+              <p className="text-xs sm:text-sm text-gray-500 text-center">
                 Your story will be visible for 24 hours
               </p>
             </div>
@@ -133,7 +133,7 @@ const StoryUploadModal = ({ isOpen, onClose, onSuccess }) => {
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-2 sm:gap-3 p-3 sm:p-4 border-t border-gray-200 dark:border-gray-700 sticky bottom-0 bg-white dark:bg-gray-800">
+        <div className="flex items-center justify-end gap-2 sm:gap-3 p-3 sm:p-4 border-t border-gray-200 sticky bottom-0 bg-white">
           <Button
             variant="outline"
             onClick={handleClose}

@@ -40,7 +40,7 @@ const CreatePost = ({ currentUser, onCreatePost }) => {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-3 sm:p-4 mb-3 sm:mb-4">
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 sm:p-4 mb-3 sm:mb-4">
       <div className="flex gap-2 sm:gap-3 mb-2 sm:mb-3">
         <UserAvatar user={currentUser} size="md" />
         <div className="flex-1 min-w-0">
@@ -48,7 +48,7 @@ const CreatePost = ({ currentUser, onCreatePost }) => {
             value={content}
             onChange={(e) => setContent(e.target.value)}
             placeholder="What's on your mind?"
-            className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+            className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base bg-gray-50 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
             rows="3"
           />
         </div>
@@ -72,8 +72,8 @@ const CreatePost = ({ currentUser, onCreatePost }) => {
       )}
 
       {/* Actions */}
-      <div className="flex items-center justify-between pt-2 sm:pt-3 border-t border-gray-200 dark:border-gray-700 gap-2">
-        <label className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition-colors">
+      <div className="flex items-center justify-between pt-2 sm:pt-3 border-t border-gray-200 gap-2">
+        <label className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100 cursor-pointer transition-colors">
           <PhotoIcon className="w-4 h-4 sm:w-5 sm:h-5" />
           <span className="font-medium text-sm sm:text-base">Photo</span>
           <input
@@ -99,4 +99,3 @@ const CreatePost = ({ currentUser, onCreatePost }) => {
 };
 
 export default CreatePost;
-

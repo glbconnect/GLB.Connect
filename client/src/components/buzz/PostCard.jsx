@@ -132,16 +132,16 @@ const PostCard = ({ post, onUpdate, currentUser, onDelete, onRepost }) => {
   const isOwnPost = currentUser?.id === post.user?.id;
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-3 sm:p-4 mb-3 sm:mb-4">
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 sm:p-4 mb-3 sm:mb-4">
       {/* Post Header */}
       <div className="flex items-start justify-between mb-2 sm:mb-3">
         <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
           <UserAvatar user={post.user} size="md" />
           <div className="min-w-0 flex-1">
-            <h3 className="font-semibold text-sm sm:text-base text-gray-900 dark:text-white truncate">
+            <h3 className="font-semibold text-sm sm:text-base text-gray-900 truncate">
               {post.user.name}
             </h3>
-            <div className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm text-gray-500 dark:text-gray-400 flex-wrap">
+            <div className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm text-gray-500 flex-wrap">
               <span className="truncate">{post.user.branch}</span>
               <span>•</span>
               <span>{post.user.year} Year</span>
@@ -153,17 +153,17 @@ const PostCard = ({ post, onUpdate, currentUser, onDelete, onRepost }) => {
         <div className="relative flex-shrink-0 ml-2" ref={menuRef}>
           <button 
             onClick={() => setShowMenu(!showMenu)}
-            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1"
+            className="text-gray-400 hover:text-gray-600 p-1"
           >
             <EllipsisHorizontalIcon className="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
           {showMenu && (
-            <div className="absolute right-0 mt-2 w-40 sm:w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-10">
+            <div className="absolute right-0 mt-2 w-40 sm:w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-10">
               {isOwnPost && (
                 <button
                   onClick={handleDelete}
                   disabled={isDeleting}
-                  className="w-full text-left px-3 sm:px-4 py-2 text-sm sm:text-base text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 disabled:opacity-50 rounded-t-lg"
+                  className="w-full text-left px-3 sm:px-4 py-2 text-sm sm:text-base text-red-600 hover:bg-gray-100 flex items-center gap-2 disabled:opacity-50 rounded-t-lg"
                 >
                   <TrashIcon className="w-4 h-4" />
                   {isDeleting ? 'Deleting...' : 'Delete Post'}
@@ -176,7 +176,7 @@ const PostCard = ({ post, onUpdate, currentUser, onDelete, onRepost }) => {
 
       {/* Post Content */}
       <div className="mb-2 sm:mb-3">
-        <p className="text-sm sm:text-base text-gray-800 dark:text-gray-200 whitespace-pre-wrap break-words">
+        <p className="text-sm sm:text-base text-gray-800 whitespace-pre-wrap break-words">
           {post.content}
         </p>
       </div>
@@ -195,7 +195,7 @@ const PostCard = ({ post, onUpdate, currentUser, onDelete, onRepost }) => {
               const parent = e.target.parentElement;
               if (parent && !parent.querySelector('.image-error')) {
                 const errorDiv = document.createElement('div');
-                errorDiv.className = 'image-error bg-gray-100 dark:bg-gray-700 p-4 text-center text-sm text-gray-500 dark:text-gray-400';
+                errorDiv.className = 'image-error bg-gray-100 p-4 text-center text-sm text-gray-500';
                 errorDiv.textContent = 'Image not available';
                 parent.appendChild(errorDiv);
               }
@@ -205,7 +205,7 @@ const PostCard = ({ post, onUpdate, currentUser, onDelete, onRepost }) => {
       )}
 
       {/* Post Stats */}
-      <div className="flex items-center justify-between text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-2 sm:mb-3 pb-2 sm:pb-3 border-b border-gray-200 dark:border-gray-700">
+      <div className="flex items-center justify-between text-xs sm:text-sm text-gray-500 mb-2 sm:mb-3 pb-2 sm:pb-3 border-b border-gray-200">
         <div className="flex items-center gap-3 sm:gap-4">
           {likesCount > 0 && (
             <span>{likesCount} {likesCount === 1 ? 'like' : 'likes'}</span>
@@ -222,8 +222,8 @@ const PostCard = ({ post, onUpdate, currentUser, onDelete, onRepost }) => {
           onClick={handleLike}
           className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 rounded-lg transition-colors flex-1 justify-center sm:flex-initial ${
             isLiked
-              ? 'text-blue-600 dark:text-blue-400'
-              : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+              ? 'text-blue-600'
+              : 'text-gray-600 hover:bg-gray-100'
           }`}
         >
           {isLiked ? (
@@ -236,7 +236,7 @@ const PostCard = ({ post, onUpdate, currentUser, onDelete, onRepost }) => {
         
         <button
           onClick={() => setShowComments(!showComments)}
-          className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex-1 justify-center sm:flex-initial"
+          className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors flex-1 justify-center sm:flex-initial"
         >
           <ChatBubbleLeftIcon className="w-5 h-5" />
           <span className="font-medium text-xs sm:text-base hidden sm:inline">Comment</span>
@@ -244,7 +244,7 @@ const PostCard = ({ post, onUpdate, currentUser, onDelete, onRepost }) => {
         
         <button 
           onClick={handleRepost}
-          className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex-1 justify-center sm:flex-initial"
+          className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors flex-1 justify-center sm:flex-initial"
         >
           <ArrowPathIcon className="w-5 h-5" />
           <span className="font-medium text-xs sm:text-base hidden sm:inline">Repost</span>
@@ -253,7 +253,7 @@ const PostCard = ({ post, onUpdate, currentUser, onDelete, onRepost }) => {
 
       {/* Comments Section */}
       {showComments && (
-        <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-200 dark:border-gray-700">
+        <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-200">
           {/* Existing Comments */}
           {comments.length > 0 && (
             <div className="mb-3 sm:mb-4 space-y-2 sm:space-y-3 max-h-48 sm:max-h-64 overflow-y-auto">
@@ -261,15 +261,15 @@ const PostCard = ({ post, onUpdate, currentUser, onDelete, onRepost }) => {
                 <div key={comment.id} className="flex gap-2 sm:gap-3">
                   <UserAvatar user={comment.user} size="sm" />
                   <div className="flex-1 min-w-0">
-                    <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-2 sm:p-3">
-                      <p className="text-xs sm:text-sm font-medium text-gray-900 dark:text-white">
+                    <div className="bg-gray-50 rounded-lg p-2 sm:p-3">
+                      <p className="text-xs sm:text-sm font-medium text-gray-900">
                         {comment.user.name}
                       </p>
-                      <p className="text-xs sm:text-sm text-gray-700 dark:text-gray-300 mt-1 break-words">
+                      <p className="text-xs sm:text-sm text-gray-700 mt-1 break-words">
                         {comment.content}
                       </p>
                     </div>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    <p className="text-xs text-gray-500 mt-1">
                       {formatTimestamp(comment.createdAt)}
                     </p>
                   </div>
@@ -287,7 +287,7 @@ const PostCard = ({ post, onUpdate, currentUser, onDelete, onRepost }) => {
                 value={commentText}
                 onChange={(e) => setCommentText(e.target.value)}
                 placeholder="Write a comment..."
-                className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base bg-gray-50 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 disabled={isSubmitting}
               />
             </div>

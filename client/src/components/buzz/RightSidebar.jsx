@@ -22,8 +22,8 @@ const RightSidebar = ({ suggestedStudents, topContributors, trendingPosts }) => 
   return (
     <div className="hidden xl:block w-80 space-y-4">
       {/* Suggested Students */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-        <h3 className="font-semibold text-gray-900 dark:text-white mb-4">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <h3 className="font-semibold text-gray-900 mb-4">
           Suggested Students
         </h3>
         <div className="space-y-3">
@@ -32,10 +32,10 @@ const RightSidebar = ({ suggestedStudents, topContributors, trendingPosts }) => 
               <div className="flex items-center gap-3">
                 <UserAvatar user={student} size="md" />
                 <div>
-                  <h4 className="font-medium text-gray-900 dark:text-white text-sm">
+                  <h4 className="font-medium text-gray-900 text-sm">
                     {student.name}
                   </h4>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                  <p className="text-xs text-gray-500">
                     {student.branch} • {student.year} Year
                   </p>
                 </div>
@@ -44,8 +44,8 @@ const RightSidebar = ({ suggestedStudents, topContributors, trendingPosts }) => 
                 onClick={() => handleFollow(student.id)}
                 className={`text-sm font-medium transition-colors ${
                   followingStates[student.id]
-                    ? 'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
-                    : 'text-blue-600 dark:text-blue-400 hover:underline'
+                    ? 'text-gray-600 hover:text-gray-800'
+                    : 'text-blue-600 hover:underline'
                 }`}
               >
                 {followingStates[student.id] ? 'Following' : 'Follow'}
@@ -55,7 +55,7 @@ const RightSidebar = ({ suggestedStudents, topContributors, trendingPosts }) => 
         </div>
         <Link
           to="/qa-threads"
-          className="flex items-center justify-center gap-2 mt-4 text-blue-600 dark:text-blue-400 hover:underline text-sm font-medium"
+          className="flex items-center justify-center gap-2 mt-4 text-blue-600 hover:underline text-sm font-medium"
         >
           See all
           <ArrowRightIcon className="w-4 h-4" />
@@ -63,8 +63,8 @@ const RightSidebar = ({ suggestedStudents, topContributors, trendingPosts }) => 
       </div>
 
       {/* Top Contributors */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-        <h3 className="font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
           <FireIcon className="w-5 h-5 text-orange-500" />
           Top Contributors
         </h3>
@@ -72,15 +72,15 @@ const RightSidebar = ({ suggestedStudents, topContributors, trendingPosts }) => 
           {topContributors?.slice(0, 5).map((contributor, index) => (
             <div key={index} className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center w-6 h-6 rounded-full bg-orange-100 dark:bg-orange-900 text-orange-600 dark:text-orange-400 text-xs font-bold">
+                <div className="flex items-center justify-center w-6 h-6 rounded-full bg-orange-100 text-orange-600 text-xs font-bold">
                   {index + 1}
                 </div>
                 <UserAvatar user={contributor} size="sm" />
                 <div>
-                  <h4 className="font-medium text-gray-900 dark:text-white text-sm">
+                  <h4 className="font-medium text-gray-900 text-sm">
                     {contributor.name}
                   </h4>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                  <p className="text-xs text-gray-500">
                     {contributor.posts} posts
                   </p>
                 </div>
@@ -91,17 +91,17 @@ const RightSidebar = ({ suggestedStudents, topContributors, trendingPosts }) => 
       </div>
 
       {/* Trending Posts */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-        <h3 className="font-semibold text-gray-900 dark:text-white mb-4">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <h3 className="font-semibold text-gray-900 mb-4">
           Trending Posts
         </h3>
         <div className="space-y-3">
           {trendingPosts?.slice(0, 3).map((post, index) => (
-            <div key={index} className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-2 rounded-lg transition-colors">
-              <p className="text-sm text-gray-800 dark:text-gray-200 line-clamp-2">
+            <div key={index} className="cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors">
+              <p className="text-sm text-gray-800 line-clamp-2">
                 {post.content}
               </p>
-              <div className="flex items-center gap-2 mt-2 text-xs text-gray-500 dark:text-gray-400">
+              <div className="flex items-center gap-2 mt-2 text-xs text-gray-500">
                 <span>{post.likes} likes</span>
                 <span>•</span>
                 <span>{post.comments} comments</span>
@@ -115,4 +115,3 @@ const RightSidebar = ({ suggestedStudents, topContributors, trendingPosts }) => 
 };
 
 export default RightSidebar;
-

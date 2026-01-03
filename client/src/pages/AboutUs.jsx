@@ -152,26 +152,22 @@ const AboutUs = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           <TeamCard 
-            name="Muhammad Baqir" 
-            role="Founder" 
+            name="Muhammad Baqir"  
             description="Visionary leader passionate about community building and tech innovation."
             delay={0.1}
           />
           <TeamCard 
             name="Nisha Ahmad" 
-            role="Core Team Member" 
             description="Leading the technical development and ensuring a seamless user experience."
             delay={0.2}
           />
           <TeamCard 
             name="Maahi Dhaka" 
-            role="Core Team Member" 
             description="Focused on strategic growth and student outreach initiatives."
             delay={0.3}
           />
           <TeamCard 
             name="Kshitij Dwivedi" 
-            role="Core Team Member" 
             description="Technical expertise ensuring the platform runs smoothly."
             delay={0.4}
           />

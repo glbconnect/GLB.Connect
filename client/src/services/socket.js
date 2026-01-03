@@ -247,6 +247,7 @@ export default {
     disconnectSocket: disconnectSocket,
     sendMessage: sendMessage,
     listenForMessages: listenForMessages,
+    listenForNotifications: listenForNotifications,
     listenForTyping: listenForTyping,
     emitTyping: emitTyping,
     removeAllListeners: removeAllListeners,

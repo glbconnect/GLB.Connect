@@ -3,6 +3,7 @@ import path from "path";
 import multer from "multer";
 import fs from "fs";
 import { uploadToCloudinary, deleteFromCloudinary, isCloudinaryConfigured } from "../utils/cloudinary.js";
+import { createNotification } from "./notificationController.js";
 
 const prisma = new PrismaClient();
 
@@ -279,6 +280,23 @@ export const toggleLike = async (req, res) => {
           userId: userId
         }
       });
+
+      // Get post author to send notification
+      const post = await prisma.post.findUnique({
+        where: { id: postId },
+        select: { userId: true }
+      });
+
+      if (post) {
+        await createNotification({
+          recipientId: post.userId,
+          senderId: userId,
+          type: 'LIKE',
+          message: 'liked your post',
+          relatedId: postId
+        });
+      }
+
       res.json({ liked: true });
     }
   } catch (error) {
@@ -314,6 +332,22 @@ export const addComment = async (req, res) => {
         }
       }
     });
+
+    // Get post author to send notification
+    const post = await prisma.post.findUnique({
+      where: { id: postId },
+      select: { userId: true }
+    });
+
+    if (post) {
+      await createNotification({
+        recipientId: post.userId,
+        senderId: userId,
+        type: 'COMMENT',
+        message: 'commented on your post',
+        relatedId: postId
+      });
+    }
 
     res.status(201).json(comment);
   } catch (error) {
@@ -409,6 +443,17 @@ export const sharePost = async (req, res) => {
         userId: userId
       }
     });
+
+    // Send notification to original post author
+    if (originalPost) {
+      await createNotification({
+        recipientId: originalPost.userId,
+        senderId: userId,
+        type: 'SHARE',
+        message: 'shared your post',
+        relatedId: postId
+      });
+    }
 
     // Get server URL
     const getServerUrl = () => {
@@ -856,6 +901,16 @@ export const toggleFollow = async (req, res) => {
           followingId: followingId
         }
       });
+
+      // Send notification
+      await createNotification({
+        recipientId: followingId,
+        senderId: userId,
+        type: 'FOLLOW',
+        message: 'started following you',
+        relatedId: userId
+      });
+
       res.json({ following: true });
     }
   } catch (error) {

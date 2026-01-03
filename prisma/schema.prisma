@@ -50,8 +50,26 @@ model User {
   stories          Story[]
   followers        Follow[] @relation("UserFollowers")
   following        Follow[] @relation("UserFollowing")
+  notifications    Notification[] @relation("UserNotifications")
+  sentNotifications Notification[] @relation("NotificationSender")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Notification {
+  id          String   @id @default(uuid())
+  recipientId String
+  senderId    String?
+  type        String   // LIKE, COMMENT, FOLLOW, MENTION, SYSTEM
+  message     String
+  isRead      Boolean  @default(false)
+  relatedId   String?  // ID of the post, comment, etc.
+  recipient   User     @relation("UserNotifications", fields: [recipientId], references: [id], onDelete: Cascade)
+  sender      User?    @relation("NotificationSender", fields: [senderId], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+
+  @@index([recipientId])
+  @@index([isRead])
 }
 
 model Message {

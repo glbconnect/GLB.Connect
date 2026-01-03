@@ -375,4 +375,15 @@ export const toggleFollowUser = async (userId) => {
   return response.data;
 };
 
+// Notification API calls
+export const getNotifications = async () => {
+  const response = await api.get('/notifications');
+  return response.data;
+};
+
+export const markNotificationAsRead = async (notificationId) => {
+  const response = await api.put(`/notifications/${notificationId}/read`);
+  return response.data;
+};
+
 export default api; 

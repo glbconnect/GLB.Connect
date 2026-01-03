@@ -15,6 +15,7 @@ import anonymousMessageRouter from './src/routes/anonymousMessageRoutes.js';
 import eventRouter from './src/routes/eventRoutes.js';
 import buzzRouter from './src/routes/buzzRoutes.js';
 import sessionRouter from './src/routes/sessionRoutes.js';
+import notificationRouter from './src/routes/notificationRoutes.js';
 import multer from 'multer';
 import fs from 'fs';
 
@@ -58,6 +59,7 @@ app.use('/api/anonymous-messages', anonymousMessageRouter);
 app.use('/api/events', eventRouter);
 app.use('/api/buzz', buzzRouter);
 app.use('/api/sessions', sessionRouter);
+app.use('/api/notifications', notificationRouter);
 
 app.get('/api/health', (req, res) => {
   res.status(200).send('OK');

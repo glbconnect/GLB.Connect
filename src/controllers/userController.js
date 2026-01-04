@@ -6,10 +6,13 @@ import path from "path";
 
 import multer from "multer";
 
+import fs from "fs";
+
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient;
 
+import { uploadToCloudinary, isCloudinaryConfigured } from "../utils/cloudinary.js";
 const avatarStorage = multer.diskStorage({
     destination: function(req, file, cb) {
         cb(null, path.join(process.cwd(), "uploads"));
@@ -233,8 +236,18 @@ export const uploadAvatar = async (req, res) => {
         });
     }
     const userId = req.user.id;
-    const avatarUrl = `/uploads/${req.file.filename}`;
     try {
+        let avatarUrl;
+        if (isCloudinaryConfigured()) {
+            const filePath = path.join(process.cwd(), "uploads", req.file.filename);
+            const buffer = fs.readFileSync(filePath);
+            const publicId = `avatar-${userId}`;
+            const result = await uploadToCloudinary(buffer, "avatars", publicId);
+            avatarUrl = result.url;
+            try { fs.unlinkSync(filePath); } catch {}
+        } else {
+            avatarUrl = `/uploads/${req.file.filename}`;
+        }
         const updatedUser = await prisma.user.update({
             where: {
                 id: userId

@@ -17,6 +17,7 @@ import buzzRouter from './src/routes/buzzRoutes.js';
 import sessionRouter from './src/routes/sessionRoutes.js';
 import multer from 'multer';
 import fs from 'fs';
+import { uploadToCloudinary, isCloudinaryConfigured } from './src/utils/cloudinary.js';
 
 dotenv.config();
 
@@ -146,13 +147,27 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // Handle file uploads
-app.post('/api/uploads', upload.single('file'), (req, res) => {
+app.post('/api/uploads', upload.single('file'), async (req, res) => {
   if (!req.file) {
     return res.status(400).json({ error: 'No file uploaded' });
   }
-  // The URL should be relative to the server root
-  const fileUrl = `/uploads/${req.file.filename}`;
-  res.json({ url: fileUrl });
+  try {
+    if (isCloudinaryConfigured()) {
+      const filePath = path.join(__dirname, 'uploads', req.file.filename);
+      const buffer = fs.readFileSync(filePath);
+      const publicId = req.file.filename.replace(path.extname(req.file.filename), '');
+      const result = await uploadToCloudinary(buffer, 'events', publicId);
+      // cleanup local file
+      try { fs.unlinkSync(filePath); } catch {}
+      return res.json({ url: result.url });
+    } else {
+      const fileUrl = `/uploads/${req.file.filename}`;
+      return res.json({ url: fileUrl });
+    }
+  } catch (error) {
+    console.error('Error handling upload:', error);
+    return res.status(500).json({ error: 'Failed to upload file' });
+  }
 });
 
 // Add CORS headers for file serving (before static middleware)

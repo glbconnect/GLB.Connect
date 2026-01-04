@@ -20,8 +20,7 @@ export const uploadToCloudinary = async (fileBuffer, folder, publicId = null) =>
     const uploadOptions = {
       folder: folder,
       resource_type: 'image',
-      format: 'auto', // Auto-optimize format
-      quality: 'auto', // Auto-optimize quality
+      transformation: [{ fetch_format: 'auto', quality: 'auto' }],
     };
 
     if (publicId) {
@@ -99,4 +98,3 @@ export const isCloudinaryConfigured = () => {
     process.env.USE_CLOUDINARY === 'true'
   );
 };
-

@@ -289,18 +289,3 @@ model Session {
   @@index([scheduledAt])
   @@index([createdBy])
 }
-
-model ConnectionRequest {
-  id         String   @id @default(uuid())
-  senderId   String
-  receiverId String
-  status     String   @default("pending")
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  sender     User     @relation(fields: [senderId], references: [id])
-  receiver   User     @relation(fields: [receiverId], references: [id])
-
-  @@unique([senderId, receiverId])
-  @@index([senderId])
-  @@index([receiverId])
-}

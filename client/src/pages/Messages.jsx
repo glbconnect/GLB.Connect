@@ -16,15 +16,15 @@ const Messages = ({ isLoggedIn, onLogout, currentUser }) => {
   const [activeUserId, setActiveUserId] = useState(userId || null);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
-  const [isAnonymous] = useState(false);
+  const [isAnonymous, setIsAnonymous] = useState(false);
   const [conversations, setConversations] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [userTyping, setUserTyping] = useState(null);
   const [socket, setSocket] = useState(null);
   const [showSidebar, setShowSidebar] = useState(false); // For mobile sidebar toggle
-  const [connectionStatus, setConnectionStatus] = useState('none');
   
+  const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
   const typingTimeoutRef = useRef(null);
 
@@ -154,20 +154,6 @@ const Messages = ({ isLoggedIn, onLogout, currentUser }) => {
       fetchMessages();
     }
   }, [activeUserId, currentUser?.id]);
-
-  useEffect(() => {
-    if (activeUserId) {
-      api.getConnectionStatus(activeUserId)
-        .then(res => {
-          setConnectionStatus(res?.status || 'none');
-        })
-        .catch(() => {
-          setConnectionStatus('none');
-        });
-    } else {
-      setConnectionStatus('none');
-    }
-  }, [activeUserId]);
 
   // Scroll to bottom of chat area only (not whole page)
   useEffect(() => {
@@ -358,10 +344,6 @@ const Messages = ({ isLoggedIn, onLogout, currentUser }) => {
     
     // Prevent multiple rapid submissions or empty messages
     if (sendingMessage || !messageContent) return;
-    if (connectionStatus !== 'accepted') {
-      setError('Messaging disabled until follow request is accepted');
-      return;
-    }
     
     // Prevent duplicate sends (double-click or multiple rapid enters)
     const now = Date.now();
@@ -761,13 +743,12 @@ const Messages = ({ isLoggedIn, onLogout, currentUser }) => {
                   <div className="flex-1 relative">
                     <Input
                       type="text"
-                      placeholder={connectionStatus === 'accepted' ? 'Type a message...' : 'Messaging disabled until follow is accepted'}
+                      placeholder="Type a message..."
                       value={newMessage}
                       onChange={handleInputChange}
                       onKeyDown={handleKeyDown}
                       className="w-full rounded-2xl border border-gray-200 px-4 py-3 lg:px-5 lg:py-3 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-200 bg-white shadow-sm text-sm lg:text-base transition-all resize-none"
                       autoComplete="off"
-                      disabled={connectionStatus !== 'accepted'}
                     />
                   </div>
                   
@@ -781,7 +762,7 @@ const Messages = ({ isLoggedIn, onLogout, currentUser }) => {
                   <button
                     type="submit"
                     className="bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-full p-2 lg:p-3 w-10 h-10 lg:w-12 lg:h-12 flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-105 hover:from-blue-600 hover:to-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none focus:outline-none focus:ring-2 focus:ring-blue-200"
-                    disabled={!newMessage.trim() || connectionStatus !== 'accepted'}
+                    disabled={!newMessage.trim()}
                     aria-label="Send message"
                   >
                     <svg className="w-4 h-4 lg:w-5 lg:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

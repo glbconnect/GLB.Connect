@@ -13,7 +13,6 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient;
 
 import { uploadToCloudinary, isCloudinaryConfigured } from "../utils/cloudinary.js";
-import { getIO } from "../sockets/chatSocket.js";
 const avatarStorage = multer.diskStorage({
     destination: function(req, file, cb) {
         cb(null, path.join(process.cwd(), "uploads"));
@@ -266,104 +265,5 @@ export const uploadAvatar = async (req, res) => {
         res.status(500).json({
             error: "Failed to update avatar"
         });
-    }
-};
-
-export const sendFollowRequest = async (req, res) => {
-    try {
-        const senderId = req.user.id;
-        const { id: receiverId } = req.params;
-        if (senderId === receiverId) {
-            return res.status(400).json({ error: "Cannot follow yourself" });
-        }
-        const existing = await prisma.connectionRequest.findUnique({
-            where: { senderId_receiverId: { senderId, receiverId } }
-        });
-        if (existing) {
-            return res.json({ success: true, status: existing.status, requestId: existing.id });
-        }
-        const request = await prisma.connectionRequest.create({
-            data: { senderId, receiverId, status: "pending" }
-        });
-        try {
-            const io = getIO();
-            io.emit("follow:request", { id: request.id, senderId, receiverId });
-        } catch {}
-        res.status(201).json({ success: true, status: "pending", requestId: request.id });
-    } catch (error) {
-        console.error("Error sending follow request:", error);
-        res.status(500).json({ error: "Failed to send follow request" });
-    }
-};
-
-export const getConnectionStatus = async (req, res) => {
-    try {
-        const userId = req.user.id;
-        const { otherUserId } = req.params;
-        const request = await prisma.connectionRequest.findFirst({
-            where: {
-                OR: [
-                    { senderId: userId, receiverId: otherUserId },
-                    { senderId: otherUserId, receiverId: userId }
-                ]
-            },
-            orderBy: { updatedAt: "desc" }
-        });
-        const status = request ? request.status : "none";
-        res.json({ status, requestId: request?.id || null });
-    } catch (error) {
-        console.error("Error getting connection status:", error);
-        res.status(500).json({ error: "Failed to get connection status" });
-    }
-};
-
-export const listPendingRequests = async (req, res) => {
-    try {
-        const userId = req.user.id;
-        const requests = await prisma.connectionRequest.findMany({
-            where: { receiverId: userId, status: "pending" },
-            orderBy: { createdAt: "desc" }
-        });
-        res.json({ requests });
-    } catch (error) {
-        console.error("Error listing follow requests:", error);
-        res.status(500).json({ error: "Failed to list follow requests" });
-    }
-};
-
-export const respondToFollowRequest = async (req, res) => {
-    try {
-        const userId = req.user.id;
-        const { requestId } = req.params;
-        const { action } = req.body; // "accept" | "reject"
-        const request = await prisma.connectionRequest.findUnique({ where: { id: requestId } });
-        if (!request || request.receiverId !== userId) {
-            return res.status(404).json({ error: "Request not found" });
-        }
-        const status = action === "accept" ? "accepted" : "rejected";
-        const updated = await prisma.connectionRequest.update({
-            where: { id: requestId },
-            data: { status }
-        });
-        if (status === "accepted") {
-            try {
-                await prisma.follow.create({
-                    data: { followerId: request.senderId, followingId: request.receiverId }
-                });
-            } catch {}
-            try {
-                await prisma.follow.create({
-                    data: { followerId: request.receiverId, followingId: request.senderId }
-                });
-            } catch {}
-        }
-        try {
-            const io = getIO();
-            io.emit("follow:response", { id: requestId, status, senderId: request.senderId, receiverId: request.receiverId });
-        } catch {}
-        res.json({ success: true, status });
-    } catch (error) {
-        console.error("Error responding to follow request:", error);
-        res.status(500).json({ error: "Failed to respond to follow request" });
     }
 };

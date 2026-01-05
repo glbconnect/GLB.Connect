@@ -55,14 +55,10 @@ const QAThreads = ({ isLoggedIn, onLogout, currentUser }) => {
   // Get unique batch years for filter
   const batchYears = [...new Set(users.map(user => user.batchYear))].sort((a, b) => b - a);
 
-  const handleFollowClick = async (user, e) => {
+  // Handle message button click to navigate to chat
+  const handleMessageClick = (user, e) => {
     e.stopPropagation();
-    try {
-      const res = await api.sendFollowRequest(user.id);
-      setConnections(prev => ({ ...prev, [user.id]: res.status || 'pending' }));
-    } catch (err) {
-      console.error('Failed to send follow request:', err);
-    }
+    navigate(`/messages/${user.id}`);
   };
 
   // Dummy connect handler (replace with API call)
@@ -221,7 +217,7 @@ const QAThreads = ({ isLoggedIn, onLogout, currentUser }) => {
                     connectionStatus={connections[user.id] || 'none'}
                     onConnect={(e) => {
                       e.stopPropagation();
-                      handleFollowClick(user, e);
+                      handleMessageClick(user, e);
                     }}
                   />
                         </div>
@@ -326,13 +322,13 @@ const QAThreads = ({ isLoggedIn, onLogout, currentUser }) => {
                       )}
                     </div>
 
-                    {/* Follow Button */}
+                    {/* Connect Button */}
                     <div className="flex justify-center pt-4">
                       <button
-                        onClick={() => handleFollowClick(selectedUser, { stopPropagation: () => {} })}
+                        onClick={() => handleMessageClick(selectedUser, { stopPropagation: () => {} })}
                         className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 shadow-lg"
                       >
-                        Follow {selectedUser.name.split(' ')[0]}
+                        Message {selectedUser.name.split(' ')[0]}
                       </button>
                     </div>
                   </div>

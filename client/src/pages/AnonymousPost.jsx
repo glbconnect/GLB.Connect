@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import io from 'socket.io-client';
 import * as api from '../services/api';
 import { HiOutlineUserCircle, HiOutlinePaperAirplane } from 'react-icons/hi';
 import { FaMask } from 'react-icons/fa6';
-import toast from 'react-hot-toast';
 
-const AnonymousPost = () => {
+const AnonymousPost = ({ isLoggedIn, onLogout, currentUser }) => {
+  const navigate = useNavigate();
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [guestId] = useState(`Guest${Math.floor(Math.random() * 1000)}`);
@@ -57,28 +58,9 @@ const AnonymousPost = () => {
     scrollToBottom();
   }, [messages]);
 
-  const BAD_WORDS = [
-    "fuck","shit","bitch","asshole","dick","cunt","bastard","slut","whore",
-    "kill yourself","kys","retard","fag","nigger","chink","spic","terrorist","dirty immigrant",
-    "porn","sex","nude","rape","incest","blowjob","handjob","anal","cum"
-  ];
-  const normalize = (t) => t.toLowerCase().replace(/[^a-z0-9\\s]/g, ' ').replace(/\\s+/g, ' ').trim();
-  const isAbusive = (t) => {
-    const nt = normalize(t);
-    return BAD_WORDS.some(w => nt.includes(w));
-  };
-
   const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!newMessage.trim() || !socket) return;
-    if (newMessage.trim().length > 500) {
-      toast.error('Message too long (max 500 characters)');
-      return;
-    }
-    if (isAbusive(newMessage)) {
-      toast.error('Your message contains abusive content and cannot be sent.');
-      return;
-    }
 
     const messageData = {
       content: newMessage,
@@ -91,7 +73,6 @@ const AnonymousPost = () => {
       setNewMessage('');
     } catch (error) {
       console.error('Error sending message:', error);
-      toast.error(error?.response?.data?.message || 'Failed to send message');
     }
   };
 
@@ -137,27 +118,6 @@ const AnonymousPost = () => {
                   >
                     <div className={`font-semibold text-xs mb-1 ${isOwn ? 'text-blue-100' : 'text-blue-500'}`}>{message.guestId}</div>
                     <p className="break-words leading-relaxed text-base">{message.content}</p>
-                    {!isOwn && (
-                      <div className="mt-2 text-right">
-                        <button
-                          className="text-xs text-blue-600 hover:underline"
-                          onClick={async () => {
-                            const reason = window.prompt('Report reason (optional):', 'abusive');
-                            if (reason) {
-                              api.reportAnonymousMessage(message.id, reason)
-                                .then(() => {
-                                  toast.success('Reported. Thanks for keeping the chat safe.');
-                                })
-                                .catch(() => {
-                                  toast.error('Failed to report.');
-                                });
-                            }
-                          }}
-                        >
-                          Report
-                        </button>
-                      </div>
-                    )}
                     <div className="text-[10px] mt-2 opacity-60 text-right select-none">
                       {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </div>

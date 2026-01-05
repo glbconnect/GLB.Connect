@@ -36,8 +36,6 @@ model User {
   branch    String?
   year      String?
   skills    String?   
-  isMuted   Boolean   @default(false)
-  isBanned  Boolean   @default(false)
   messagesSent     Message[] @relation("SenderMessages")
   messagesReceived Message[] @relation("ReceiverMessages")
   jobsPosted       Job[]     @relation("JobPoster")
@@ -52,8 +50,6 @@ model User {
   stories          Story[]
   followers        Follow[] @relation("UserFollowers")
   following        Follow[] @relation("UserFollowing")
-  anonymousMessages AnonymousMessage[]
-  anonymousReports  AnonymousReport[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -77,31 +73,11 @@ model AnonymousMessage {
   id        String    @id @default(uuid())
   content   String
   guestId   String    
-  userId    String?
-  user      User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
-  flagged   Boolean   @default(false)
-  moderationStatus String @default("APPROVED") // APPROVED | REJECTED
-  moderationReason String?
   timestamp DateTime  @default(now())
-  reports   AnonymousReport[]
 
   @@index([timestamp])
-  @@index([userId])
 }
 
-model AnonymousReport {
-  id          String   @id @default(uuid())
-  messageId   String
-  reporterId  String
-  reason      String
-  status      String   @default("OPEN") // OPEN | RESOLVED
-  createdAt   DateTime @default(now())
-  message     AnonymousMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
-  reporter    User     @relation(fields: [reporterId], references: [id], onDelete: Cascade)
-
-  @@index([messageId])
-  @@index([reporterId])
-}
 
 model Job {
   id                  Int      @id @default(autoincrement())

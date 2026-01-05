@@ -32,10 +32,15 @@ const hasAbusiveContent = (text) => {
 router.get("/", authenticateToken, async (req, res) => {
     try {
         const messages = await getAnonymousMessages();
-        const reportCounts = await prisma.anonymousMessageReport.groupBy({
-            by: ['messageId'],
-            _count: { messageId: true }
-        });
+        let reportCounts = [];
+        try {
+            reportCounts = await prisma.anonymousMessageReport.groupBy({
+                by: ['messageId'],
+                _count: { messageId: true }
+            });
+        } catch (err) {
+            reportCounts = [];
+        }
         const countMap = new Map(reportCounts.map(rc => [rc.messageId, rc._count.messageId]));
         const enriched = messages.map(m => ({
             ...m,
@@ -84,12 +89,21 @@ router.post("/", authenticateToken, async (req, res) => {
             return res.status(400).json({ message: "Inappropriate language is not allowed" });
         }
 
-        const message = await createAnonymousMessage({
-            content,
-            guestId,
-            timestamp,
-            posterUserId: userId
-        });
+        let message;
+        try {
+            message = await createAnonymousMessage({
+                content,
+                guestId,
+                timestamp,
+                posterUserId: userId
+            });
+        } catch (err) {
+            message = await createAnonymousMessage({
+                content,
+                guestId,
+                timestamp
+            });
+        }
         lastMessageAtByUser.set(userId, now);
         const io = getIO();
         io.to("anonymous-chat").emit("anonymous-message", message);

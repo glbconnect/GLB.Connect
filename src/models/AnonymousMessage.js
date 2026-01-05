@@ -6,7 +6,8 @@ export const createAnonymousMessage = async messageData => prisma.anonymousMessa
     data: {
         content: messageData.content,
         guestId: messageData.guestId,
-        timestamp: new Date(messageData.timestamp)
+        timestamp: new Date(messageData.timestamp),
+        posterUserId: messageData.posterUserId || null
     }
 });
 

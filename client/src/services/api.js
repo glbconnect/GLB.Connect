@@ -187,6 +187,11 @@ export const sendAnonymousMessage = async (messageData) => {
   return response.data;
 };
 
+export const reportAnonymousMessage = async (messageId, reportData) => {
+  const response = await api.post(`/anonymous-messages/${messageId}/report`, reportData);
+  return response.data;
+};
+
 // Events API calls
 export const getEvents = async () => {
   const response = await api.get('/events');

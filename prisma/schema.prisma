@@ -36,6 +36,8 @@ model User {
   branch    String?
   year      String?
   skills    String?   
+  muted     Boolean   @default(false)
+  banned    Boolean   @default(false)
   messagesSent     Message[] @relation("SenderMessages")
   messagesReceived Message[] @relation("ReceiverMessages")
   jobsPosted       Job[]     @relation("JobPoster")
@@ -50,6 +52,8 @@ model User {
   stories          Story[]
   followers        Follow[] @relation("UserFollowers")
   following        Follow[] @relation("UserFollowing")
+  anonymousPosts   AnonymousMessage[] @relation("AnonymousPoster")
+  reportsFiled     AnonymousMessageReport[] @relation("ReporterReports")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -74,8 +78,26 @@ model AnonymousMessage {
   content   String
   guestId   String    
   timestamp DateTime  @default(now())
+  posterUserId String?
+  poster      User?     @relation("AnonymousPoster", fields: [posterUserId], references: [id])
+  reports     AnonymousMessageReport[] @relation("MessageReports")
 
   @@index([timestamp])
+  @@index([posterUserId])
+}
+
+model AnonymousMessageReport {
+  id              String   @id @default(uuid())
+  messageId       String
+  reportedGuestId String
+  reporterUserId  String
+  reason          String
+  timestamp       DateTime @default(now())
+  message         AnonymousMessage @relation("MessageReports", fields: [messageId], references: [id], onDelete: Cascade)
+  reporter        User             @relation("ReporterReports", fields: [reporterUserId], references: [id])
+
+  @@index([messageId])
+  @@index([reporterUserId])
 }
 
 

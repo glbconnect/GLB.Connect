@@ -61,10 +61,7 @@ router.post("/", authenticateToken, async (req, res) => {
         const messageData = {
             content,
             guestId: req.body.guestId,
-            userId,
-            timestamp: new Date().toISOString(),
-            flagged: false,
-            moderationStatus: "APPROVED"
+            timestamp: new Date().toISOString()
         };
         const message = await createAnonymousMessage(messageData);
         const io = getIO();

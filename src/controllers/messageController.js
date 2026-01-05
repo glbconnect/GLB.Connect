@@ -8,6 +8,18 @@ export const sendMessage = async (req, res) => {
     try {
         const {receiverId: receiverId, content: content, isAnonymous: isAnonymous} = req.body;
         const senderId = req.user.id;
+        const accepted = await prisma.connectionRequest.findFirst({
+            where: {
+                status: "accepted",
+                OR: [
+                    { senderId: senderId, receiverId: receiverId },
+                    { senderId: receiverId, receiverId: senderId }
+                ]
+            }
+        });
+        if (!accepted) {
+            return res.status(403).json({ error: "Messaging disabled until follow request is accepted" });
+        }
         const message = await createMessage(senderId, receiverId, content, isAnonymous);
         res.status(201).json(message);
     } catch (error) {

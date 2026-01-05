@@ -20,7 +20,7 @@ const UserCard = ({ user, onConnect, connectionStatus }) => {
         )}
       </div>
       {connectionStatus === 'none' && (
-        <Button onClick={onConnect} className="mt-2 w-full">Message</Button>
+        <Button onClick={onConnect} className="mt-2 w-full">Follow</Button>
       )}
       {connectionStatus === 'pending' && (
         <div className="mt-2 text-yellow-600 text-sm">Request Sent</div>

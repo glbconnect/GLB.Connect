@@ -296,6 +296,27 @@ export const getAllConversations = async () => {
   return response.data;
 };
 
+// Follow / connection requests
+export const sendFollowRequest = async (userId) => {
+  const response = await api.post(`/users/${userId}/follow-request`);
+  return response.data;
+};
+
+export const getConnectionStatus = async (otherUserId) => {
+  const response = await api.get(`/users/connection-status/${otherUserId}`);
+  return response.data;
+};
+
+export const listPendingConnectionRequests = async () => {
+  const response = await api.get('/users/connection-requests');
+  return response.data;
+};
+
+export const respondToConnectionRequest = async (requestId, action) => {
+  const response = await api.post(`/users/connection-requests/${requestId}/respond`, { action });
+  return response.data;
+};
+
 // Buzz API calls
 export const getBuzzPosts = async () => {
   const response = await api.get('/buzz/posts');

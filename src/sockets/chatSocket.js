@@ -3,6 +3,8 @@ import { Server } from "socket.io";
 import { createMessage } from "../models/messageModel.js";
 
 import { verifyToken } from "../middleware/auth.js";
+import { PrismaClient } from "@prisma/client";
+const prisma = new PrismaClient();
 
 let ioInstance;
 
@@ -78,6 +80,19 @@ export const initializeSocket = httpServer => {
             }
             try {
                 const {senderId: senderId, receiverId: receiverId, content: content, isAnonymous: isAnonymous} = data;
+                const accepted = await prisma.connectionRequest.findFirst({
+                    where: {
+                        status: "accepted",
+                        OR: [
+                            { senderId: senderId, receiverId: receiverId },
+                            { senderId: receiverId, receiverId: senderId }
+                        ]
+                    }
+                });
+                if (!accepted) {
+                    socket.emit("message_error", { error: "Messaging disabled until follow request is accepted" });
+                    return;
+                }
                 const message = await createMessage(senderId, receiverId, content, isAnonymous);
                 io.to(receiverId).emit("receive_message", message);
                 socket.emit("message_sent", message);

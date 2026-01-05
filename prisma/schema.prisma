@@ -52,6 +52,8 @@ model User {
   stories          Story[]
   followers        Follow[] @relation("UserFollowers")
   following        Follow[] @relation("UserFollowing")
+  anonymousMessages AnonymousMessage[]
+  anonymousReports  AnonymousReport[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -81,6 +83,7 @@ model AnonymousMessage {
   moderationStatus String @default("APPROVED") // APPROVED | REJECTED
   moderationReason String?
   timestamp DateTime  @default(now())
+  reports   AnonymousReport[]
 
   @@index([timestamp])
   @@index([userId])

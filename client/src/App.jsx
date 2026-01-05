@@ -23,6 +23,7 @@ import './index.css';
 import Header from './components/layout/Header';
 import * as socketService from './services/socket';
 import { useLocation } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 
 function AppRoutes() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -136,6 +137,7 @@ function AppRoutes() {
 
   return (
     <>
+      <Toaster position="top-center" />
       <Header
         isLoggedIn={isLoggedIn}
         onLogout={handleLogout}

@@ -5,6 +5,7 @@ import fs from "fs";
 import path from "path";
 
 import { fileURLToPath } from "url";
+import { uploadToCloudinary, isCloudinaryConfigured, deleteFromCloudinary } from "../utils/cloudinary.js";
 
 const prisma = new PrismaClient;
 
@@ -172,9 +173,21 @@ export const createResource = async (req, res) => {
                 message: "Please upload a file"
             });
         }
-        const fileUrl = `/uploads/${req.file.filename}`;
         const fileType = getFileType(req.file.originalname);
         const fileSize = formatFileSize(req.file.size);
+        let fileUrl = `/uploads/${req.file.filename}`;
+        let publicId = req.file.filename;
+        if (isCloudinaryConfigured()) {
+            const filePath = path.join(__dirname, "../../uploads", req.file.filename);
+            const buffer = fs.readFileSync(filePath);
+            const imageExts = [ "jpg", "jpeg", "png", "gif", "webp" ];
+            const videoExts = [ "mp4", "avi", "mov", "mkv" ];
+            const resourceType = imageExts.includes(fileType) ? "image" : (videoExts.includes(fileType) ? "video" : "raw");
+            const result = await uploadToCloudinary(buffer, "resources", null, resourceType);
+            fileUrl = result.url;
+            publicId = result.public_id;
+            try { fs.unlinkSync(filePath); } catch {}
+        }
         const resource = await prisma.resource.create({
             data: {
                 title: title,
@@ -182,7 +195,7 @@ export const createResource = async (req, res) => {
                 fileUrl: fileUrl,
                 fileType: fileType,
                 thumbnailUrl: fileUrl,
-                publicId: req.file.filename,
+                publicId: publicId,
                 year: parseInt(year),
                 size: fileSize,
                 userId: userId,
@@ -274,6 +287,7 @@ export const deleteResource = async (req, res) => {
     try {
         const {id: id} = req.params;
         const userId = req.user.id;
+        const isAdmin = req.user?.role === "ADMIN";
         const existingResource = await prisma.resource.findUnique({
             where: {
                 id: parseInt(id)
@@ -285,7 +299,7 @@ export const deleteResource = async (req, res) => {
                 message: "Resource not found"
             });
         }
-        if (existingResource.userId !== userId) {
+        if (!isAdmin && existingResource.userId !== userId) {
             return res.status(403).json({
                 success: false,
                 message: "You can only delete your own resources"
@@ -294,6 +308,11 @@ export const deleteResource = async (req, res) => {
         const filePath = path.join(__dirname, "../../uploads", existingResource.publicId);
         if (fs.existsSync(filePath)) {
             fs.unlinkSync(filePath);
+        }
+        if (isCloudinaryConfigured() && existingResource.publicId) {
+            try {
+                await deleteFromCloudinary(existingResource.publicId);
+            } catch {}
         }
         await prisma.resource.delete({
             where: {

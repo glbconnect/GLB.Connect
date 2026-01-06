@@ -151,15 +151,17 @@ const ResourceSharing = ({ isLoggedIn, onLogout, currentUser }) => {
                 </svg>
               </Link>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {recentResources.map((resource, index) => (
                 <div key={resource.id} className="animate-fade-in-up" style={{ animationDelay: `${index * 150}ms` }}>
-                  <ResourceCard resource={resource} />
+                  <ResourceCard resource={resource} currentUser={currentUser} onDelete={(id) => {
+                    setRecentResources(prev => prev.filter(r => r.id !== id));
+                  }} />
                 </div>
               ))}
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
         {/* Call to Action */}
         {!isLoggedIn && (

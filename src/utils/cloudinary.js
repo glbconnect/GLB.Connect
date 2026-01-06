@@ -10,21 +10,24 @@ cloudinary.config({
 
 /**
  * Upload image to Cloudinary
- * @param {Buffer|ReadableStream} fileBuffer - Image file buffer or stream
- * @param {string} folder - Folder name in Cloudinary (e.g., 'posts', 'stories')
- * @param {string} publicId - Public ID for the image (optional, will be auto-generated if not provided)
+ * @param {Buffer|ReadableStream} fileBuffer
+ * @param {string} folder
+ * @param {string} publicId
+ * @param {string} resourceType
  * @returns {Promise<{url: string, public_id: string}>}
  */
-export const uploadToCloudinary = async (fileBuffer, folder, publicId = null) => {
+export const uploadToCloudinary = async (fileBuffer, folder, publicId = null, resourceType = 'auto') => {
   return new Promise((resolve, reject) => {
     const uploadOptions = {
       folder: folder,
-      resource_type: 'image',
-      transformation: [{ fetch_format: 'auto', quality: 'auto' }],
+      resource_type: resourceType,
     };
 
     if (publicId) {
       uploadOptions.public_id = publicId;
+    }
+    if (resourceType === 'image') {
+      uploadOptions.transformation = [{ fetch_format: 'auto', quality: 'auto' }];
     }
 
     // Convert buffer to stream if needed

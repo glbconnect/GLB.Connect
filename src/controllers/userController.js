@@ -242,7 +242,7 @@ export const uploadAvatar = async (req, res) => {
             const filePath = path.join(process.cwd(), "uploads", req.file.filename);
             const buffer = fs.readFileSync(filePath);
             const publicId = `avatar-${userId}`;
-            const result = await uploadToCloudinary(buffer, "avatars", publicId);
+            const result = await uploadToCloudinary(buffer, "avatars", publicId, "image");
             avatarUrl = result.url;
             try { fs.unlinkSync(filePath); } catch {}
         } else {

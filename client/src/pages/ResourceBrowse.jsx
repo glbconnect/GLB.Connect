@@ -105,6 +105,14 @@ const ResourceBrowse = ({ isLoggedIn, onLogout, currentUser }) => {
     { value: 4, label: 'Year 4' }
   ];
 
+  const handleDeleteResource = (id) => {
+    setResources(prev => prev.filter(r => r.id !== id));
+    setPagination(prev => ({
+      ...prev,
+      totalCount: Math.max(0, prev.totalCount - 1)
+    }));
+  };
+
   return (
     <Layout isLoggedIn={isLoggedIn} onLogout={onLogout}>
       {/* Hero Section */}
@@ -266,7 +274,7 @@ const ResourceBrowse = ({ isLoggedIn, onLogout, currentUser }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
               {resources.map((resource, index) => (
                 <div key={resource.id} className="animate-fade-in-up" style={{ animationDelay: `${index * 100}ms` }}>
-                  <ResourceCard resource={resource} />
+                  <ResourceCard resource={resource} currentUser={currentUser} onDelete={handleDeleteResource} />
                 </div>
               ))}
             </div>

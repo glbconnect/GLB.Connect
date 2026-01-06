@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { handleFileAccess } from '../../utils/fileUtils';
+import { deleteResource } from '../../services/api';
 
-const ResourceCard = ({ resource }) => {
+const ResourceCard = ({ resource, currentUser, onDelete }) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const getFileIcon = (fileType) => {
     const iconMap = {
@@ -98,6 +100,27 @@ const ResourceCard = ({ resource }) => {
     }
   };
 
+  const handleDelete = async (e) => {
+    e.preventDefault();
+    if (!currentUser || currentUser.role !== 'ADMIN') return;
+    const ok = window.confirm('Delete this resource?');
+    if (!ok) return;
+    setIsDeleting(true);
+    try {
+      const res = await deleteResource(resource.id);
+      if (res && res.success) {
+        if (onDelete) onDelete(resource.id);
+      } else {
+        alert(res?.message || 'Failed to delete resource');
+      }
+    } catch (error) {
+      console.error('Delete error:', error);
+      alert('Failed to delete resource');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
     <div className="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-500 transform hover:-translate-y-2 border border-gray-100 overflow-hidden">
       <div className="p-6">
@@ -166,33 +189,48 @@ const ResourceCard = ({ resource }) => {
             </div>
           </div>
           
-          <button
-            onClick={handleViewFile}
-            disabled={isLoading}
-            className={`inline-flex items-center px-4 py-2 text-white text-sm font-semibold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg ${
-              isLoading 
-                ? 'bg-gray-400 cursor-not-allowed' 
-                : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700'
-            }`}
-          >
-            {isLoading ? (
-              <>
-                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Loading...
-              </>
-            ) : (
-              <>
-                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                </svg>
-                {resource.fileType === 'pdf' ? 'View' : 'Download'}
-              </>
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={handleViewFile}
+              disabled={isLoading}
+              className={`inline-flex items-center px-4 py-2 text-white text-sm font-semibold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg ${
+                isLoading 
+                  ? 'bg-gray-400 cursor-not-allowed' 
+                  : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700'
+              }`}
+            >
+              {isLoading ? (
+                <>
+                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Loading...
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                  {resource.fileType === 'pdf' ? 'View' : 'Download'}
+                </>
+              )}
+            </button>
+            {currentUser?.role === 'ADMIN' && (
+              <button
+                onClick={handleDelete}
+                disabled={isDeleting}
+                className={`inline-flex items-center px-4 py-2 text-white text-sm font-semibold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg ${
+                  isDeleting 
+                    ? 'bg-gray-400 cursor-not-allowed' 
+                    : 'bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700'
+                }`}
+              >
+                {isDeleting ? 'Deleting...' : 'Delete'}
+              </button>
             )}
-          </button>
+          </div>
         </div>
       </div>
       

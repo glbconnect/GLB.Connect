@@ -21,7 +21,7 @@ const AnonymousPost = ({ isLoggedIn, onLogout, currentUser }) => {
   const PROFANE_WORDS = [
     "fuck","shit","bitch","asshole","bastard","dick","cunt","slut","whore",
     "fag","faggot","nigger","chink","spic","kike",
-    "rape","rapist","cum","suck my","kill yourself","kys"
+    "rape","rapist","cum","suck my","kill yourself","kys","chutiya","madarchod","bc","sex","chod","mdc"
   ];
 
   const hasAbusiveContent = (text) => {
@@ -57,7 +57,8 @@ const AnonymousPost = ({ isLoggedIn, onLogout, currentUser }) => {
       const fetchMessages = async () => {
         try {
           const response = await api.getAnonymousMessages();
-          setMessages(response);
+          const sorted = [...response].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+          setMessages(sorted);
         } catch (error) {
           console.error('Error fetching messages:', error);
         }

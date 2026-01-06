@@ -198,20 +198,6 @@ const AnonymousPost = ({ isLoggedIn, onLogout, currentUser }) => {
             })}
             <div ref={messagesEndRef} />
           </div>
-          
-          <div className="px-3 md:px-4 pt-2 flex-shrink-0">
-            <div className="flex items-start gap-3 bg-yellow-50 border border-yellow-200 rounded-2xl p-3 text-sm text-yellow-900">
-              <span className="mt-0.5">
-                <HiOutlineExclamationTriangle className="text-yellow-600 text-xl" />
-              </span>
-              <div>
-                <div className="font-semibold">Community Guidelines</div>
-                <div className="mt-0.5">
-                  Please do not use abusive, hateful, or inappropriate language. Messages are automatically moderated. Violations may lead to warnings or bans.
-                </div>
-              </div>
-            </div>
-          </div>
 
           {/* Input Area */}
           <div className="border-t p-3 md:p-4 flex-shrink-0">
@@ -234,6 +220,20 @@ const AnonymousPost = ({ isLoggedIn, onLogout, currentUser }) => {
               </button>
             </form>
             {error && <div className="mt-2 text-sm text-red-600">{error}</div>}
+          </div>
+        </div>
+      </div>
+      <div className="hidden md:block fixed left-6 top-28 z-30">
+        <div className="bg-yellow-50/90 backdrop-blur rounded-2xl border border-yellow-200 shadow-lg w-72 p-4">
+          <div className="flex items-start gap-3 text-yellow-900">
+            <span className="mt-0.5">
+              <HiOutlineExclamationTriangle className="text-yellow-600 text-2xl" />
+            </span>
+            <div className="text-sm leading-snug">
+              <div className="font-semibold mb-1">Community Guidelines</div>
+              <div>⚠️ Please do not use abusive, hateful, or inappropriate language.</div>
+              <div className="mt-1">Messages are monitored automatically. Violations may lead to warnings or bans.</div>
+            </div>
           </div>
         </div>
       </div>

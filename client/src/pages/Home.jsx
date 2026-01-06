@@ -21,7 +21,7 @@ const Home = ({ isLoggedIn, onLogout }) => {
       <div className={isDark ? 'dark' : ''}>
         <button
           onClick={() => setIsDark((v) => !v)}
-          className="fixed top-4 right-4 z-50 bg-white text-gray-800 dark:bg-gray-800 dark:text-white border border-gray-200 dark:border-gray-700 rounded-full p-2 shadow hover:bg-gray-100 dark:hover:bg-gray-700"
+          className="fixed bottom-4 right-4 z-50 bg-white text-gray-800 dark:bg-gray-800 dark:text-white border border-gray-200 dark:border-gray-700 rounded-full p-2 shadow hover:bg-gray-100 dark:hover:bg-gray-700"
           aria-label="Toggle theme"
         >
           {isDark ? (

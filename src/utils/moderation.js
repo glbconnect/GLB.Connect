@@ -13,7 +13,8 @@ export async function getToxicityScore(text) {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 8000);
     try {
-        const res = await fetch(HF_MODEL_URL, {
+        const fetchFn = globalThis.fetch || (await import("node-fetch")).default;
+        const res = await fetchFn(HF_MODEL_URL, {
             method: "POST",
             headers: {
                 "Authorization": `Bearer ${key}`,
@@ -49,6 +50,8 @@ export async function getToxicityScore(text) {
 
 export async function isToxic(text, threshold = DEFAULT_THRESHOLD) {
     const score = await getToxicityScore(text);
+    if (score > threshold) {
+        try { console.log(`[Moderation] Toxicity blocked: score=${score.toFixed(3)}`); } catch {}
+    }
     return score > threshold;
 }
-

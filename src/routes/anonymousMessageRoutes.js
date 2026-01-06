@@ -7,6 +7,7 @@ import { PrismaClient } from "@prisma/client";
 import { authenticateToken } from "../middleware/auth.js";
 
 import { getIO } from "../sockets/chatSocket.js";
+import { isToxic } from "../utils/moderation.js";
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -14,6 +15,7 @@ const prisma = new PrismaClient();
 const RATE_LIMIT_MS = 3000;
 const MAX_MESSAGE_LENGTH = 300;
 const REPORT_FLAG_THRESHOLD = 3;
+const HF_THRESHOLD = 0.7;
 
 const lastMessageAtByUser = new Map();
 
@@ -64,46 +66,51 @@ router.post("/", authenticateToken, async (req, res) => {
             return res.status(400).json({ message: "Missing required fields" });
         }
 
-        if (content.length > MAX_MESSAGE_LENGTH) {
-            return res.status(400).json({ message: `Message too long (max ${MAX_MESSAGE_LENGTH} chars)` });
-        }
+    if (content.length > MAX_MESSAGE_LENGTH) {
+        return res.status(400).json({ message: `Message too long (max ${MAX_MESSAGE_LENGTH} chars)` });
+    }
 
-        const now = Date.now();
-        const last = lastMessageAtByUser.get(userId) || 0;
-        if (now - last < RATE_LIMIT_MS) {
-            return res.status(429).json({ message: "Please wait before sending another message" });
-        }
+    const now = Date.now();
+    const last = lastMessageAtByUser.get(userId) || 0;
+    if (now - last < RATE_LIMIT_MS) {
+        return res.status(429).json({ message: "Please wait before sending another message" });
+    }
 
-        const user = await prisma.user.findUnique({
-            where: { id: userId },
-            select: { muted: true, banned: true }
+    const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { muted: true, banned: true }
+    });
+    if (user?.banned) {
+        return res.status(403).json({ message: "You are banned from posting anonymously" });
+    }
+    if (user?.muted) {
+        return res.status(403).json({ message: "You are muted and cannot post anonymously" });
+    }
+
+    if (hasAbusiveContent(content)) {
+        return res.status(400).json({ message: "Inappropriate language is not allowed" });
+    }
+    
+    const toxic = await isToxic(content, HF_THRESHOLD);
+    if (toxic) {
+        return res.status(400).json({ message: "Inappropriate language is not allowed" });
+    }
+
+    let message;
+    try {
+        message = await createAnonymousMessage({
+            content,
+            guestId,
+            timestamp,
+            posterUserId: userId
         });
-        if (user?.banned) {
-            return res.status(403).json({ message: "You are banned from posting anonymously" });
-        }
-        if (user?.muted) {
-            return res.status(403).json({ message: "You are muted and cannot post anonymously" });
-        }
-
-        if (hasAbusiveContent(content)) {
-            return res.status(400).json({ message: "Inappropriate language is not allowed" });
-        }
-
-        let message;
-        try {
-            message = await createAnonymousMessage({
-                content,
-                guestId,
-                timestamp,
-                posterUserId: userId
-            });
-        } catch (err) {
-            message = await createAnonymousMessage({
-                content,
-                guestId,
-                timestamp
-            });
-        }
+    } catch (err) {
+        message = await createAnonymousMessage({
+            content,
+            guestId,
+            timestamp
+        });
+    }
         lastMessageAtByUser.set(userId, now);
         const io = getIO();
         io.to("anonymous-chat").emit("anonymous-message", message);

@@ -60,8 +60,8 @@ export const getAlternativeUrls = (fileUrl) => {
   
   const alternatives = [];
   
-  // Try with current origin
-  if (typeof window !== 'undefined') {
+  // Try with current origin for relative paths only
+  if (typeof window !== 'undefined' && fileUrl.startsWith('/')) {
     const currentOrigin = window.location.origin;
     alternatives.push(`${currentOrigin}${fileUrl}`);
   }
@@ -126,7 +126,9 @@ const openFile = (url, fileName, fileType) => {
     // For other files, trigger download
     const link = document.createElement('a');
     link.href = url;
-    link.download = fileName || 'download';
+    const safeName = (fileName || 'download').replace(/[^\w\-]+/g, '_');
+    const ext = fileType ? `.${fileType}` : '';
+    link.download = `${safeName}${ext}`;
     link.target = '_blank';
     document.body.appendChild(link);
     link.click();

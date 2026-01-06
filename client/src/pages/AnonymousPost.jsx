@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import io from 'socket.io-client';
 import * as api from '../services/api';
 import { HiOutlineUserCircle, HiOutlinePaperAirplane } from 'react-icons/hi';
+import { HiOutlineExclamationTriangle } from 'react-icons/hi2';
 import { FaMask } from 'react-icons/fa6';
 
 const AnonymousPost = ({ isLoggedIn, onLogout, currentUser }) => {
@@ -196,6 +197,20 @@ const AnonymousPost = ({ isLoggedIn, onLogout, currentUser }) => {
               );
             })}
             <div ref={messagesEndRef} />
+          </div>
+          
+          <div className="px-3 md:px-4 pt-2 flex-shrink-0">
+            <div className="flex items-start gap-3 bg-yellow-50 border border-yellow-200 rounded-2xl p-3 text-sm text-yellow-900">
+              <span className="mt-0.5">
+                <HiOutlineExclamationTriangle className="text-yellow-600 text-xl" />
+              </span>
+              <div>
+                <div className="font-semibold">Community Guidelines</div>
+                <div className="mt-0.5">
+                  Please do not use abusive, hateful, or inappropriate language. Messages are automatically moderated. Violations may lead to warnings or bans.
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Input Area */}

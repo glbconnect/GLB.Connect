@@ -14,7 +14,7 @@ const colleges = [
 ];
 
 const Home = ({ isLoggedIn, onLogout }) => {
-  const [isDark, setIsDark] = useState(false);
+  const [isDark, setIsDark] = useState(true);
 
   return (
     <Layout isLoggedIn={isLoggedIn} onLogout={onLogout}>
@@ -37,7 +37,7 @@ const Home = ({ isLoggedIn, onLogout }) => {
         <div className="bg-white dark:bg-gray-900 overflow-x-hidden px-2 sm:px-4 md:px-8">
         <HeroSection isLoggedIn={isLoggedIn} />
         
-        <div className="py-6 md:py-8 bg-gray-50 dark:bg-gray-800 border-y border-gray-200 dark:border-gray-700">
+        <div className="py-6 md:py-8 bg-blue-600 dark:bg-blue-700">
           <div className="scroller">
             <div className="scroller-inner">
               {[...colleges, ...colleges].map((college, index) => (

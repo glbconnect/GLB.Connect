@@ -1,7 +1,9 @@
 import { v2 as cloudinary } from 'cloudinary';
 import { Readable } from 'stream';
 
-// Configure Cloudinary
+/**
+ * Configure Cloudinary
+ */
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
@@ -9,44 +11,64 @@ cloudinary.config({
 });
 
 /**
- * Upload image to Cloudinary
+ * Upload file to Cloudinary (Images + PDFs supported)
+ * - Images → optimized
+ * - PDFs → previewable in browser
+ *
  * @param {Buffer|ReadableStream} fileBuffer
  * @param {string} folder
- * @param {string} publicId
- * @param {string} resourceType
+ * @param {string|null} publicId
+ * @param {string|null} mimeType
  * @returns {Promise<{url: string, public_id: string}>}
  */
-export const uploadToCloudinary = async (fileBuffer, folder, publicId = null, resourceType = 'auto') => {
+export const uploadToCloudinary = async (
+  fileBuffer,
+  folder,
+  publicId = null,
+  mimeType = null
+) => {
   return new Promise((resolve, reject) => {
+
+    // ✅ Decide resource type
+    let resourceType = 'auto';
+    if (mimeType === 'application/pdf') {
+      resourceType = 'image'; // REQUIRED for PDF preview
+    }
+
     const uploadOptions = {
-      folder: folder,
+      folder,
       resource_type: resourceType,
+      use_filename: true,
+      unique_filename: true,
     };
 
     if (publicId) {
       uploadOptions.public_id = publicId;
     }
-    if (resourceType === 'image') {
-      uploadOptions.transformation = [{ fetch_format: 'auto', quality: 'auto' }];
+
+    // ✅ Optimize only real images (NOT PDFs)
+    if (resourceType === 'image' && mimeType !== 'application/pdf') {
+      uploadOptions.transformation = [
+        { fetch_format: 'auto', quality: 'auto' }
+      ];
     }
 
-    // Convert buffer to stream if needed
     const uploadStream = cloudinary.uploader.upload_stream(
       uploadOptions,
       (error, result) => {
         if (error) {
           console.error('Cloudinary upload error:', error);
-          reject(error);
-        } else {
-          resolve({
-            url: result.secure_url, // Use HTTPS URL
-            public_id: result.public_id,
-          });
+          return reject(error);
         }
+
+        resolve({
+          url: result.secure_url,
+          public_id: result.public_id,
+        });
       }
     );
 
-    // Handle both Buffer and Stream
+    // ✅ Handle Buffer & Stream
     if (Buffer.isBuffer(fileBuffer)) {
       uploadStream.end(fileBuffer);
     } else if (fileBuffer instanceof Readable) {
@@ -58,43 +80,37 @@ export const uploadToCloudinary = async (fileBuffer, folder, publicId = null, re
 };
 
 /**
- * Delete image from Cloudinary
- * @param {string} publicId - Public ID of the image to delete
- * @returns {Promise<void>}
+ * Delete file from Cloudinary (Image / PDF)
+ * @param {string} publicIdOrUrl
  */
-export const deleteFromCloudinary = async (publicId) => {
+export const deleteFromCloudinary = async (publicIdOrUrl) => {
   try {
-    // Extract public_id from URL if full URL is provided
-    let actualPublicId = publicId;
-    if (publicId.includes('cloudinary.com')) {
-      // Extract public_id from Cloudinary URL
-      const urlParts = publicId.split('/');
-      const uploadIndex = urlParts.findIndex(part => part === 'upload');
-      if (uploadIndex !== -1 && urlParts[uploadIndex + 2]) {
-        // Get the path after version number
-        const pathAfterVersion = urlParts.slice(uploadIndex + 2).join('/');
-        actualPublicId = pathAfterVersion.replace(/\.[^/.]+$/, ''); // Remove extension
+    let actualPublicId = publicIdOrUrl;
+
+    // If full URL is passed
+    if (publicIdOrUrl.includes('cloudinary.com')) {
+      const urlParts = publicIdOrUrl.split('/');
+      const uploadIndex = urlParts.findIndex(p => p === 'upload');
+
+      if (uploadIndex !== -1) {
+        actualPublicId = urlParts
+          .slice(uploadIndex + 2)
+          .join('/')
+          .replace(/\.[^/.]+$/, '');
       }
     }
 
-    const result = await cloudinary.uploader.destroy(actualPublicId);
-    if (result.result === 'ok') {
-      console.log(`Deleted image from Cloudinary: ${actualPublicId}`);
-    } else {
-      console.warn(`Failed to delete image from Cloudinary: ${actualPublicId}`, result);
-    }
+    await cloudinary.uploader.destroy(actualPublicId);
   } catch (error) {
-    console.error('Error deleting from Cloudinary:', error);
-    // Don't throw - allow deletion to continue even if Cloudinary deletion fails
+    console.error('Cloudinary delete error:', error);
   }
 };
 
 /**
- * Check if Cloudinary is configured
- * @returns {boolean}
+ * Check Cloudinary config
  */
 export const isCloudinaryConfigured = () => {
-  return !!(
+  return Boolean(
     process.env.CLOUDINARY_CLOUD_NAME &&
     process.env.CLOUDINARY_API_KEY &&
     process.env.CLOUDINARY_API_SECRET &&

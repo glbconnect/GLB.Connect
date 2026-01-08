@@ -51,7 +51,6 @@ const ResourceItem = ({ resource }) => {
             <div className="flex items-center space-x-4 text-sm text-gray-500">
               <span>📁 {resource.fileType.toUpperCase()}</span>
               <span>📏 {resource.size}</span>
-              <span>⬇️ {resource.downloadCount} downloads</span>
               <span>👤 {resource.user?.name || 'Unknown'}</span>
               <span>📅 {formatDate(resource.createdAt)}</span>
             </div>
@@ -66,7 +65,7 @@ const ResourceItem = ({ resource }) => {
             target="_blank"
             rel="noopener noreferrer"
           >
-            Download
+            View 
           </a>
         </div>
       </div>

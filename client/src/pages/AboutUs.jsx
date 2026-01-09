@@ -163,21 +163,21 @@ const AboutUs = () => {
             description="Leading the technical development and ensuring a seamless user experience."
             delay={0.2}
             linkedinUrl="https://linkedin.com/in/nisha-ahmad"
-            githubUrl="https://github.com/nisha-ahmad"
+            githubUrl="https://github.com/NAhmad231"
           />
           <TeamCard 
             name="Maahi Dhaka" 
             description="Focused on strategic growth and student outreach initiatives."
             delay={0.3}
             linkedinUrl="https://linkedin.com/in/maahi-dhaka"
-            githubUrl="https://github.com/maahi-dhaka"
+            githubUrl="https://github.com/maahidhaka"
           />
           <TeamCard 
             name="Kshitij Dwivedi" 
             description="Technical expertise ensuring the platform runs smoothly."
             delay={0.4}
             linkedinUrl="https://linkedin.com/in/kshitij-dwivedi"
-            githubUrl="https://github.com/kshitij2145"
+            githubUrl="https://github.com/Kshitij2145"
           />
         </div>
       </Section>

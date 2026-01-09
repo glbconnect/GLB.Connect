@@ -107,10 +107,23 @@ export const listenForMessages = callback => {
     if (socket && socket.connected) {
         socket.off("receive_message");
         socket.on("receive_message", message => {
+            // Validate message structure
+            if (!message || !message.id || !message.senderId || !message.receiverId) {
+                console.warn("Invalid message structure received:", message);
+                return;
+            }
+            
+            // Check for duplicate messages
             if (message.id && !isMessageCached(message.id)) {
                 addToMessageCache(message.id);
                 callback(message);
             }
+        });
+        
+        // Listen for socket errors
+        socket.off("error");
+        socket.on("error", error => {
+            console.error("Socket error:", error);
         });
     } else {
         console.warn("Socket not connected, cannot listen for messages");

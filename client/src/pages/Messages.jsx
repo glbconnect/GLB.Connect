@@ -68,6 +68,18 @@ const Messages = ({ isLoggedIn, onLogout, currentUser }) => {
     
     // Listen for incoming messages
     socketService.listenForMessages((message) => {
+      // Validate message structure
+      if (!message || !message.id || !message.senderId || !message.receiverId) {
+        console.warn('Invalid message structure received:', message);
+        return;
+      }
+      
+      // Only process messages that involve the current user
+      if (message.senderId !== currentUser.id && message.receiverId !== currentUser.id) {
+        console.warn('Message received for different user, ignoring:', message);
+        return;
+      }
+      
       // If the message is from the active conversation (sender OR receiver must match activeUserId)
       if (
         // Make sure message is part of the current conversation by checking both participants
@@ -374,6 +386,20 @@ const Messages = ({ isLoggedIn, onLogout, currentUser }) => {
       content: messageContent,
       isAnonymous
     };
+    
+    // Validate message data
+    if (!messageData.senderId || !messageData.receiverId || !messageData.content) {
+      setError('Invalid message data');
+      sendingMessage = false;
+      return;
+    }
+    
+    // Ensure senderId matches current user (additional security check)
+    if (messageData.senderId !== currentUser.id) {
+      setError('Unauthorized: Cannot send messages as another user');
+      sendingMessage = false;
+      return;
+    }
     
     try {
       // Create optimistic message for UI

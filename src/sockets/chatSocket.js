@@ -27,7 +27,7 @@ export const initializeSocket = httpServer => {
             if (token) {
                 try {
                     const decoded = await verifyToken(token);
-                    socket.userId = decoded.userId;
+                    socket.userId = decoded.id; // Fix: JWT contains 'id', not 'userId'
                     socket.authenticated = true;
                 } catch (err) {
                     console.warn("Invalid token in socket connection:", err.message);
@@ -45,8 +45,12 @@ export const initializeSocket = httpServer => {
     });
     io.on("connection", socket => {
         console.log("User connected:", socket.id, socket.authenticated ? "(authenticated)" : "(not authenticated)");
-        socket.join("anonymous-chat");
-        console.log(`User ${socket.id} joined anonymous-chat room`);
+        
+        // Only join anonymous users to the anonymous-chat room
+        if (!socket.authenticated) {
+            socket.join("anonymous-chat");
+            console.log(`User ${socket.id} joined anonymous-chat room`);
+        }
         socket.on("join-room", room => {
             socket.join(room);
             console.log(`User ${socket.id} joined room: ${room}`);
@@ -58,6 +62,15 @@ export const initializeSocket = httpServer => {
                 });
                 return;
             }
+            
+            // Validate that the senderId matches the authenticated user
+            if (data.senderId !== socket.userId) {
+                socket.emit("error", {
+                    message: "Unauthorized: Cannot send private messages as another user"
+                });
+                return;
+            }
+            
             const room = [ data.senderId, data.receiverId ].sort().join("-");
             io.to(room).emit("private-message", data);
         });
@@ -78,9 +91,22 @@ export const initializeSocket = httpServer => {
             }
             try {
                 const {senderId: senderId, receiverId: receiverId, content: content, isAnonymous: isAnonymous} = data;
+                
+                // Validate that the senderId matches the authenticated user
+                if (senderId !== socket.userId) {
+                    socket.emit("error", {
+                        message: "Unauthorized: Cannot send messages as another user"
+                    });
+                    return;
+                }
+                
                 const message = await createMessage(senderId, receiverId, content, isAnonymous);
+                
+                // Only emit to the specific receiver and sender
                 io.to(receiverId).emit("receive_message", message);
                 socket.emit("message_sent", message);
+                
+                console.log(`Message sent from ${senderId} to ${receiverId}`);
             } catch (error) {
                 console.error("Error handling message:", error);
                 socket.emit("message_error", {
@@ -89,13 +115,21 @@ export const initializeSocket = httpServer => {
             }
         });
         socket.on("typing", ({senderId: senderId, receiverId: receiverId}) => {
+            // Validate that the senderId matches the authenticated user
+            if (socket.authenticated && senderId !== socket.userId) {
+                return; // Ignore typing events from unauthorized users
+            }
+            
             io.to(receiverId).emit("user_typing", {
                 senderId: senderId
             });
         });
         socket.on("disconnect", () => {
             console.log("User disconnected:", socket.id);
-            socket.leave("anonymous-chat");
+            // Only leave anonymous-chat room if user was in it
+            if (!socket.authenticated) {
+                socket.leave("anonymous-chat");
+            }
         });
         socket.on("event:register", data => {
             io.emit("event:register", data);

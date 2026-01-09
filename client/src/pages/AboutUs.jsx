@@ -4,7 +4,7 @@ import { Linkedin, Github, Twitter, UserCircle } from 'lucide-react';
 import Header from '../components/layout/Header';
 import Footer from '../components/glb-connect/Footer';
 
-const TeamCard = ({ name, role, description, delay }) => (
+const TeamCard = ({ name, role, description, delay, linkedinUrl, githubUrl }) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     whileInView={{ opacity: 1, y: 0 }}
@@ -21,8 +21,8 @@ const TeamCard = ({ name, role, description, delay }) => (
     {description && <p className="text-gray-500 text-sm mb-4">{description}</p>}
     
     <div className="flex gap-3 mt-auto">
-      <a href="#" className="text-gray-400 hover:text-blue-600 transition-colors"><Linkedin size={18} /></a>
-      <a href="#" className="text-gray-400 hover:text-gray-800 transition-colors"><Github size={18} /></a>
+      <a href={linkedinUrl} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-blue-600 transition-colors"><Linkedin size={18} /></a>
+      <a href={githubUrl} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-800 transition-colors"><Github size={18} /></a>
     </div>
   </motion.div>
 );
@@ -155,21 +155,29 @@ const AboutUs = () => {
             name="Muhammad Baqir"  
             description="Visionary leader passionate about community building and tech innovation."
             delay={0.1}
+            linkedinUrl="https://linkedin.com/in/muhammad-baqir"
+            githubUrl="https://github.com/mb-aarfi"
           />
           <TeamCard 
             name="Nisha Ahmad" 
             description="Leading the technical development and ensuring a seamless user experience."
             delay={0.2}
+            linkedinUrl="https://linkedin.com/in/nisha-ahmad"
+            githubUrl="https://github.com/nisha-ahmad"
           />
           <TeamCard 
             name="Maahi Dhaka" 
             description="Focused on strategic growth and student outreach initiatives."
             delay={0.3}
+            linkedinUrl="https://linkedin.com/in/maahi-dhaka"
+            githubUrl="https://github.com/maahi-dhaka"
           />
           <TeamCard 
             name="Kshitij Dwivedi" 
             description="Technical expertise ensuring the platform runs smoothly."
             delay={0.4}
+            linkedinUrl="https://linkedin.com/in/kshitij-dwivedi"
+            githubUrl="https://github.com/kshitij2145"
           />
         </div>
       </Section>

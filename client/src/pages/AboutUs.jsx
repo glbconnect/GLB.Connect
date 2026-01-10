@@ -64,8 +64,7 @@ const AboutUs = () => {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm rounded-full px-6 py-2 mb-6 shadow-lg"
           >
-            <Sparkles className="w-4 h-4 text-blue-600" />
-            <span className="text-sm font-medium text-gray-700">Empowering Student Connections</span>
+            
           </motion.div>
           
           <h1 className="text-4xl md:text-6xl font-extrabold text-gray-900 mb-6 tracking-tight">
@@ -123,10 +122,6 @@ const AboutUs = () => {
               viewport={{ once: true }}
               className="mt-8"
             >
-              <button className="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-full font-medium hover:bg-blue-700 transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl">
-                Learn More
-                <ArrowRight className="w-4 h-4" />
-              </button>
             </motion.div>
           </motion.div>
           
@@ -254,23 +249,20 @@ const AboutUs = () => {
         <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           <TeamCard 
             name="Muhammad Baqir"  
-            role="Founder & CEO"
             description="Visionary leader passionate about community building and tech innovation."
             delay={0.1}
             linkedinUrl="https://linkedin.com/in/muhammad-baqir"
             githubUrl="https://github.com/mb-aarfi"
           />
           <TeamCard 
-            name="Nisha Ahmad" 
-            role="CTO & Lead Developer"
+            name="Nisha Ahmad"
             description="Leading the technical development and ensuring a seamless user experience."
             delay={0.2}
             linkedinUrl="https://linkedin.com/in/nisha-ahmad"
             githubUrl="https://github.com/NAhmad231"
           />
           <TeamCard 
-            name="Maahi Dhaka" 
-            role="Head of Growth"
+            name="Maahi Dhaka"
             description="Focused on strategic growth and student outreach initiatives."
             delay={0.3}
             linkedinUrl="https://linkedin.com/in/maahi-dhaka"
@@ -278,7 +270,6 @@ const AboutUs = () => {
           />
           <TeamCard 
             name="Kshitij Dwivedi" 
-            role="Senior Developer"
             description="Technical expertise ensuring the platform runs smoothly and efficiently."
             delay={0.4}
             linkedinUrl="https://linkedin.com/in/kshitij-dwivedi"
@@ -286,19 +277,7 @@ const AboutUs = () => {
           />
         </div>
         
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.5 }}
-          viewport={{ once: true }}
-          className="relative z-10 text-center mt-16"
-        >
-          <p className="text-gray-600 mb-6">Interested in joining our mission?</p>
-          <button className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-full font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl">
-            View Open Positions
-            <ArrowRight className="w-4 h-4" />
-          </button>
-        </motion.div>
+        
       </Section>
 
       {/* Call to Action Section */}
@@ -318,10 +297,6 @@ const AboutUs = () => {
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
           >
-            <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-6 py-2 mb-6">
-              <Sparkles className="w-5 h-5 text-yellow-300" />
-              <span className="text-sm font-medium">Ready to Connect?</span>
-            </div>
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
               Join Our Growing Community
             </h2>
@@ -332,9 +307,6 @@ const AboutUs = () => {
               <button className="inline-flex items-center gap-2 bg-white text-blue-600 px-8 py-3 rounded-full font-bold hover:bg-gray-100 transition-all duration-300 hover:scale-105 shadow-lg">
                 Get Started
                 <ArrowRight className="w-5 h-5" />
-              </button>
-              <button className="inline-flex items-center gap-2 bg-transparent border-2 border-white text-white px-8 py-3 rounded-full font-bold hover:bg-white/10 transition-all duration-300 hover:scale-105">
-                Learn More
               </button>
             </div>
           </motion.div>

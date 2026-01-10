@@ -58,14 +58,6 @@ const AboutUs = () => {
           transition={{ duration: 0.8, ease: "easeOut" }}
           className="relative max-w-4xl mx-auto"
         >
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm rounded-full px-6 py-2 mb-6 shadow-lg"
-          >
-            
-          </motion.div>
           
           <h1 className="text-4xl md:text-6xl font-extrabold text-gray-900 mb-6 tracking-tight">
             About <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">GLB.Connect</span>
